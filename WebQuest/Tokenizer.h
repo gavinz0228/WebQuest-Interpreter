@@ -41,6 +41,9 @@ public:
 	bool IsNextComma();
 	bool IsNextRightParen();
 	bool IsNextLeftParen();
+	bool IsNextArithmeticOperator();
+	bool IsNextIfKeyword();
+	bool IsNextElseKeyword();
 	//void MoveBack();
 private:
 	bool StartGettingToken;
@@ -59,8 +62,8 @@ private:
 #define				OP_R_CURLYBRAC				"}"
 #define				OP_L_ANGLEBRAC				"<"
 #define				OP_R_ANGLEBRAC				">"
-#define				OP_Multiply					"*"
-#define				OP_Devide					"/"
+#define				OP_MULTIPLY					"*"
+#define				OP_DEVIDE					"/"
 #define				OP_PLUS						"+"
 #define				OP_MINUS					"-"
 #define				OP_MODULO					"%"
@@ -78,5 +81,8 @@ private:
 #define				OP_LESSEQUAL				"<="
 #define				OP_EQUAL					"=="
 #define				OP_COMMA					","
+#define				OP_COLON					":"
 
+#define				KW_IF						"if"
+#define				KW_ELSE						"else"
 #endif

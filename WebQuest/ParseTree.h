@@ -14,7 +14,8 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_FLOAT,
 	NT_INTEGER,
 	NT_STRING,
-	NT_VARIABLE};
+	NT_VARIABLE,
+	NT_IF};
 class NodeBase
 {
 public:
@@ -43,12 +44,7 @@ public:
 	string* Value;
 	int GetType(){ return NT_VARIABLE; }
 };
-class OperationNode : public TerminalNodeBase
-{
-public:
-	string* Value;
-	int GetType(){ return NT_OPERATION; }
-};
+
 
 class IntegerNode :public TerminalNodeBase
 {
@@ -85,6 +81,13 @@ public:
 	int GetType(){ return NT_EXPRESSION; };
 };
 
+class OperationNode:public NodeBase
+{
+public:
+	list<ExpressionNode*>* Terms;
+	list<string*>* Operators;
+	int GetType(){ return NT_OPERATION; }
+};
 class AssignmentNode :public NodeBase
 {
 public:
@@ -104,7 +107,13 @@ public:
 	static int Type;
 	int GetType(){ return NT_FUNCTIONCALL; };
 };
-
+class IfNode :public NodeBase
+{
+	ExpressionNode* Condition;
+	list<NodeBase*>* True;
+	list<NodeBase*>* NotTrue;
+	int GetType(){ return NT_IF; }
+};
 
 
 class ParseTree
@@ -116,6 +125,8 @@ private:
 	void ParseExpression(Tokenizer* tker, ExpressionNode* node);
 	void ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters);
 	void ConsumeNewLine(Tokenizer* tker);
+	void ParseTerm(Tokenizer* tker, ExpressionNode* exp);
+	void ParseIf(Tokenizer* tker, IfNode* ifnode);
 	volatile ProgramNode *program;
 	void PrintTreeNode(NodeBase* node, int level);
 	void TypesInit();

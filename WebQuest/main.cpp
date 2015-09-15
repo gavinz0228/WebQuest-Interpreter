@@ -18,7 +18,8 @@ void Parse()
 {
 
 	ParseTree parser;
-	parser.Parse("dd=12.2\r\nab=func(asdf,func2(aa))\r\n");
+	//parser.Parse("ab=1+2\r\n");
+	parser.Parse("if 1==1 : ab=1 else: ab=2");
 	parser.PrintTree();
 }
 void Tokenize()

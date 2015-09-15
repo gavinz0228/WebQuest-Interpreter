@@ -70,73 +70,104 @@ void ParseTree::Parse(string script)
 
 void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 {
-	///for testing!!!!!
-	if (tker->IsNextNumber())
+	ExpressionNode frstexp ;
+	ParseTerm(tker, &frstexp);
+	//there is only one term in this expression
+	//its sign is that the next token is right parenthesis or new line
+	if (tker->IsNextNewLine() || tker->IsNextRightParen())
 	{
-		Token* numtk = tker->NextToken();
-		if (numtk->Type == TK_FLOAT)
-		{
-			FloatNode* fltnode = new FloatNode;
-			fltnode->Value = numtk->Float;
-			exp->Expression = (NodeBase*)fltnode;
-			exp->ExpressionType = NT_FLOAT;
-		}
-		else if (numtk->Type == TK_INTEGER)
-		{
-			IntegerNode* intnode = new IntegerNode;
-			intnode->Value = numtk->Integer;
-			exp->Expression = (NodeBase*)intnode;
-			exp->ExpressionType = NT_INTEGER;
-		}
+		exp->Expression = frstexp.Expression;
+		exp->ExpressionType = frstexp.ExpressionType;
 		
 	}
-	else if (tker->IsNextVariable())
+	//there is more than one term in this expression
+	else if (tker->IsNextArithmeticOperator())
+	{
+		/* 
+		evaluation for this parsing solution
+		3-4*1+2
+		if it sees - or +, evaluate the right first
+		3-(4*1+2)
+		if it sees * or / evaluation the current one first
+		//do this recursively
+		*/
+		//copy the first node over to a new dynamically allocated expression node
+		OperationNode* opnode = new OperationNode;
+		opnode->Operators = new list < string* > ;
+		opnode->Terms = new list < ExpressionNode* > ;
+		ExpressionNode* firstterm = new ExpressionNode;
+		firstterm->Expression = frstexp.Expression;
+		firstterm->ExpressionType = frstexp.ExpressionType;
+		opnode->Terms->push_back(firstterm);
+		//copy the rest
+		while (true)
+		{
+			if (!tker->IsNextArithmeticOperator())
+				break;
+			opnode->Operators->push_back(tker->NextToken()->Symbol);
+			ExpressionNode* newterm = new ExpressionNode;
+			ParseTerm(tker, newterm);
+			opnode->Terms->push_back(newterm);
+		}
+		
+		exp->Expression = opnode;
+		exp->ExpressionType = NT_OPERATION;
+	}
+
+	// the next one is neither arithmetic operator nor terminal node, nor  new line or right paren
+	//throw exception
+	else
+	{
+		throw INVALID_EXPRESSION;
+	}
+
+}
+
+
+void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
+{
+	Token* frsttk=tker->NextToken();
+	if (frsttk->Type == TK_FLOAT)
+	{
+		FloatNode* fltnode = new FloatNode;
+		fltnode->Value = frsttk->Float;
+		exp->Expression = (NodeBase*)fltnode;
+		exp->ExpressionType = NT_FLOAT;
+	}
+	else if (frsttk->Type == TK_INTEGER)
+	{
+		IntegerNode* intnode = new IntegerNode;
+		intnode->Value = frsttk->Integer;
+		exp->Expression = (NodeBase*)intnode;
+		exp->ExpressionType = NT_INTEGER;
+	}
+	else if (frsttk->Type == TK_STRING)
+	{
+
+		StringNode* strnode = new StringNode;
+		strnode->Value = tker->NextToken()->Symbol;
+		exp->Expression = (NodeBase*)strnode;
+		exp->ExpressionType = NT_STRING;
+	}
+	else if (frsttk->Type == TK_VARIABLE)
 	{ //get the next token- variable or function name
-		Token* tkvar = tker->NextToken();
 		if (tker->IsNextLeftParen())
 		{
 			FunctionCallNode* function = new FunctionCallNode;
 			list<ExpressionNode*>* params = new list < ExpressionNode* >;
 			ParseParameters(tker, params);
 
-			function->FunctionName = tkvar->Symbol;
+			function->FunctionName = frsttk->Symbol;
 			function->Parameters = params;
 			exp->Expression = function;
 			exp->ExpressionType = NT_FUNCTIONCALL;
 		}
 		else{
 			VariableNode* varnode = new VariableNode();
-			varnode->Value = tkvar->Symbol;
+			varnode->Value = frsttk->Symbol;
 			exp->Expression = (NodeBase*)varnode;
 			exp->ExpressionType = NT_VARIABLE;
 		}
-	}
-	else if (tker->IsNextString())
-	{
-
-		StringNode* strnode = new StringNode;
-		strnode->Value = tker->NextToken()->Symbol;
-		exp->Expression = (NodeBase*)strnode;
-		exp->ExpressionType = NT_INTEGER;
-	}
-
-
-	return;
-
-	while (true)
-	{
-		if (tker->IsNextOperator())
-		{
-			Token* op = tker->NextToken();
-			if (tker->IsNextNumber() || tker->IsNextOperator())
-			{
-				Token* symbol = tker->NextToken();
-
-			}
-		}
-		else
-			break;
-
 	}
 }
 
@@ -190,7 +221,7 @@ string Padding(int num)
 void ParseTree::PrintTreeNode(NodeBase* node,int level)
 {
 
-	printf("\n");
+
 	if (node->GetType() == NT_EXPRESSION)
 	{
 		ExpressionNode* expnode = (ExpressionNode*)node;
@@ -209,38 +240,55 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 	else if (node->GetType() == NT_VARIABLE)
 	{
 		VariableNode* varnode = (VariableNode*)node;
-		printf(Padding(level).c_str());
+		//printf(Padding(level).c_str());
 		printf(varnode->Value->c_str());
 	}
 	else if (node->GetType() == NT_STRING)
 	{
 		StringNode* strnode = (StringNode*)node;
-		printf(Padding(level).c_str());
+		//printf(Padding(level).c_str());
 		printf("%s", strnode->Value);
 	}
 	else if (node->GetType() == NT_OPERATION)
 	{
+		printf("Operation(  Terms: ");
 		OperationNode* opnode = (OperationNode*)node;
-		printf(Padding(level).c_str());
-		printf("%s", opnode->Value);
+		//printf(Padding(level).c_str());
+		for (list<ExpressionNode*>::iterator expit = opnode->Terms->begin();
+			expit != opnode->Terms->end();
+			expit++)
+		{
+			PrintTreeNode((*expit), level + 1);
+		}
+		printf("  Operators: ");
+		for (list<string*>::iterator opit = opnode->Operators->begin();
+			opit != opnode->Operators->end();
+			opit++)
+		{
+			printf("%s ", (*opit)->c_str());
+		}
+		printf(")");
+
 	}
 	else if (node->GetType()==NT_FLOAT)
 	{
 		FloatNode* fltnode = (FloatNode*)node;
-		printf(Padding(level).c_str());
+		//printf(Padding(level).c_str());
+		printf(" ");
 		printf("%f", fltnode->Value);
 	}
 	else if (node->GetType() == NT_INTEGER)
 	{
 		IntegerNode* intnode = (IntegerNode*)node;
-		printf(Padding(level).c_str());
+		//printf(Padding(level).c_str());
+		printf(" ");
 		printf("%d", intnode->Value);
 	}
 	else if (node->GetType() == NT_FUNCTIONCALL)
 	{
 
 		FunctionCallNode* funcnode=(FunctionCallNode*)node;
-		printf(Padding(level).c_str());
+		//printf(Padding(level).c_str());
 		printf("Function Call:");
 		
 		printf(funcnode->FunctionName->c_str());
@@ -286,3 +334,18 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 //	if (Tokens != NULL)
 //		delete Tokens;
 //}
+
+
+//
+//Token* optk = tker->NextToken();
+//OperationNode* opnode = new OperationNode;
+//ExpressionNode* leftside = new ExpressionNode;
+//leftside->Expression = frstexp.Expression;
+//leftside->ExpressionType = frstexp.ExpressionType;
+//
+//ExpressionNode* rightside = new ExpressionNode;
+//opnode->Operation = optk->Symbol;
+//ParseTerm(tker, rightside);
+//
+//opnode->LeftSide = leftside;
+//opnode->RightSide = rightside;

@@ -22,7 +22,7 @@ Token::~Token()
 }
 //-----------------------------------------------------------------------------------------------------------------
 char*  Tokenizer::OPERATORS[] { OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
-OP_Multiply, OP_Devide, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
+OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
 OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
 OP_AND, OP_OR, OP_GREATER, OP_LESS, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, NULL};
 
@@ -255,4 +255,13 @@ bool Tokenizer::IsNextRightParen()
 {
 	Token* next = LookAhead();
 	return next != NULL&& *next->Symbol == OP_R_PAREN;
+}
+bool Tokenizer::IsNextArithmeticOperator()
+{
+	Token* next = LookAhead();
+	return next != NULL && (*next->Symbol==OP_PLUS||
+		*next->Symbol == OP_MINUS||
+		*next->Symbol == OP_MULTIPLY||
+		*next->Symbol == OP_DEVIDE||
+		*next->Symbol== OP_MODULO);
 }

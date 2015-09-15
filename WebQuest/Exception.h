@@ -4,6 +4,7 @@
 #define EXCEPTION_H
 
 #define		INVALID_FUNCTION_CALL					"Expecting a comma or right parenthesis"
+#define		INVALID_EXPRESSION						"Invalid expression"
 
 class Exception :std::exception
 {
