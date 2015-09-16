@@ -89,9 +89,18 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, ch - start, TK_STRING);
 			}
+			else if (strncmp(start, KW_IF,ch-start)==0)
+			{
+				tk = new Token(start, ch - start, TK_IF);
+			}
+			else if (strncmp(start, KW_ELSE, ch - start) == 0)
+			{
+				tk = new Token(start, ch - start, TK_ELSE);
+			}
 			else if (Converter::StringToInteger(start, ch - start, integer))
 			{
 				tk = new Token(integer);
+				
 			}
 			else if (Converter::StringToFloat(start, ch - start, floating))
 			{
@@ -264,4 +273,28 @@ bool Tokenizer::IsNextArithmeticOperator()
 		*next->Symbol == OP_MULTIPLY||
 		*next->Symbol == OP_DEVIDE||
 		*next->Symbol== OP_MODULO);
+}
+bool Tokenizer::IsNextIfKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&*next->Symbol == KW_IF;
+}
+bool Tokenizer::IsNextElseKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&*next->Symbol == KW_ELSE;
+}
+bool Tokenizer::IsNextElseIfKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&*next->Symbol == KW_ELSEIF;
+}
+bool Tokenizer::IsNextEndIfKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&*next->Symbol == KW_ENDIF;
+}
+bool Tokenizer::IsNextEndBlock()
+{
+	return IsNextEndBlock() || IsNextEndIfKeyword() || IsNextElseKeyword();
 }

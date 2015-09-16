@@ -3,7 +3,7 @@
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE,TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T'};
+enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE,TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF,TK_ELSE};
 
 class Token
 {
@@ -16,6 +16,7 @@ public:
 	string* Symbol;
 	long long Integer;
 	long double Float;
+	long lineno;
 };
 class Tokenizer
 {
@@ -44,6 +45,9 @@ public:
 	bool IsNextArithmeticOperator();
 	bool IsNextIfKeyword();
 	bool IsNextElseKeyword();
+	bool IsNextElseIfKeyword();
+	bool IsNextEndIfKeyword();
+	bool IsNextEndBlock();
 	//void MoveBack();
 private:
 	bool StartGettingToken;
@@ -85,4 +89,6 @@ private:
 
 #define				KW_IF						"if"
 #define				KW_ELSE						"else"
+#define				KW_ELSEIF					"elseif"
+#define				KW_ENDIF					"endif"
 #endif

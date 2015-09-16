@@ -1,7 +1,11 @@
 #include "ParseTree.h"
-void ParseTree::TypesInit()
-{
 
+ParseTree::~ParseTree()
+{
+	if (tker != NULL)
+		delete tker;
+	if (program != NULL)
+		delete program;
 }
 void ParseTree::Parse(string script)
 {
@@ -9,7 +13,12 @@ void ParseTree::Parse(string script)
 		delete tker;
 	tker = new Tokenizer;
 	tker->Tokenize(script);
-	ProgramNode* program = new ProgramNode;
+	CodeBlockNode* program = new CodeBlockNode;
+	ParseCodeBlock(tker, program);
+	this->program = program;
+}
+void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
+{
 	while (true)
 	{
 		//------------------------------------------
@@ -25,48 +34,58 @@ void ParseTree::Parse(string script)
 			//4. dictionary operation?
 			bool ss = tker->IsNextOperator();
 			Token* tk = tker->LookAhead();
-			if (tker->IsNextOperator()&&*tker->LookAhead()->Symbol == OP_ASSIGN)
+			if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_ASSIGN)
 			{
 				//get rid of the OP_ASSIGN/=
 				tker->NextToken();
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
-				ExpressionNode* rightside = new ExpressionNode;
-				VariableNode* leftside = new VariableNode;
-				leftside->Value=frsttk->Symbol;
-				assignment->LeftSide = leftside;
-				ParseExpression(tker, rightside);
-				assignment->RightSide = rightside;
-				program->Statements.push_back((NodeBase*)assignment);
+
+				assignment->LeftSide->Value = frsttk->Symbol;
+				ParseExpression(tker, assignment->RightSide);
+
+				program->Statements->push_back((NodeBase*)assignment);
 				ConsumeNewLine(tker);
 
 			}
 			//function call
-			else if (tker->IsNextOperator()&&*tker->LookAhead()->Symbol == OP_L_PAREN)
+			else if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_L_PAREN)
 			{
 
 				FunctionCallNode* function = new FunctionCallNode;
-				list<ExpressionNode*>* params = new list < ExpressionNode* > ;
-				ParseParameters(tker, params);
-
+				
 				function->FunctionName = frsttk->Symbol;
-				function->Parameters = params;
-				program->Statements.push_back(function);
+				ParseParameters(tker, function->Parameters);
+
+				program->Statements->push_back(function);
 			}
-			else if (tker->IsNextOperator()&&*tker->LookAhead()->Symbol == OP_L_BRAC)
+			else if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_L_BRAC)
 			{
 				//list or dictionary
 			}
-
+			else if (tker->IsNextIfKeyword())
+			{
+				//skip the "if"
+				tker->NextToken();
+				IfNode* ifnode = new IfNode;
+				//parse the condition
+				ParseExpression(tker, ifnode->Condition);
+				ParseCodeBlock(tker, ifnode->True);
+				program->Statements->push_back(ifnode);
+				//skip endif
+				tker->NextToken();
+			}
+			else if (tker->IsNextEndBlock())
+			{
+				break;
+			}
 			else
 			{
 				// not any of them, throw error
 			}
 		}
 	}
-	this->program = program;
 }
-
 
 void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 {
@@ -93,8 +112,6 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 		*/
 		//copy the first node over to a new dynamically allocated expression node
 		OperationNode* opnode = new OperationNode;
-		opnode->Operators = new list < string* > ;
-		opnode->Terms = new list < ExpressionNode* > ;
 		ExpressionNode* firstterm = new ExpressionNode;
 		firstterm->Expression = frstexp.Expression;
 		firstterm->ExpressionType = frstexp.ExpressionType;
@@ -154,11 +171,11 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 		if (tker->IsNextLeftParen())
 		{
 			FunctionCallNode* function = new FunctionCallNode;
-			list<ExpressionNode*>* params = new list < ExpressionNode* >;
-			ParseParameters(tker, params);
+
+			ParseParameters(tker, function->Parameters);
 
 			function->FunctionName = frsttk->Symbol;
-			function->Parameters = params;
+			
 			exp->Expression = function;
 			exp->ExpressionType = NT_FUNCTIONCALL;
 		}
@@ -300,12 +317,12 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 			printf(" ");
 		}
 	}
-	else if (node->GetType() == NT_PROGRAM)
+	else if (node->GetType() == NT_CODEBLOCK)
 	{
 		printf(Padding(level).c_str());
 		printf("Program");
-		ProgramNode* program = (ProgramNode*)node;
-		for (list<NodeBase*>::iterator it = program->Statements.begin(); it != program->Statements.end(); it++)
+		CodeBlockNode* program = (CodeBlockNode*)node;
+		for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
 		{
 			NodeBase* nxt = *it;
 			PrintTreeNode(*it, level + 1);
