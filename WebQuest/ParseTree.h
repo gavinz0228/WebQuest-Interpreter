@@ -10,6 +10,8 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_EXPRESSION,
 	NT_FUNCTIONCALL ,
 	//NT_PROGRAM,
+	NT_COMPARISON,
+	NT_LOGIC,
 	NT_CODEBLOCK,
 	NT_OPERATION,
 	NT_FLOAT,
@@ -33,18 +35,18 @@ class TerminalNodeBase :public NodeBase
 public:
 	bool IsTerminal(){ return true; };
 };
-//class Assignable :public virtual NodeBase
-//{
-//public:
-//	bool IsAssignable(){ return true; }
-//};
+class Assignable
+{
+public:
+	bool IsAssignable(){ return true; }
+};
 class StringNode :public  TerminalNodeBase
 {
 public:
 	string* Value; 
 	int GetType(){ return NT_STRING; }
 };
-class VariableNode :public TerminalNodeBase
+class VariableNode :public TerminalNodeBase, public Assignable
 {
 public:
 	string* Value;
@@ -65,6 +67,7 @@ public:
 	long double Value;
 	int GetType(){ return NT_FLOAT; }
 };
+
 
 /*
 Non-terminal Node
@@ -102,7 +105,6 @@ public:
 	OperationNode(){ Terms = new list < ExpressionNode* > ; Operators = new list < string* > ; }
 	~OperationNode(){ 
 		while (!Terms->empty()) delete Terms->front(), Terms->pop_front();
-		while (!Operators->empty()) delete Operators->front(), Operators->pop_front();
 		delete Terms; delete Operators;
 	
 	}
@@ -144,6 +146,53 @@ public:
 	CodeBlockNode* NotTrue;
 	int GetType(){ return NT_IF; }
 };
+
+
+
+/*
+Logic Node
+for holding data <exp> <operator> <exp>
+
+forexamples:
+<exp> and <exp>
+<exp> or <exp>
+not	<exp>
+*/
+class LogicNode :public NodeBase
+{
+public:
+	LogicNode()
+	{
+		Expressions = new list<ExpressionNode*>;
+		Operators = new list < string* >;
+	}
+	~LogicNode()
+	{
+		while (!Expressions->empty()){ delete Expressions->front(); Expressions->pop_front(); }
+		delete Expressions;
+		delete Operators;
+	}
+	list<ExpressionNode*> * Expressions;
+	list<string*>* Operators;
+	int GetType(){ return NT_LOGIC; }
+};
+/*
+Comparison Node
+
+for holding data <exp> > <exp>,<exp> >= <exp>, <exp> == <exp> ...
+*/
+class ComparisonNode :public NodeBase
+{
+public:
+	ComparisonNode(){ LeftSide = new ExpressionNode; RightSide = new ExpressionNode; }
+	ExpressionNode* LeftSide;
+	string* Operator;
+	ExpressionNode* RightSide;
+	int GetType(){ return NT_COMPARISON; }
+};
+
+
+
 /*
 	ParseTree class
 */
@@ -172,7 +221,7 @@ private:
 //{
 //public:
 //
-//	ParseTreeNode(ParseTreeNodeType type);
+//	ParseTreeNode(Pars3eTreeNodeType type);
 //	~ParseTreeNode();
 //	void AddNode(ParseTreeNode* node);
 //	void AddToken(Token* tk);

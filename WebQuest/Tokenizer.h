@@ -3,7 +3,7 @@
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE,TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF,TK_ELSE};
+enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE,TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF,TK_ELSE,TK_ELSEIF,TK_END};
 
 class Token
 {
@@ -42,12 +42,18 @@ public:
 	bool IsNextComma();
 	bool IsNextRightParen();
 	bool IsNextLeftParen();
+	bool IsNextComparisonOperator();
 	bool IsNextArithmeticOperator();
+	bool IsNextColon();
+	bool IsNextAndOperator();
+	bool IsNextOrOperator();
+	bool IsNextNotOperator();
 	bool IsNextIfKeyword();
 	bool IsNextElseKeyword();
 	bool IsNextElseIfKeyword();
-	bool IsNextEndIfKeyword();
+	bool IsNextEndKeyword();
 	bool IsNextEndBlock();
+
 	//void MoveBack();
 private:
 	bool StartGettingToken;
@@ -79,6 +85,7 @@ private:
 #define				OP_MODULOASSIGN				"%="
 #define				OP_AND						"&&"
 #define				OP_OR						"||"
+#define				OP_NOT						"!"
 #define				OP_GREATER					">"
 #define				OP_LESS						"<"
 #define				OP_GREATEQUAL				">="
@@ -90,5 +97,5 @@ private:
 #define				KW_IF						"if"
 #define				KW_ELSE						"else"
 #define				KW_ELSEIF					"elseif"
-#define				KW_ENDIF					"endif"
+#define				KW_END						"end"
 #endif

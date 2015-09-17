@@ -19,7 +19,8 @@ void Parse()
 
 	ParseTree parser;
 	//parser.Parse("ab=1+2\r\n");
-	parser.Parse("if 1==1  ab=1 else ab=2 endif");
+	//parser.Parse("a=!3>2");
+	parser.Parse("if a==3 a=1 else b=2 end");
 	parser.PrintTree();
 }
 void Tokenize()

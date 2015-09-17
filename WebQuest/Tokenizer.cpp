@@ -21,10 +21,17 @@ Token::~Token()
 		delete Symbol;
 }
 //-----------------------------------------------------------------------------------------------------------------
+//Rule Number 1. this array ends with a NULL
+//Rule Number 2. Longer item should  be placed before the shorter ones.
+// for example:  <= before < 
+//== before =
+//etc...
 char*  Tokenizer::OPERATORS[] { OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
+OP_AND, OP_OR, OP_NOT, OP_GREATER, OP_LESS, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL,
 OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
+
 OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
-OP_AND, OP_OR, OP_GREATER, OP_LESS, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, NULL};
+ NULL};
 
 Tokenizer::Tokenizer()
 {
@@ -96,6 +103,14 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (strncmp(start, KW_ELSE, ch - start) == 0)
 			{
 				tk = new Token(start, ch - start, TK_ELSE);
+			}
+			else if (strncmp(start, KW_ELSEIF, ch - start) == 0)
+			{
+				tk = new Token(start, ch - start, TK_ELSEIF);
+			}
+			else if (strncmp(start, KW_END, ch - start) == 0)
+			{
+				tk = new Token(start, ch - start, TK_END);
 			}
 			else if (Converter::StringToInteger(start, ch - start, integer))
 			{
@@ -253,17 +268,23 @@ bool Tokenizer::IsNextString()
 bool Tokenizer::IsNextComma()
 {
 	Token* next = LookAhead();
-	return next != NULL&& *next->Symbol==OP_COMMA;
+	return next != NULL&&next->Type==TK_OPERATOR&& *next->Symbol==OP_COMMA;
 }
 bool Tokenizer::IsNextLeftParen()
 {
 	Token* next = LookAhead();
-	return next != NULL&& *next->Symbol ==OP_L_PAREN;
+	return next != NULL&&next->Type==TK_OPERATOR&& *next->Symbol ==OP_L_PAREN;
 }
 bool Tokenizer::IsNextRightParen()
 {
 	Token* next = LookAhead();
 	return next != NULL&& *next->Symbol == OP_R_PAREN;
+}
+bool Tokenizer::IsNextColon()
+{
+	Token* next = LookAhead();
+	return next != NULL&&*next->Symbol == OP_COLON;
+
 }
 bool Tokenizer::IsNextArithmeticOperator()
 {
@@ -274,27 +295,52 @@ bool Tokenizer::IsNextArithmeticOperator()
 		*next->Symbol == OP_DEVIDE||
 		*next->Symbol== OP_MODULO);
 }
+bool Tokenizer::IsNextComparisonOperator()
+{
+	Token* next = LookAhead();
+	return next != NULL&&(*next->Symbol == OP_GREATER ||
+		*next->Symbol == OP_GREATEQUAL ||
+		*next->Symbol == OP_EQUAL ||
+		*next->Symbol == OP_LESS ||
+		*next->Symbol == OP_LESSEQUAL);
+
+}
 bool Tokenizer::IsNextIfKeyword()
 {
 	Token* next = LookAhead();
-	return next != NULL&&*next->Symbol == KW_IF;
+	return next != NULL&&next->Type==TK_IF;
 }
 bool Tokenizer::IsNextElseKeyword()
 {
 	Token* next = LookAhead();
-	return next != NULL&&*next->Symbol == KW_ELSE;
+	return next != NULL&&next->Type == TK_ELSE;
 }
 bool Tokenizer::IsNextElseIfKeyword()
 {
 	Token* next = LookAhead();
-	return next != NULL&&*next->Symbol == KW_ELSEIF;
+	return next != NULL&&(next->Type==TK_ELSEIF);
 }
-bool Tokenizer::IsNextEndIfKeyword()
+bool Tokenizer::IsNextEndKeyword()
 {
 	Token* next = LookAhead();
-	return next != NULL&&*next->Symbol == KW_ENDIF;
+	return next != NULL&&(next->Type == TK_END);
 }
 bool Tokenizer::IsNextEndBlock()
 {
-	return IsNextEndBlock() || IsNextEndIfKeyword() || IsNextElseKeyword();
+	return  IsNextEndKeyword() || IsNextElseKeyword();
+}
+bool Tokenizer::IsNextAndOperator()
+{
+	Token* next = LookAhead();
+	return next != NULL && *next->Symbol == OP_AND;
+}
+bool Tokenizer::IsNextOrOperator()
+{
+	Token* next = LookAhead();
+	return next != NULL && *next->Symbol == OP_OR;
+}
+bool Tokenizer::IsNextNotOperator()
+{
+	Token* next = LookAhead();
+	return next != NULL &&next->Type==TK_OPERATOR&& (*next->Symbol == OP_NOT);
 }

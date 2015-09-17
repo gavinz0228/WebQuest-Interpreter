@@ -19,13 +19,38 @@ void ParseTree::Parse(string script)
 }
 void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 {
+	if (tker->IsNextEndBlock())
+		return;
 	while (true)
 	{
 		//------------------------------------------
 		Token* frsttk = tker->NextToken();
 		if (frsttk == NULL)
 			break;
-		if (frsttk->Type == TK_VARIABLE)
+		if (frsttk->Type==TK_IF)
+		{
+
+			IfNode* ifnode = new IfNode;
+			//parse the condition
+			ParseExpression(tker, ifnode->Condition);
+			ParseCodeBlock(tker, ifnode->True);
+			if (tker->IsNextElseKeyword())
+				ParseCodeBlock(tker, ifnode->NotTrue);
+			//after parsing if and else , expecting a 'end'
+			if (!tker->IsNextEndBlock())
+			{
+				throw SYNTAX_EXPECTING_END_IF;
+			}
+			program->Statements->push_back(ifnode);
+			//skip endif
+			tker->NextToken();
+		}
+		else if (frsttk->Type == TK_ELSE)
+		{
+			//the end of the current block so just return
+			return;
+		}
+		else if (frsttk->Type == TK_VARIABLE)
 		{
 			//starts with symbol
 			//1. assignment?
@@ -63,25 +88,16 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			{
 				//list or dictionary
 			}
-			else if (tker->IsNextIfKeyword())
+
+			else if (tker->LookAhead()==NULL)
 			{
-				//skip the "if"
-				tker->NextToken();
-				IfNode* ifnode = new IfNode;
-				//parse the condition
-				ParseExpression(tker, ifnode->Condition);
-				ParseCodeBlock(tker, ifnode->True);
-				program->Statements->push_back(ifnode);
-				//skip endif
-				tker->NextToken();
-			}
-			else if (tker->IsNextEndBlock())
-			{
-				break;
+				// end of the program
+				return;
 			}
 			else
 			{
-				// not any of them, throw error
+				//throw exception
+				// syntax error ,unexpected token
 			}
 		}
 	}
@@ -90,17 +106,52 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 {
 	ExpressionNode frstexp ;
-	ParseTerm(tker, &frstexp);
+	if (tker->IsNextLeftParen())
+	{
+		// skip the left parenthesis
+		tker->NextToken();
+		ExpressionNode* wrapexp = new ExpressionNode;
+		ParseExpression(tker, wrapexp);
+		exp->Expression =(NodeBase*) wrapexp;
+		exp->ExpressionType = NT_EXPRESSION;
+		if (!tker->IsNextRightParen())
+		{
+			throw SYNTAX_EXPECTING_RIGHT_PAREN;
+		}
+		//skip the right parenthesis
+		tker->NextToken();
+		return;
+	}
+	//Two cases
+	//1. !<Term>
+	//2 <Term>
+	if (tker->IsNextNotOperator())
+	{
+		LogicNode* notnode = new LogicNode;
+		notnode->Operators->push_back(tker->NextToken()->Symbol);
+		ExpressionNode* tmpexp = new ExpressionNode;
+		ParseExpression(tker,tmpexp);
+		notnode->Expressions->push_back(tmpexp);
+		frstexp.Expression = (NodeBase*)notnode;
+		frstexp.ExpressionType = NT_LOGIC;
+	}
+	else
+	{
+		ParseTerm(tker, &frstexp);
+	}
+	ExpressionNode* currentexp=&frstexp;
 	//there is only one term in this expression
 	//its sign is that the next token is right parenthesis or new line
-	if (tker->IsNextNewLine() || tker->IsNextRightParen())
+	if (tker->IsNextRightParen()||tker->IsNextEndBlock())
 	{
-		exp->Expression = frstexp.Expression;
-		exp->ExpressionType = frstexp.ExpressionType;
-		
+		//exp->Expression = frstexp.Expression;
+		//exp->ExpressionType = frstexp.ExpressionType;
+		memcpy(exp, &frstexp,sizeof(frstexp));
+		return;
 	}
+
 	//there is more than one term in this expression
-	else if (tker->IsNextArithmeticOperator())
+	if (tker->IsNextArithmeticOperator())
 	{
 		/* 
 		evaluation for this parsing solution
@@ -126,17 +177,48 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 			ParseTerm(tker, newterm);
 			opnode->Terms->push_back(newterm);
 		}
-		
-		exp->Expression = opnode;
-		exp->ExpressionType = NT_OPERATION;
+		currentexp->Expression = opnode;
+		currentexp->ExpressionType = NT_OPERATION;
+	}
+	//if it's a comparison , then this is a comparison Node
+	if (tker->IsNextComparisonOperator())
+	{
+		Token* op = tker->NextToken();
+		ComparisonNode* comnode = new ComparisonNode;
+		//comnode->LeftSide = currentexp;
+		memcpy(comnode->LeftSide, currentexp, sizeof(*currentexp));
+		comnode->Operator = op->Symbol;
+		ParseExpression(tker, comnode->RightSide);
+		currentexp->Expression = (NodeBase*)comnode;
+		currentexp->ExpressionType = NT_COMPARISON;
+	}
+	//if it finds a logic operator after the current expression:
+	// currentnode && ...
+	// then use a logic node to wrap the whole expression ,for example:
+	// <currentnode> && aa==1 || bb==2
+	if (tker->IsNextAndOperator() || tker->IsNextOrOperator())
+	{
+		LogicNode* lgnode = new LogicNode;
+		lgnode->Expressions->push_back(currentexp);
+		while (true)
+		{
+			if (!tker->IsNextAndOperator() && !tker->IsNextOrOperator())
+			{
+				//the end of this expression
+				break;
+			}
+			lgnode->Operators->push_back(tker->NextToken()->Symbol);
+			ExpressionNode* temexp = new ExpressionNode;
+			ParseExpression(tker, temexp);
+			lgnode->Expressions->push_back(temexp);
+		}
+		currentexp->Expression = currentexp->Expression;
+		currentexp->ExpressionType = currentexp->ExpressionType;
+
 	}
 
-	// the next one is neither arithmetic operator nor terminal node, nor  new line or right paren
-	//throw exception
-	else
-	{
-		throw INVALID_EXPRESSION;
-	}
+	exp->Expression = currentexp->Expression;
+	exp->ExpressionType = currentexp->ExpressionType;
 
 }
 
@@ -186,6 +268,10 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 			exp->ExpressionType = NT_VARIABLE;
 		}
 	}
+	else if (tker->LookAhead() == NULL)
+	{
+		return;
+	}
 }
 
 void ParseTree::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters)
@@ -205,7 +291,7 @@ void ParseTree::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* paramete
 		ParseExpression(tker, exp);
 		parameters->push_back(exp);
 		if (!tker->IsNextComma() && !tker->IsNextRightParen())
-			throw INVALID_FUNCTION_CALL;
+			throw SYNTAX_INVALID_FUNCTION_CALL;
 
 	}
 }
@@ -237,8 +323,6 @@ string Padding(int num)
 }
 void ParseTree::PrintTreeNode(NodeBase* node,int level)
 {
-
-
 	if (node->GetType() == NT_EXPRESSION)
 	{
 		ExpressionNode* expnode = (ExpressionNode*)node;
@@ -286,6 +370,33 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 		}
 		printf(")");
 
+	}
+	else if (node->GetType() == NT_COMPARISON)
+	{
+		ComparisonNode* comnode = (ComparisonNode*)node;
+		PrintTreeNode(comnode->LeftSide, level + 1);
+		printf(comnode->Operator->c_str());
+		PrintTreeNode(comnode->RightSide, level + 1);
+		
+	}
+	else if (node->GetType() == NT_LOGIC)
+	{
+		LogicNode* lgnode = (LogicNode*)node;
+		printf("Logic Node(Expressions:");
+		for (list<ExpressionNode*>::iterator expit = lgnode->Expressions->begin();
+			expit != lgnode->Expressions->end();
+			expit++)
+		{
+			PrintTreeNode(*expit, level + 1);
+		}
+		printf(", Logic Operators:");
+		for (list<string*>::iterator lgit = lgnode->Operators ->begin();
+			lgit != lgnode->Operators->end();
+			lgit++)
+		{
+			printf((*lgit)->c_str(), level + 1);
+		}
+		printf(")");
 	}
 	else if (node->GetType()==NT_FLOAT)
 	{
