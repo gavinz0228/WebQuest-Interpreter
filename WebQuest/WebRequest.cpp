@@ -4,7 +4,6 @@ void WebRequest::AddHeader(string key, string value)
 {
 	headers.insert(pair<string,string>( key, value));
 }
-
 string WebRequest::GetHeaders(string method, Uri uri)
 {
 	string data;

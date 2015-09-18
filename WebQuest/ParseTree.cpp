@@ -32,14 +32,36 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 		{
 
 			IfNode* ifnode = new IfNode;
+			ExpressionNode* firstifcondition = new ExpressionNode;
+			CodeBlockNode* firstifblock = new CodeBlockNode;
 			//parse the condition
-			ParseExpression(tker, ifnode->Condition);
-			ParseCodeBlock(tker, ifnode->True);
+			ParseExpression(tker, firstifcondition);
+			ParseCodeBlock(tker, firstifblock);
+			ifnode->IfBlock->insert(pair<ExpressionNode*,CodeBlockNode*>(firstifcondition,firstifblock));
+			if (tker->IsNextElseIfKeyword())
+			{
+				while (tker->IsNextElseIfKeyword())
+				{
+					//skip the elseif
+					tker->NextToken();
+					ExpressionNode* elseifcondition = new ExpressionNode;
+					CodeBlockNode* elseifblock = new CodeBlockNode;
+					//parse the condition
+					ParseExpression(tker, elseifcondition);
+					ParseCodeBlock(tker, elseifblock);
+					ifnode->IfBlock->insert( pair<ExpressionNode*, CodeBlockNode*>(elseifcondition, elseifblock));
+
+				}
+
+			}
 			if (tker->IsNextElseKeyword())
 			{
 				//skip the else keyword
 				tker->NextToken();
-				ParseCodeBlock(tker, ifnode->NotTrue);
+				CodeBlockNode* elseblock = new CodeBlockNode;
+				//parse the condition
+				ParseCodeBlock(tker, ifnode->ElseBlock);
+				
 			}
 			//after parsing if and else , expecting a 'end'
 			if (!tker->IsNextEndBlock())
@@ -50,7 +72,7 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//skip endif
 			tker->NextToken();
 		}
-		else if (frsttk->Type == TK_ELSE)
+		else if (frsttk->Type == TK_ELSE||frsttk->Type== TK_ELSEIF)
 		{
 			//the end of the current block so just return
 			return;
@@ -93,7 +115,6 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			{
 				//list or dictionary
 			}
-
 			else if (tker->LookAhead()==NULL)
 			{
 				// end of the program
@@ -387,16 +408,32 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 	else if (node->GetType() == NT_IF)
 	{
 		IfNode* ifnode = (IfNode*)node;
+		map<ExpressionNode*, CodeBlockNode*>::iterator it = ifnode->IfBlock->begin();
+		if (it != ifnode->IfBlock->end())
+		{
+			printf(Padding(level).c_str());
+			printf("\nIf Expression(");
+
+			PrintTreeNode(it->first, level + 1);
+			printf(") True:");
+			printf(Padding(level).c_str());
+			PrintTreeNode(it->second, level + 1);
+		}
+		it++;
+		while (it != ifnode->IfBlock->end())
+		{
+			printf(Padding(level).c_str());
+			printf("\nElse If Expression(");
+
+			PrintTreeNode(it->first, level + 1);
+			printf(") True:");
+			printf(Padding(level).c_str());
+			PrintTreeNode(it->second, level + 1);
+			it++;
+		}
 		printf(Padding(level).c_str());
-		printf("\nIf Expression(");
-		PrintTreeNode(ifnode->Condition,level+1);
-		printf(")");
-		printf(Padding(level).c_str());
-		printf("\nTrue:");
-		PrintTreeNode(ifnode->True, level+1);
-		printf(Padding(level).c_str());
-		printf("\nFalse:");
-		PrintTreeNode(ifnode->NotTrue, level + 1);
+		printf("\nElse:");
+		PrintTreeNode(ifnode->ElseBlock, level + 1);
 
 	}
 	else if (node->GetType() == NT_COMPARISON)

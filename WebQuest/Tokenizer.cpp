@@ -90,40 +90,43 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			}
 			long long integer;
 			long double floating;
+			int len = ch - start;
 			Token* tk;
 			//if the first character is a slash, then it's a string
 			if (*start=='\"'||*start=='\'')
 			{
-				tk = new Token(start, ch - start, TK_STRING);
+				tk = new Token(start, len, TK_STRING);
 			}
-			else if (strncmp(start, KW_IF,ch-start)==0)
+
+			else if (len == strlen(KW_ELSEIF)&&strncmp(start, KW_ELSEIF, len) == 0)
 			{
-				tk = new Token(start, ch - start, TK_IF);
+				
+				tk = new Token(start, len, TK_ELSEIF);
 			}
-			else if (strncmp(start, KW_ELSE, ch - start) == 0)
+			else if (len == strlen(KW_IF) && strncmp(start, KW_IF, len) == 0)
 			{
-				tk = new Token(start, ch - start, TK_ELSE);
+				tk = new Token(start, len, TK_IF);
 			}
-			else if (strncmp(start, KW_ELSEIF, ch - start) == 0)
+			else if (len == strlen(KW_ELSE) && strncmp(start, KW_ELSE, len) == 0)
 			{
-				tk = new Token(start, ch - start, TK_ELSEIF);
+				tk = new Token(start, len, TK_ELSE);
 			}
-			else if (strncmp(start, KW_END, ch - start) == 0)
+			else if (len == strlen(KW_END) && strncmp(start, KW_END, len) == 0)
 			{
-				tk = new Token(start, ch - start, TK_END);
+				tk = new Token(start, len, TK_END);
 			}
-			else if (Converter::StringToInteger(start, ch - start, integer))
+			else if (Converter::StringToInteger(start, len, integer))
 			{
 				tk = new Token(integer);
 				
 			}
-			else if (Converter::StringToFloat(start, ch - start, floating))
+			else if (Converter::StringToFloat(start, len, floating))
 			{
 				tk = new Token(floating);
 			}
 			else
 			{
-				tk = new Token(start, ch - start, TK_VARIABLE);
+				tk = new Token(start, len, TK_VARIABLE);
 			}
 			
 			Tokens->push_back(tk);
@@ -322,6 +325,9 @@ bool Tokenizer::IsNextElseKeyword()
 bool Tokenizer::IsNextElseIfKeyword()
 {
 	Token* next = LookAhead();
+	//char b = TK_END;
+	//char a =  TK_ELSEIF;
+	//char c = TK_ELSE;
 	return next != NULL&&(next->Type==TK_ELSEIF);
 }
 bool Tokenizer::IsNextEndKeyword()
@@ -331,7 +337,7 @@ bool Tokenizer::IsNextEndKeyword()
 }
 bool Tokenizer::IsNextEndBlock()
 {
-	return  IsNextEndKeyword() || IsNextElseKeyword();
+	return  IsNextEndKeyword() || IsNextElseKeyword()||IsNextElseIfKeyword();
 }
 bool Tokenizer::IsNextAndOperator()
 {

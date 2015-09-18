@@ -3,7 +3,7 @@
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE,TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF,TK_ELSE,TK_ELSEIF,TK_END};
+enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE='V',TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF='U',TK_ELSE='X',TK_ELSEIF='Y',TK_END='Z'};
 
 class Token
 {
@@ -99,4 +99,6 @@ private:
 #define				KW_ELSE						"else"
 #define				KW_ELSEIF					"elseif"
 #define				KW_END						"end"
+#define				KW_CONTINUE					"continue"
+#define				KW_BREAK					"break"
 #endif

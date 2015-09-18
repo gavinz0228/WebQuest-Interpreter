@@ -1,6 +1,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <map>
 #include "Tokenizer.h"
 #include "WQObject.h"
 #include "Exception.h"
@@ -139,11 +140,18 @@ public:
 class IfNode :public NodeBase
 {
 public:
-	IfNode(){ Condition = new ExpressionNode; True = new CodeBlockNode; NotTrue = new CodeBlockNode; }
-	~IfNode(){ delete Condition; delete True; delete NotTrue; }
-	ExpressionNode* Condition;
-	CodeBlockNode* True;
-	CodeBlockNode* NotTrue;
+	IfNode(){ IfBlock = new map < ExpressionNode*, CodeBlockNode* > ; ElseBlock = new CodeBlockNode; }
+	~IfNode(){
+		map< ExpressionNode*, CodeBlockNode* >::iterator it = IfBlock->begin();
+		for (; it != IfBlock->end(); it++)
+		{
+			delete it->first;
+			delete it->second;
+		}
+		delete IfBlock; delete ElseBlock;
+	}
+	CodeBlockNode* ElseBlock;
+	map<ExpressionNode*, CodeBlockNode*>* IfBlock;
 	int GetType(){ return NT_IF; }
 };
 
