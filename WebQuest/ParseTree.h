@@ -205,7 +205,7 @@ public:
 	void PrintTree();
 private:
 	void ParseCodeBlock(Tokenizer* tker, CodeBlockNode* codeblock);
-	void ParseExpression(Tokenizer* tker, ExpressionNode* node);
+	void ParseExpression(Tokenizer* tker, ExpressionNode* node,bool parselogicnode=true);
 	void ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters);
 	void ConsumeNewLine(Tokenizer* tker);
 	void ParseTerm(Tokenizer* tker, ExpressionNode* exp);

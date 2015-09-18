@@ -33,6 +33,7 @@ public:
 	void Clear();
 	Token* NextToken();
 	Token* LookAhead();
+	void InitIterator();
 	bool IsNextNumber();
 	bool IsNextSymbol();
 	bool IsNextOperator();

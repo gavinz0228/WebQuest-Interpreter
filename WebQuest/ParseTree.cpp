@@ -19,10 +19,11 @@ void ParseTree::Parse(string script)
 }
 void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 {
-	if (tker->IsNextEndBlock())
-		return;
+
 	while (true)
 	{
+		if (tker->IsNextEndBlock())
+			return;
 		//------------------------------------------
 		Token* frsttk = tker->NextToken();
 		if (frsttk == NULL)
@@ -35,7 +36,11 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			ParseExpression(tker, ifnode->Condition);
 			ParseCodeBlock(tker, ifnode->True);
 			if (tker->IsNextElseKeyword())
+			{
+				//skip the else keyword
+				tker->NextToken();
 				ParseCodeBlock(tker, ifnode->NotTrue);
+			}
 			//after parsing if and else , expecting a 'end'
 			if (!tker->IsNextEndBlock())
 			{
@@ -103,7 +108,7 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 	}
 }
 
-void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
+void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parselogicnode)
 {
 	ExpressionNode frstexp ;
 	if (tker->IsNextLeftParen())
@@ -179,6 +184,7 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 		}
 		currentexp->Expression = opnode;
 		currentexp->ExpressionType = NT_OPERATION;
+
 	}
 	//if it's a comparison , then this is a comparison Node
 	if (tker->IsNextComparisonOperator())
@@ -188,7 +194,7 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 		//comnode->LeftSide = currentexp;
 		memcpy(comnode->LeftSide, currentexp, sizeof(*currentexp));
 		comnode->Operator = op->Symbol;
-		ParseExpression(tker, comnode->RightSide);
+		ParseExpression(tker, comnode->RightSide,false);
 		currentexp->Expression = (NodeBase*)comnode;
 		currentexp->ExpressionType = NT_COMPARISON;
 	}
@@ -198,22 +204,28 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp)
 	// <currentnode> && aa==1 || bb==2
 	if (tker->IsNextAndOperator() || tker->IsNextOrOperator())
 	{
-		LogicNode* lgnode = new LogicNode;
-		lgnode->Expressions->push_back(currentexp);
-		while (true)
+		if (parselogicnode == true)
 		{
-			if (!tker->IsNextAndOperator() && !tker->IsNextOrOperator())
+			LogicNode* lgnode = new LogicNode;
+			ExpressionNode* whatihavenow = new ExpressionNode;
+			whatihavenow->Expression = currentexp->Expression;
+			whatihavenow->ExpressionType = currentexp->ExpressionType;
+			lgnode->Expressions->push_back(whatihavenow);
+			while (true)
 			{
-				//the end of this expression
-				break;
+				if (!tker->IsNextAndOperator() && !tker->IsNextOrOperator())
+				{
+					//the end of this expression
+					break;
+				}
+				lgnode->Operators->push_back(tker->NextToken()->Symbol);
+				ExpressionNode* temexp = new ExpressionNode;
+				ParseExpression(tker, temexp,false);
+				lgnode->Expressions->push_back(temexp);
 			}
-			lgnode->Operators->push_back(tker->NextToken()->Symbol);
-			ExpressionNode* temexp = new ExpressionNode;
-			ParseExpression(tker, temexp);
-			lgnode->Expressions->push_back(temexp);
+			currentexp->Expression = (NodeBase*)lgnode;
+			currentexp->ExpressionType = NT_LOGIC;
 		}
-		currentexp->Expression = currentexp->Expression;
-		currentexp->ExpressionType = currentexp->ExpressionType;
 
 	}
 
@@ -299,6 +311,7 @@ void ParseTree::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* paramete
 
 void ParseTree::PrintTree()
 {
+	printf("Program");
 	PrintTreeNode((NodeBase*)program, 0);
 }
 void ParseTree::ConsumeNewLine(Tokenizer* tker)
@@ -371,6 +384,21 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 		printf(")");
 
 	}
+	else if (node->GetType() == NT_IF)
+	{
+		IfNode* ifnode = (IfNode*)node;
+		printf(Padding(level).c_str());
+		printf("\nIf Expression(");
+		PrintTreeNode(ifnode->Condition,level+1);
+		printf(")");
+		printf(Padding(level).c_str());
+		printf("\nTrue:");
+		PrintTreeNode(ifnode->True, level+1);
+		printf(Padding(level).c_str());
+		printf("\nFalse:");
+		PrintTreeNode(ifnode->NotTrue, level + 1);
+
+	}
 	else if (node->GetType() == NT_COMPARISON)
 	{
 		ComparisonNode* comnode = (ComparisonNode*)node;
@@ -431,7 +459,6 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
 		printf(Padding(level).c_str());
-		printf("Program");
 		CodeBlockNode* program = (CodeBlockNode*)node;
 		for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
 		{

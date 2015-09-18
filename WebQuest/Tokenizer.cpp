@@ -131,13 +131,17 @@ list<Token*>* Tokenizer::Tokenize(string script)
 	}
 	return Tokens;
 }
-Token* Tokenizer::NextToken()
+void Tokenizer::InitIterator()
 {
 	if (StartGettingToken == false)
 	{
 		StartGettingToken = true;
 		iterator = Tokens->begin();
 	}
+}
+Token* Tokenizer::NextToken()
+{
+	InitIterator();
 	if (iterator == Tokens->end())
 		return NULL;
 	else
@@ -154,7 +158,7 @@ Token* Tokenizer::NextToken()
 //}
 Token* Tokenizer::LookAhead()
 {
-
+	InitIterator();
 	//list<Token*>::iterator temp_it = next(iterator);
 	if (iterator != Tokens->end())
 		return *iterator;
