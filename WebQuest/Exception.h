@@ -7,6 +7,11 @@
 #define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
 #define		SYNTAX_EXPECTING_END_IF							"Expecting an 'end' for the if block"
 #define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting an right parentheise"
+#define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
+
+#define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
+
+
 class Exception :std::exception
 {
 public:

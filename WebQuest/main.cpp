@@ -1,18 +1,27 @@
 #include "Tokenizer.h"
 #include "WebRequest.h"
 #include "ParseTree.h"
+#include "RunTime.h"
+
 using namespace std;
 void Request();
 void Tokenize();
 void Parse();
+void Evaluate();
 int main(int argc, char **argv)
 {
 	//Request();
 	//Tokenize();
-	Parse();
+	//Parse();
+	Evaluate();
 	char wait;
 	scanf_s(&wait);
 	return 0;
+}
+void Evaluate()
+{
+	Runtime rt;
+	rt.Run("print('asdf')");
 }
 void Parse()
 {

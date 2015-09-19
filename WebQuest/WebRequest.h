@@ -9,8 +9,8 @@
 #include "Uri.h"
 #include "Exception.h"
 using namespace std;
-#ifndef REQUEST_H
-#define REQUEST_H
+#ifndef WEBREQUEST_H
+#define WEBREQUEST_H
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")

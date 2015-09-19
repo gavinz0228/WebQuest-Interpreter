@@ -93,9 +93,15 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			int len = ch - start;
 			Token* tk;
 			//if the first character is a slash, then it's a string
-			if (*start=='\"'||*start=='\'')
+			if ((*start == '\"' || *start == '\'') )
 			{
-				tk = new Token(start, len, TK_STRING);
+				if ((*(start + len - 1) == '\"') || (*(start + len - 1) == '\''))
+				{
+					//skip the quote at the begining and the end;
+					tk = new Token(start+1, len-2, TK_STRING);
+				}
+				else
+					throw SYNTAX_STRING_MISSING_QUOTE;
 			}
 
 			else if (len == strlen(KW_ELSEIF)&&strncmp(start, KW_ELSEIF, len) == 0)
@@ -123,6 +129,14 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (Converter::StringToFloat(start, len, floating))
 			{
 				tk = new Token(floating);
+			}
+			else if (len == strlen(KW_CREATEDICT) && strncmp(start, KW_CREATEDICT, len) == 0)
+			{
+				tk = new Token(start, len, TK_CREATEDICT);
+			}
+			else if (len == strlen(KW_CREATELIST) && strncmp(start, KW_CREATELIST, len) == 0)
+			{
+				tk = new Token(start, len, TK_CREATELIST);
 			}
 			else
 			{
@@ -282,10 +296,20 @@ bool Tokenizer::IsNextLeftParen()
 	Token* next = LookAhead();
 	return next != NULL&&next->Type==TK_OPERATOR&& *next->Symbol ==OP_L_PAREN;
 }
+bool Tokenizer::IsNextLeftBracket()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_OPERATOR&&*next->Symbol == OP_L_BRAC;
+}
+bool Tokenizer::IsNextRightBracket()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_OPERATOR&&*next->Symbol == OP_R_BRAC;
+}
 bool Tokenizer::IsNextRightParen()
 {
 	Token* next = LookAhead();
-	return next != NULL&& *next->Symbol == OP_R_PAREN;
+	return next != NULL&&next->Type==TK_OPERATOR&& *next->Symbol == OP_R_PAREN;
 }
 bool Tokenizer::IsNextColon()
 {

@@ -6,6 +6,8 @@
 #include "WQObject.h"
 #include "Exception.h"
 using namespace std;
+#ifndef PARSERTREE_H
+#define PARSERTREE_H
 
 enum ParseTreeNodeType{ NT_ASSIGNMENT, 
 	NT_EXPRESSION,
@@ -211,6 +213,7 @@ public:
 	~ParseTree();
 	void Parse(string script);
 	void PrintTree();
+	volatile CodeBlockNode *program;
 private:
 	void ParseCodeBlock(Tokenizer* tker, CodeBlockNode* codeblock);
 	void ParseExpression(Tokenizer* tker, ExpressionNode* node,bool parselogicnode=true);
@@ -218,12 +221,12 @@ private:
 	void ConsumeNewLine(Tokenizer* tker);
 	void ParseTerm(Tokenizer* tker, ExpressionNode* exp);
 	void ParseIf(Tokenizer* tker, IfNode* ifnode);
-	volatile CodeBlockNode *program;
+
 	void PrintTreeNode(NodeBase* node, int level);
 	Tokenizer* tker;
 
 };
-
+#endif
 //
 //class ParseTreeNode
 //{

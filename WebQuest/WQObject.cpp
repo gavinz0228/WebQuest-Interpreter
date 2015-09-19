@@ -2,10 +2,14 @@
 
 WQObject::WQObject()
 {
-	type = DT_NONE;
+	Type = DT_NONE;
 	data = NULL;
 }
 WQObject::~WQObject()
+{
+	ClearValue();
+}
+void WQObject::ClearValue()
 {
 	if (data != NULL)
 	{
@@ -19,42 +23,54 @@ bool WQObject::Assigned()
 }
 void WQObject::SetFloatValue(long double &value)
 {
-	type = DT_FLOAT;
+	ClearValue();
+	Type = DT_FLOAT;
 	data = new long double;
 	*((long double*)data) = value;
 	assigned = true;
 }
 void WQObject::SetIntValue(long long &value)
 {
-	type = DT_INTEGER;
+	ClearValue();
+	Type = DT_INTEGER;
 	data = new long long;
 	*((long long*)data) = value;
 	assigned = true;
 }
 void WQObject::SetStringValue(string &value)
 {
-	type = DT_STRING;
+	ClearValue();
+	Type = DT_STRING;
 	data = new string;
 	*((string*)data) = value;
 	assigned = true;
 }
 void WQObject::SetListValue(list<WQObject> &value)
 {
-	type = DT_LIST;
+	Type = DT_LIST;
 	data = new list < WQObject > ;
 	*((list<WQObject>*)data) = value; 
 	assigned = true;
 }
+void WQObject:: SetNull()
+{
+	ClearValue();
+	Type = DT_NULL;
+}
 string WQObject::ToString()
 {
-	if (this->type == DT_NONE)
+	if (this->Type == DT_NONE)
 		return "None";
-	else if (type == DT_INTEGER)
+	else if (Type == DT_INTEGER)
 	{
 		//Convertion::ToString(*((long long*)data));
 		return "";
 	}
-	else if (type == DT_FLOAT)
+	else if (Type == DT_STRING)
+	{
+		return *((string*)data);
+	}
+	else if (Type == DT_FLOAT)
 		return "";
 	return "None";
 }

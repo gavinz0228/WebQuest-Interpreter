@@ -36,14 +36,20 @@
     <ClInclude Include="Converter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Evaluation.h">
+    <ClInclude Include="WQState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Evironment.h">
+    <ClInclude Include="GlobalFunctions.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RunTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment.cpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Environment.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -68,7 +74,13 @@
     <ClCompile Include="Converter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Evaluation.cpp">
+    <ClCompile Include="GlobalFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WQState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Runtime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

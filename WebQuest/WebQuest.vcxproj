@@ -65,25 +65,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Converter.h" />
+    <ClInclude Include="Environment.cpp" />
+    <ClInclude Include="RunTime.h" />
     <ClInclude Include="Environment.h" />
-    <ClInclude Include="Evaluation.h" />
-    <ClInclude Include="Evironment.h" />
     <ClInclude Include="Exception.h" />
+    <ClInclude Include="GlobalFunctions.h" />
     <ClInclude Include="ParseTree.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="WebRequest.h" />
     <ClInclude Include="Uri.h" />
     <ClInclude Include="WQObject.h" />
+    <ClInclude Include="WQState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Converter.cpp" />
-    <ClCompile Include="Evaluation.cpp" />
+    <ClCompile Include="Runtime.cpp" />
+    <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ParseTree.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
     <ClCompile Include="WebRequest.cpp" />
     <ClCompile Include="Uri.cpp" />
     <ClCompile Include="WQObject.cpp" />
+    <ClCompile Include="WQState.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

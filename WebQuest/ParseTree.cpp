@@ -94,7 +94,26 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				AssignmentNode* assignment = new AssignmentNode;
 
 				assignment->LeftSide->Value = frsttk->Symbol;
-				ParseExpression(tker, assignment->RightSide);
+				//assignment of  <variable>=[]
+				if (tker->LookAhead()->Type == TK_CREATELIST)
+				{
+					string* name=tker->NextToken()->Symbol;
+					FunctionCallNode* createlist = new FunctionCallNode;
+					createlist->FunctionName = name;
+					assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
+					assignment->RightSide->Expression = (NodeBase*)createlist;
+				}
+				//assignment of  <variable>={}
+				else if (tker->LookAhead()->Type == TK_CREATEDICT)
+				{
+					string* name = tker->NextToken()->Symbol;
+					FunctionCallNode* createdict = new FunctionCallNode;
+					createdict->FunctionName = name;
+					assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
+					assignment->RightSide->Expression = (NodeBase*)createdict;
+				}
+				else
+					ParseExpression(tker, assignment->RightSide);
 
 				program->Statements->push_back((NodeBase*)assignment);
 				ConsumeNewLine(tker);
@@ -168,7 +187,7 @@ void ParseTree::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parse
 	ExpressionNode* currentexp=&frstexp;
 	//there is only one term in this expression
 	//its sign is that the next token is right parenthesis or new line
-	if (tker->IsNextRightParen()||tker->IsNextEndBlock())
+	if (tker->IsNextRightParen()||tker->IsNextEndBlock()||tker->IsNextColon()||tker->IsNextRightBracket())
 	{
 		//exp->Expression = frstexp.Expression;
 		//exp->ExpressionType = frstexp.ExpressionType;
@@ -277,7 +296,7 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 	{
 
 		StringNode* strnode = new StringNode;
-		strnode->Value = tker->NextToken()->Symbol;
+		strnode->Value = frsttk->Symbol;
 		exp->Expression = (NodeBase*)strnode;
 		exp->ExpressionType = NT_STRING;
 	}
@@ -294,6 +313,31 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 			exp->Expression = function;
 			exp->ExpressionType = NT_FUNCTIONCALL;
 		}
+		else if (tker->IsNextLeftBracket())
+		{
+			//parse a list or a dictionary,for example,
+			//<variable>[<exp>]
+			//<variable>[<exp>:<exp>]
+			//skip the [
+			tker->NextToken();
+			ExpressionNode* firstitem = new ExpressionNode;
+			ParseExpression(tker, firstitem);
+			if (tker->IsNextColon())
+			{
+				tker->NextToken();
+				FunctionCallNode* slicing;
+			}
+			
+			if (tker->IsNextRightBracket())
+			{
+				tker->NextToken();
+			}
+			else
+			{
+				throw SYNTAX_INVALID_EXPRESSION;
+			}
+		}
+
 		else{
 			VariableNode* varnode = new VariableNode();
 			varnode->Value = frsttk->Symbol;
@@ -315,7 +359,7 @@ void ParseTree::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* paramete
 	while (true)
 	{
 		if (tker->IsNextRightParen())
-		{
+		{ 
 			//skipt the right parenthesis
 			tker->NextToken();
 			break;

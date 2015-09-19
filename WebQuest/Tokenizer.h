@@ -1,9 +1,23 @@
 #include <list>
 #include "Converter.h"
+#include "Exception.h"
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-enum TokenType:char{TK_OPERATOR='O',TK_STRING='S',TK_VARIABLE='V',TK_INTEGER='I',TK_FLOAT='F',TK_NEWLINE='N',TK_TAB='T',TK_IF='U',TK_ELSE='X',TK_ELSEIF='Y',TK_END='Z'};
+enum TokenType:char{TK_OPERATOR='O',
+	TK_STRING='S',
+	TK_VARIABLE='V',
+	TK_INTEGER='I',
+	TK_FLOAT='F',
+	TK_NEWLINE='N',
+	TK_TAB='T',
+	TK_IF='U',
+	TK_ELSE='X',
+	TK_ELSEIF='Y',
+	TK_END='Z',
+	TK_CREATELIST,
+	TK_CREATEDICT
+};
 
 class Token
 {
@@ -43,6 +57,8 @@ public:
 	bool IsNextComma();
 	bool IsNextRightParen();
 	bool IsNextLeftParen();
+	bool IsNextLeftBracket();
+	bool IsNextRightBracket();
 	bool IsNextComparisonOperator();
 	bool IsNextArithmeticOperator();
 	bool IsNextColon();
@@ -101,4 +117,6 @@ private:
 #define				KW_END						"end"
 #define				KW_CONTINUE					"continue"
 #define				KW_BREAK					"break"
+#define				KW_CREATELIST				"[]"
+#define				KW_CREATEDICT				"{}"
 #endif
