@@ -125,7 +125,6 @@ list<Token*>* Tokenizer::Tokenize(string script)
 
 			else if (len == strlen(KW_ELSEIF)&&strncmp(start, KW_ELSEIF, len) == 0)
 			{
-				
 				tk = new Token(start, len, TK_ELSEIF);
 			}
 			else if (len == strlen(KW_IF) && strncmp(start, KW_IF, len) == 0)
@@ -139,6 +138,10 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (len == strlen(KW_END) && strncmp(start, KW_END, len) == 0)
 			{
 				tk = new Token(start, len, TK_END);
+			}
+			else if (len == strlen(KW_WHILE) && strncmp(start, KW_WHILE, len) == 0)
+			{
+				tk = new Token(start, len, TK_WHILE);
 			}
 			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
 				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
@@ -402,4 +405,9 @@ bool Tokenizer::IsNextNotOperator()
 {
 	Token* next = LookAhead();
 	return next != NULL &&next->Type==TK_OPERATOR&& (*next->Symbol == OP_NOT);
+}
+bool Tokenizer::IsNextWhileKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_WHILE;
 }

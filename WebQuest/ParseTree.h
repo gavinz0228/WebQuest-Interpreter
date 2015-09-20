@@ -21,7 +21,8 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_INTEGER,
 	NT_STRING,
 	NT_VARIABLE,
-	NT_IF};
+	NT_IF,
+	NT_WHILE};
 enum AssignableType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -164,6 +165,15 @@ public:
 	CodeBlockNode* ElseBlock;
 	map<ExpressionNode*, CodeBlockNode*>* IfBlock;
 	int GetType(){ return NT_IF; }
+};
+class WhileNode :public NodeBase
+{
+public:
+	WhileNode(){ CodeBlock = new CodeBlockNode; Condition = new ExpressionNode; }
+	~WhileNode(){ delete CodeBlock; delete Condition; }
+	CodeBlockNode* CodeBlock;
+	ExpressionNode* Condition;
+	int GetType(){ return NT_WHILE; }
 };
 
 

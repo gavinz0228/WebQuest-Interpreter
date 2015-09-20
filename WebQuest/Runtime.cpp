@@ -120,7 +120,23 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		
 		if (anyifexecuted==false)
 			Evaluate(ifnode->ElseBlock, state);
-
+	}
+	else if (node->GetType() == NT_WHILE)
+	{
+		WhileNode* whilenode = (WhileNode*)node;
+		while (true)
+		{
+			Evaluate(whilenode->Condition, state);
+			if (state->ReturnObject.Type != DT_BOOLEAN)
+			{
+				throw RUNTIME_EXPECTING_BOOLEAN;
+			}
+			if (state->ReturnObject.GetBoolValue() == false)
+			{
+				break;
+			}
+			Evaluate(whilenode->CodeBlock, state);
+		}
 	}
 	else if (node->GetType() == NT_COMPARISON)
 	{

@@ -39,7 +39,7 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//parse the condition
 			ParseExpression(tker, firstifcondition);
 			ParseCodeBlock(tker, firstifblock);
-			ifnode->IfBlock->insert(pair<ExpressionNode*,CodeBlockNode*>(firstifcondition,firstifblock));
+			ifnode->IfBlock->insert(pair<ExpressionNode*, CodeBlockNode*>(firstifcondition, firstifblock));
 			if (tker->IsNextElseIfKeyword())
 			{
 				while (tker->IsNextElseIfKeyword())
@@ -51,7 +51,7 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 					//parse the condition
 					ParseExpression(tker, elseifcondition);
 					ParseCodeBlock(tker, elseifblock);
-					ifnode->IfBlock->insert( pair<ExpressionNode*, CodeBlockNode*>(elseifcondition, elseifblock));
+					ifnode->IfBlock->insert(pair<ExpressionNode*, CodeBlockNode*>(elseifcondition, elseifblock));
 
 				}
 
@@ -63,16 +63,29 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				CodeBlockNode* elseblock = new CodeBlockNode;
 				//parse the condition
 				ParseCodeBlock(tker, ifnode->ElseBlock);
-				
+
 			}
 			//after parsing if and else , expecting a 'end'
 			if (!tker->IsNextEndBlock())
 			{
-				throw SYNTAX_EXPECTING_END_IF;
+				throw SYNTAX_EXPECTING_END;
 			}
 			program->Statements->push_back(ifnode);
 			//skip endif
 			tker->NextToken();
+		}
+		else if (tker->IsNextWhileKeyword())
+		{
+			//skip the while
+			tker->NextToken();
+			WhileNode* whilenode = new WhileNode;
+			ParseExpression(tker, whilenode->Condition);
+			ParseCodeBlock(tker, whilenode->CodeBlock);
+			program->Statements->push_back(whilenode);
+			if (!tker->IsNextEndBlock())
+			{
+				throw SYNTAX_EXPECTING_END;
+			}
 		}
 		//frsttk->Type == TK_ELSE || frsttk->Type == TK_ELSEIF
 		//else if (tker->IsNextElseKeyword()||tker->IsNextElseIfKeyword())

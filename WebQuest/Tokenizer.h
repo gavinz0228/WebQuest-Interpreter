@@ -73,6 +73,7 @@ public:
 	bool IsNextElseIfKeyword();
 	bool IsNextEndKeyword();
 	bool IsNextEndBlock();
+	bool IsNextWhileKeyword();
 
 	//void MoveBack();
 private:

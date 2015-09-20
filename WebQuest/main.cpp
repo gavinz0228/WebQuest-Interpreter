@@ -23,7 +23,8 @@ void Evaluate()
 	Runtime rt;
 	//rt.Run("print('asdf')");
 	//rt.Run("a='yea' b=true print(b)");
-	rt.Run("if true a='yes' else a='no' end print(a)");
+	//rt.Run("if true a='yes' else a='no' end print(a)");
+	rt.Run("a=true while a  print(a) end");
 }
 void Parse()
 {
