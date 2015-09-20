@@ -4,14 +4,16 @@
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
-enum TokenType:char{TK_OPERATOR='O',
-	TK_STRING='S',
-	TK_VARIABLE='V',
-	TK_INTEGER='I',
-	TK_FLOAT='F',
+enum TokenType :char{
+	TK_OPERATOR = 'O',
+	TK_STRING = 'S',
+	TK_VARIABLE = 'V',
+	TK_INTEGER = 'I',
+	TK_FLOAT = 'F',
 	TK_BOOLEAN = 'B',
-	TK_NEWLINE='N',
-	TK_TAB='T',
+	TK_NEWLINE = 'N',
+	TK_TAB = 'T',
+	TK_WHILE = 'W',
 	TK_IF='U',
 	TK_ELSE='X',
 	TK_ELSEIF='Y',
@@ -114,6 +116,7 @@ private:
 
 #define				KW_TRUE						"true"
 #define				KW_FALSE					"false"
+#define				KW_WHILE					"while"
 #define				KW_IF						"if"
 #define				KW_ELSE						"else"
 #define				KW_ELSEIF					"elseif"
@@ -122,4 +125,5 @@ private:
 #define				KW_BREAK					"break"
 #define				KW_CREATELIST				"[]"
 #define				KW_CREATEDICT				"{}"
+
 #endif
