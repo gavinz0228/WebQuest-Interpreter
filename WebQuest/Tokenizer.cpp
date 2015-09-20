@@ -83,19 +83,38 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		else
 		{
 			char* start = ch;
-			//not a operator , then see it as a symbol at this stage
-			while (!IsOperator(ch, charlen) && !IsSpaceTabOrNewLine(ch)&& ch < end)
+			bool gettingString = false;
+			bool finishedString = false;
+			if (*start == '\'' || *start == '\"')
 			{
+				gettingString = true;
+			}
+			//not a operator , then see it as a symbol at this stage
+
+			while (ch < end)
+			{					
 				ch++;
+				if (gettingString == false && (IsOperator(ch, charlen) || IsSpaceTabOrNewLine(ch)))
+					break;
+				else if (gettingString == true)
+				{
+					if (*ch == '\'' || *ch == '\"')
+					{
+						ch++;
+						finishedString = true;
+						break;
+					}
+				}
+
 			}
 			long long integer;
 			long double floating;
 			int len = ch - start;
 			Token* tk;
 			//if the first character is a slash, then it's a string
-			if ((*start == '\"' || *start == '\'') )
+			if (gettingString==true )
 			{
-				if ((*(start + len - 1) == '\"') || (*(start + len - 1) == '\''))
+				if (finishedString==true)
 				{
 					//skip the quote at the begining and the end;
 					tk = new Token(start+1, len-2, TK_STRING);
@@ -120,6 +139,12 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (len == strlen(KW_END) && strncmp(start, KW_END, len) == 0)
 			{
 				tk = new Token(start, len, TK_END);
+			}
+			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
+				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
+				)
+			{
+				tk = new Token(start, len, TK_BOOLEAN);
 			}
 			else if (Converter::StringToInteger(start, len, integer))
 			{

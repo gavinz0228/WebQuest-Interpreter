@@ -11,7 +11,7 @@ public:
 	~Runtime(){
 		delete environment;
 	}
-	void Evaulate(NodeBase* program,WQState* state);
+	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	Environment* environment;
 private:

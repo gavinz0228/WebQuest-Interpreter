@@ -9,7 +9,7 @@ public:
 	
 	WQObject* GetParam();
 	void AddParam(WQObject& obj);
-	void ReturnInteger(long long&);
+	void ReturnInteger(long long& integer);
 	void ReturnString(string& str);
 	void ReturnFloat(long double&);
 	void ReturnNull();

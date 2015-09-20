@@ -65,7 +65,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Converter.h" />
-    <ClInclude Include="Environment.cpp" />
     <ClInclude Include="RunTime.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Exception.h" />
@@ -79,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Converter.cpp" />
+    <ClCompile Include="Environment.cpp" />
     <ClCompile Include="Runtime.cpp" />
     <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />

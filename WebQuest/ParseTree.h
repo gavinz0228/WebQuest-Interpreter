@@ -12,7 +12,7 @@ using namespace std;
 enum ParseTreeNodeType{ NT_ASSIGNMENT, 
 	NT_EXPRESSION,
 	NT_FUNCTIONCALL ,
-	//NT_PROGRAM,
+	NT_BOOLEAN,
 	NT_COMPARISON,
 	NT_LOGIC,
 	NT_CODEBLOCK,
@@ -22,6 +22,7 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_STRING,
 	NT_VARIABLE,
 	NT_IF};
+enum AssignableType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
 public:
@@ -42,6 +43,7 @@ class Assignable
 {
 public:
 	bool IsAssignable(){ return true; }
+	virtual char GetAssignableType(){ return 0; }
 };
 class StringNode :public  TerminalNodeBase
 {
@@ -54,6 +56,8 @@ class VariableNode :public TerminalNodeBase, public Assignable
 public:
 	string* Value;
 	int GetType(){ return NT_VARIABLE; }
+	char GetAssignableType(){ return AT_VARIABLE; }
+	bool IsAssignable(){ return true; }
 };
 
 
@@ -71,7 +75,12 @@ public:
 	int GetType(){ return NT_FLOAT; }
 };
 
-
+class BooleanNode :public TerminalNodeBase
+{
+public:
+	bool Value;
+	int GetType(){ return NT_BOOLEAN; }
+};
 /*
 Non-terminal Node
 */
@@ -120,7 +129,7 @@ class AssignmentNode :public NodeBase
 public:
 	AssignmentNode(){ LeftSide = new VariableNode; RightSide = new ExpressionNode; }
 	~AssignmentNode(){ delete LeftSide; delete RightSide; }
-	VariableNode* LeftSide;
+	Assignable* LeftSide;
 	ExpressionNode* RightSide;
 	static int Type;
 	int GetType(){ return NT_ASSIGNMENT; };
@@ -199,6 +208,13 @@ public:
 	string* Operator;
 	ExpressionNode* RightSide;
 	int GetType(){ return NT_COMPARISON; }
+};
+class ElementNode :public Assignable
+{
+public:
+	VariableNode* Variable;
+	ExpressionNode* key;
+	char GetAssignableType(){ return AT_ELEMENT; }
 };
 
 

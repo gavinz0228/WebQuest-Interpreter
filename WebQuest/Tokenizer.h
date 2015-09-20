@@ -9,6 +9,7 @@ enum TokenType:char{TK_OPERATOR='O',
 	TK_VARIABLE='V',
 	TK_INTEGER='I',
 	TK_FLOAT='F',
+	TK_BOOLEAN = 'B',
 	TK_NEWLINE='N',
 	TK_TAB='T',
 	TK_IF='U',
@@ -111,6 +112,8 @@ private:
 #define				OP_COMMA					","
 #define				OP_COLON					":"
 
+#define				KW_TRUE						"true"
+#define				KW_FALSE					"false"
 #define				KW_IF						"if"
 #define				KW_ELSE						"else"
 #define				KW_ELSEIF					"elseif"

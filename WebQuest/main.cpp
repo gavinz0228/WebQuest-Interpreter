@@ -21,7 +21,9 @@ int main(int argc, char **argv)
 void Evaluate()
 {
 	Runtime rt;
-	rt.Run("print('asdf')");
+	//rt.Run("print('asdf')");
+	//rt.Run("a='yea' b=true print(b)");
+	rt.Run("if true a='yes' else a='no' end print(a)");
 }
 void Parse()
 {

@@ -4,6 +4,18 @@ void WQState::ReturnNull()
 {
 	this->ReturnObject;
 }
+void WQState::ReturnFloat(long double& num)
+{
+	this->ReturnObject.SetFloatValue(num);
+}
+void WQState::ReturnInteger(long long& num)
+{
+	this->ReturnObject.SetIntValue(num);
+}
+void WQState::ReturnString(string &str)
+{
+	this->ReturnObject.SetStringValue(str);
+}
 WQObject* WQState::GetParam()
 {
 	if (CallingParams.size() > 0)

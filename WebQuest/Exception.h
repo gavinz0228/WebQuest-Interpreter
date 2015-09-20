@@ -9,8 +9,10 @@
 #define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting an right parentheise"
 #define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
 
-#define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
+#define		SYNTAX_CAN_NOT_ASSIGN							"Variable cannot be assigned"		
 
+#define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
+#define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"
 
 class Exception :std::exception
 {

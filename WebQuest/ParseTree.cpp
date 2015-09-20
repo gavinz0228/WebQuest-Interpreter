@@ -25,11 +25,13 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 		if (tker->IsNextEndBlock())
 			return;
 		//------------------------------------------
-		Token* frsttk = tker->NextToken();
-		if (frsttk == NULL)
+		//Token* frsttk = tker->NextToken();
+		if (tker->LookAhead() == NULL)
 			break;
-		if (frsttk->Type==TK_IF)
+		if (tker->IsNextIfKeyword())
 		{
+			//skip if
+			tker->NextToken();
 
 			IfNode* ifnode = new IfNode;
 			ExpressionNode* firstifcondition = new ExpressionNode;
@@ -72,28 +74,37 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//skip endif
 			tker->NextToken();
 		}
-		else if (frsttk->Type == TK_ELSE||frsttk->Type== TK_ELSEIF)
+		//frsttk->Type == TK_ELSE || frsttk->Type == TK_ELSEIF
+		//else if (tker->IsNextElseKeyword()||tker->IsNextElseIfKeyword())
+		if (tker->IsNextEndBlock())
 		{
 			//the end of the current block so just return
 			return;
 		}
-		else if (frsttk->Type == TK_VARIABLE)
+		else if (tker->LookAhead()->Type == TK_VARIABLE)
 		{
-			//starts with symbol
+			ExpressionNode exp;
+			ParseTerm(tker, &exp);
+			//four possible situations
+
 			//1. assignment?
 			//2. function call?
 			//3. list operation?
 			//4. dictionary operation?
-			bool ss = tker->IsNextOperator();
-			Token* tk = tker->LookAhead();
+			
 			if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_ASSIGN)
 			{
+				
+				if (!exp.Expression->IsAssignable())
+				{
+					throw SYNTAX_CAN_NOT_ASSIGN;
+				}
 				//get rid of the OP_ASSIGN/=
 				tker->NextToken();
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
 
-				assignment->LeftSide->Value = frsttk->Symbol;
+				assignment->LeftSide = (Assignable*)exp.Expression;
 				//assignment of  <variable>=[]
 				if (tker->LookAhead()->Type == TK_CREATELIST)
 				{
@@ -120,17 +131,12 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 
 			}
 			//function call
-			else if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_L_PAREN)
+			else if (exp.ExpressionType==NT_FUNCTIONCALL)
 			{
 
-				FunctionCallNode* function = new FunctionCallNode;
-				
-				function->FunctionName = frsttk->Symbol;
-				ParseParameters(tker, function->Parameters);
-
-				program->Statements->push_back(function);
+				program->Statements->push_back(exp.Expression);
 			}
-			else if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_L_BRAC)
+			else if (false)
 			{
 				//list or dictionary
 			}
@@ -300,6 +306,16 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 		exp->Expression = (NodeBase*)strnode;
 		exp->ExpressionType = NT_STRING;
 	}
+	else if (frsttk->Type == TK_BOOLEAN)
+	{
+		BooleanNode * boolnode = new BooleanNode;
+		if (*frsttk->Symbol == KW_TRUE)
+			boolnode->Value = true;
+		else
+			boolnode->Value = false;
+		exp->Expression = (NodeBase*)boolnode;
+		exp->ExpressionType = NT_BOOLEAN;
+	}
 	else if (frsttk->Type == TK_VARIABLE)
 	{ //get the next token- variable or function name
 		if (tker->IsNextLeftParen())
@@ -412,7 +428,16 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 		printf("\n");
 		printf(Padding(level).c_str());
 		printf("Assignment:");
-		printf(assignment->LeftSide->Value->c_str());
+		if (assignment->LeftSide->GetAssignableType() == AT_VARIABLE)
+		{
+			VariableNode* var = (VariableNode*)((NodeBase*)assignment->LeftSide);
+			PrintTreeNode(var, level + 1);
+		}
+		else if (assignment->LeftSide->GetAssignableType() == AT_ELEMENT)
+		{
+			PrintTreeNode((NodeBase*)assignment->LeftSide, level + 1);
+		}
+
 		printf("=");
 		PrintTreeNode((NodeBase*)assignment->RightSide, level + 1);
 	}
@@ -428,6 +453,15 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 		//printf(Padding(level).c_str());
 		printf("%s", strnode->Value);
 	}
+	else if (node->GetType() == NT_BOOLEAN)
+	{
+		BooleanNode * boolnode = (BooleanNode*)node;
+		if (boolnode->Value == true)
+			printf("true");
+		else
+			printf("false");
+	}
+
 	else if (node->GetType() == NT_OPERATION)
 	{
 		printf("Operation(  Terms: ");
