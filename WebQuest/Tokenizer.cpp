@@ -26,8 +26,9 @@ Token::~Token()
 // for example:  <= before < 
 //== before =
 //etc...
-char*  Tokenizer::OPERATORS[] { OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
-OP_AND, OP_OR, OP_NOT, OP_GREATER, OP_LESS, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL,
+char*  Tokenizer::OPERATORS[] {OP_AND, OP_OR, OP_NOT, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, OP_GREATER, OP_LESS,
+	OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
+
 OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
 
 OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
@@ -266,8 +267,11 @@ bool Tokenizer::IsOperator(char* script, int &operatorlen)
 		int oplen = strlen(*op);
 		for (int i = 0; i < oplen; i++)
 		{
-			if (*(*op+i) != *(script + i))
-				matched=false;
+			if (*(*op + i) != *(script + i))
+			{
+				matched = false;
+				break;
+			}
 		}
 		if (matched)
 		{

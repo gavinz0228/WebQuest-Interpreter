@@ -24,7 +24,7 @@ void Evaluate()
 	//rt.Run("print('asdf')");
 	//rt.Run("a='yea' b=true print(b)");
 	//rt.Run("if true a='yes' else a='no' end print(a)");
-	rt.Run("a=true while a  print(a) end");
+	rt.Run("a=0 while a<10  a=a+1 print(a) end");
 }
 void Parse()
 {

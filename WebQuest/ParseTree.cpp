@@ -116,8 +116,20 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				tker->NextToken();
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
+				//assign the first side
+				if (exp.ExpressionType == NT_VARIABLE)
+				{
+					assignment->LeftSide = (Assignable*)exp.Expression;
+					assignment->TargetType = AT_VARIABLE;
+					//char tp=assignment->LeftSide->GetAssignableType();
+					//char b = tp;
+				}
+				else if (exp.ExpressionType == AT_ELEMENT)
+				{
+					assignment->LeftSide = (Assignable*)exp.Expression;
+					assignment->TargetType = AT_ELEMENT;
+				}
 
-				assignment->LeftSide = (Assignable*)exp.Expression;
 				//assignment of  <variable>=[]
 				if (tker->LookAhead()->Type == TK_CREATELIST)
 				{

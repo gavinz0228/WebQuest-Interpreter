@@ -1,6 +1,8 @@
 #include <string>
 #include <map>
+#include "Exception.h"
 #include "Converter.h"
+#include <sstream>;
 using namespace std;
 #ifndef WQOBJECT_H
 #define WQOBJECT_H
@@ -13,7 +15,7 @@ public:
 	WQObject();
 	~WQObject();
 	WQObject(DataType type);
-	string ToString();
+	string ToString() const;
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
 	void SetStringValue(string& val);
@@ -21,13 +23,21 @@ public:
 	void SetBoolValue(bool val);
 	void SetNull();
 	void GetAssigned(WQObject* obj);
-	long long GetIntValue();
-	long double GetFloatValue();
-	bool GetBoolValue();
+	long long GetIntValue() const;
+	long double GetFloatValue() const;
+	bool GetBoolValue() const;
 	list<WQObject>* GetListValue();
 	bool Assigned();
+	bool IsNumeric() const;
+	long long ToInteger() const;
+	long double ToFloat() const;
 	DataType Type;
-
+	bool operator < ( const WQObject& right) ;
+	bool operator > (const WQObject& right);
+	bool operator <= (const WQObject& right);
+	bool operator >= (const WQObject& right);
+	bool operator == (const WQObject& right);
+	WQObject& operator+=(const WQObject& right);
 private:
 	
 	void * data;
@@ -35,4 +45,5 @@ private:
 	void ClearValue();
 };
 
+WQObject& operator+(WQObject& left, const WQObject& right);
 #endif

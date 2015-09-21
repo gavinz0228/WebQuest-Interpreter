@@ -22,6 +22,7 @@ enum TokenType :char{
 	TK_CREATEDICT
 };
 
+
 class Token
 {
 public:
@@ -126,5 +127,6 @@ private:
 #define				KW_BREAK					"break"
 #define				KW_CREATELIST				"[]"
 #define				KW_CREATEDICT				"{}"
+
 
 #endif

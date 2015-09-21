@@ -23,7 +23,7 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_VARIABLE,
 	NT_IF,
 	NT_WHILE};
-enum AssignableType{AT_VARIABLE,AT_ELEMENT};
+enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
 public:
@@ -132,6 +132,7 @@ public:
 	~AssignmentNode(){ delete LeftSide; delete RightSide; }
 	Assignable* LeftSide;
 	ExpressionNode* RightSide;
+	AssignmentTargetType TargetType;
 	static int Type;
 	int GetType(){ return NT_ASSIGNMENT; };
 };

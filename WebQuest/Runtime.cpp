@@ -17,16 +17,17 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_ASSIGNMENT)
 	{
 		AssignmentNode* assignment = (AssignmentNode*)node; 
+		char i = assignment->LeftSide->GetAssignableType();
 		//Evaluate the right side
 		Evaluate((NodeBase*)assignment->RightSide, state);
 
-		if (assignment->LeftSide->GetAssignableType() == AT_VARIABLE)
+		if (assignment->TargetType == AT_VARIABLE)
 		{
 			VariableNode* var = (VariableNode*)((NodeBase*)assignment->LeftSide);
 			environment->SetVariable(*var->Value, &(state->ReturnObject));
 
 		}
-		else if (assignment->LeftSide->GetAssignableType() == AT_ELEMENT)
+		else if (assignment->TargetType == AT_ELEMENT)
 		{
 			Evaluate((NodeBase*)assignment->LeftSide,state);
 		}
@@ -61,23 +62,38 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	}
 	else if (node->GetType() == NT_OPERATION)
 	{
-		printf("Operation(  Terms: ");
+		
 		OperationNode* opnode = (OperationNode*)node;
 		//
-		for (list<ExpressionNode*>::iterator expit = opnode->Terms->begin();
-			expit != opnode->Terms->end();
-			expit++)
+		list<ExpressionNode*>::iterator expit = opnode->Terms->begin();
+		list<string*>::iterator opit = opnode->Operators->begin();
+		Evaluate(*expit, state);
+		WQObject left,right;
+		left.GetAssigned(&state->ReturnObject);
+		expit++;
+		Evaluate(*expit, state);
+		right.GetAssigned(&state->ReturnObject);
+		string* op = (*opit);
+		if (*op == "+")
 		{
-			Evaluate((*expit),state);
+			state->ReturnObject.GetAssigned (&(left + right));
 		}
-		printf("  Operators: ");
-		for (list<string*>::iterator opit = opnode->Operators->begin();
-			opit != opnode->Operators->end();
-			opit++)
-		{
-			printf("%s ", (*opit)->c_str());
-		}
-		printf(")");
+		////
+		//printf("Operation(  Terms: ");
+		//for (;
+		//	expit != opnode->Terms->end();
+		//	expit++)
+		//{
+		//	Evaluate((*expit),state);
+		//}
+		//printf("  Operators: ");
+		//for (;
+		//	opit != opnode->Operators->end();
+		//	opit++)
+		//{
+		//	printf("%s ", (*opit)->c_str());
+		//}
+		//printf(")");
 
 	}
 	else if (node->GetType() == NT_IF)
@@ -142,9 +158,33 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	{
 		ComparisonNode* comnode = (ComparisonNode*)node;
 		Evaluate(comnode->LeftSide, state);
-		printf(comnode->Operator->c_str());
-		Evaluate(comnode->RightSide, state);
+		
+		WQObject lhs;
+		lhs.GetAssigned(&state->ReturnObject);
 
+		Evaluate(comnode->RightSide, state);
+		bool result=false;
+		if (*comnode->Operator == "==")
+		{
+			result = lhs == state->ReturnObject;
+		}
+		else if (*comnode->Operator == ">")
+		{
+			result = lhs > state->ReturnObject;
+		}
+		else if (*comnode->Operator == "<")
+		{
+			result = lhs < state->ReturnObject;
+		}
+		else if (*comnode->Operator == ">=")
+		{
+			result = lhs >= state->ReturnObject;
+		}
+		else if (*comnode->Operator == "<=")
+		{
+			result = lhs <= state->ReturnObject;
+		}
+		state->ReturnObject.SetBoolValue(result);
 	}
 	else if (node->GetType() == NT_LOGIC)
 	{
@@ -204,8 +244,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			NodeBase* nxt = *it;
 			Evaluate(*it, state);
-
 		}
 	}
-	
 }
+

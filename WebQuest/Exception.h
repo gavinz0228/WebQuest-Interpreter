@@ -13,7 +13,13 @@
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
 #define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"
+#define		RUNTIME_NON_NUMERIC_CASTING						"Non numeric variable cannot be casted to numeric value"
+#define		RUNTIME_INVALID_TYPE_FOR_LESS_THAN				"Invalid type for < operator"
+#define		RUNTIME_INVALID_TYPE_FOR_GREATER_THAN			"Invalid type for > operator"
+#define		RUNTIME_INVALID_TYPE_FOR_LESS_EQUAL				"Invalid type for <= operator"
 
+#define		RUNTIME_INVALID_TYPE_FOR_EQUAL					"Invalid type for == operator"
+#define		RUNTIME_INVALID_TYPE_FOR_GREATER_EQUAL			"Invalid type for >= operator"
 class Exception :std::exception
 {
 public:
