@@ -1,5 +1,6 @@
 #include <string>
 #include <map>
+#include <vector>
 #include "Exception.h"
 #include "Converter.h"
 #include <sstream>;
@@ -16,17 +17,31 @@ public:
 	~WQObject();
 	WQObject(DataType type);
 	string ToString() const;
+	string ToElementString() const;
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
 	void SetStringValue(string& val);
-	void SetListValue(list<WQObject> &val);
+	
 	void SetBoolValue(bool val);
 	void SetNull();
+	void InitList();
+
+	//void AppendListValue(long long val);
+	//void AppendListValue(long double val);
+	//void AppendListValue(string &val);
+	//void AppendListvalue(bool val);
+	void AppendListValue(WQObject& obj);
+	WQObject* GetListElement(long index);
+
+	void AppendKeyValue(string& key, string& value);
+	void AppendKeyValue(string& key, long long value);
+
 	void GetAssigned(WQObject* obj);
 	long long GetIntValue() const;
 	long double GetFloatValue() const;
 	bool GetBoolValue() const;
-	list<WQObject>* GetListValue();
+	vector<WQObject*>* GetListValue() const;
+
 	bool Assigned();
 	bool IsNumeric() const;
 	long long ToInteger() const;
@@ -40,7 +55,7 @@ public:
 	WQObject& operator+=(const WQObject& right);
 private:
 	
-	void * data;
+	void * Data;
 	bool assigned;
 	void ClearValue();
 };

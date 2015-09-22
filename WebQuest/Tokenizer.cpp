@@ -26,7 +26,7 @@ Token::~Token()
 // for example:  <= before < 
 //== before =
 //etc...
-char*  Tokenizer::OPERATORS[] {OP_AND, OP_OR, OP_NOT, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, OP_GREATER, OP_LESS,
+char*  Tokenizer::OPERATORS[] {OP_COMMA,OP_AND, OP_OR, OP_NOT, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, OP_GREATER, OP_LESS,
 	OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
 
 OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
@@ -159,14 +159,14 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(floating);
 			}
-			else if (len == strlen(KW_CREATEDICT) && strncmp(start, KW_CREATEDICT, len) == 0)
-			{
-				tk = new Token(start, len, TK_CREATEDICT);
-			}
-			else if (len == strlen(KW_CREATELIST) && strncmp(start, KW_CREATELIST, len) == 0)
-			{
-				tk = new Token(start, len, TK_CREATELIST);
-			}
+			//else if (len == strlen(KW_CREATEDICT) && strncmp(start, KW_CREATEDICT, len) == 0)
+			//{
+			//	tk = new Token(start, len, TK_CREATEDICT);
+			//}
+			//else if (len == strlen(KW_CREATELIST) && strncmp(start, KW_CREATELIST, len) == 0)
+			//{
+			//	tk = new Token(start, len, TK_CREATELIST);
+			//}
 			else
 			{
 				tk = new Token(start, len, TK_VARIABLE);
@@ -414,4 +414,14 @@ bool Tokenizer::IsNextWhileKeyword()
 {
 	Token* next = LookAhead();
 	return next != NULL&&next->Type == TK_WHILE;
+}
+bool Tokenizer::IsNextLeftCurlyBracket()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_OPERATOR&&(*next->Symbol==OP_L_CURLYBRAC);
+}
+bool Tokenizer::IsNextRightCurlyBracket()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_OPERATOR && (*next->Symbol == OP_R_CURLYBRAC);
 }

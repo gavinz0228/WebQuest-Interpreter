@@ -16,11 +16,8 @@ WQFunction GlobalFunctions::Get(string* name)
 		return it->second;
 	}
 }
-static void WQPrint(WQState* state);
-void GlobalFunctions::LoadFunctions()
-{
-	Add("print", WQPrint);
-}
+
+
 void func(WQState* state)
 {
 }
@@ -29,6 +26,22 @@ static void WQPrint(WQState* state)
 {
 	WQObject* obj = state->GetParam();
 	printf(obj->ToString().c_str());
+}
+static void WQAppend(WQState* state)
+{
+	if (state->ParamSize!=2)
+	{
+		throw "Only accept 2 argument(list,element)";
+	}
+	else
+	{
+ 		WQObject* ls = state->GetParam();
+		ls->AppendListValue(*state->GetParam());
+	}
+}
 
-	state->ReturnNull();
+void GlobalFunctions::LoadFunctions()
+{
+	Add("print", WQPrint);
+	Add("append", WQAppend);
 }

@@ -22,7 +22,10 @@ enum ParseTreeNodeType{ NT_ASSIGNMENT,
 	NT_STRING,
 	NT_VARIABLE,
 	NT_IF,
-	NT_WHILE};
+	NT_WHILE,
+	NT_CREATELIST,
+	NT_CREATEDICT,
+	NT_ELEMENT};
 enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -225,10 +228,33 @@ class ElementNode :public Assignable
 public:
 	VariableNode* Variable;
 	ExpressionNode* key;
+	int GetType(){ return NT_ELEMENT; }
 	char GetAssignableType(){ return AT_ELEMENT; }
 };
 
-
+class CreateListNode :public NodeBase
+{
+public:
+	CreateListNode(){ Parameters = new list < ExpressionNode* > ; }
+	~CreateListNode(){
+		while (!Parameters->empty())
+		{
+			delete Parameters->front();
+			Parameters->pop_front();
+		}
+		delete Parameters;
+	}
+	list <ExpressionNode*>* Parameters;
+	int GetType(){ return NT_CREATELIST; }
+};
+class CreateDictionaryNode :public NodeBase
+{
+public:
+	CreateDictionaryNode(){ Parameter = new ExpressionNode; }
+	~CreateDictionaryNode(){ delete Parameter; }
+	ExpressionNode* Parameter;
+	int GetType(){ return NT_CREATEDICT; }
+};
 
 /*
 	ParseTree class

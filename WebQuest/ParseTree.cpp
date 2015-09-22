@@ -131,17 +131,58 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				}
 
 				//assignment of  <variable>=[]
-				if (tker->LookAhead()->Type == TK_CREATELIST)
+				if (tker->IsNextLeftBracket())
 				{
-					string* name=tker->NextToken()->Symbol;
-					FunctionCallNode* createlist = new FunctionCallNode;
-					createlist->FunctionName = name;
-					assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
-					assignment->RightSide->Expression = (NodeBase*)createlist;
+					tker->NextToken();
+					if (tker->IsNextRightBracket())
+					{
+						tker->NextToken();
+						CreateListNode * createlist = new CreateListNode;
+						assignment->RightSide->ExpressionType = NT_CREATELIST;
+						assignment->RightSide->Expression = (NodeBase*)createlist;
+					}
+					else
+					{
+						CreateListNode * createlist = new CreateListNode;
+						ParseParameters(tker, createlist->Parameters);
+						assignment->RightSide->ExpressionType = NT_CREATELIST;
+						assignment->RightSide->Expression = (NodeBase*)createlist;
+						if (tker->IsNextRightBracket())
+							tker->NextToken();
+						else
+							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+					}
 				}
-				//assignment of  <variable>={}
-				else if (tker->LookAhead()->Type == TK_CREATEDICT)
+				//assignment of  <variable>={} or <variable>={<exp>}
+				else if (tker->IsNextLeftCurlyBracket())
 				{
+					tker->NextToken();
+					if (tker->IsNextRightCurlyBracket())
+					{
+						//<variable>={}
+						tker->NextToken();
+						CreateDictionaryNode* createdict = new CreateDictionaryNode;
+
+						assignment->RightSide->ExpressionType = NT_CREATEDICT;
+						assignment->RightSide->Expression = (NodeBase*)createdict;
+					}
+					else
+					{
+						ExpressionNode* param = new ExpressionNode;
+						ParseExpression(tker, param);
+						if (tker->IsNextRightCurlyBracket())
+						{
+							CreateDictionaryNode* createdict = new CreateDictionaryNode;
+							createdict->Parameter = param;
+
+							assignment->RightSide->ExpressionType = NT_CREATEDICT;
+							assignment->RightSide->Expression = (NodeBase*)createdict;
+						}
+						else
+							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+					}
+
+
 					string* name = tker->NextToken()->Symbol;
 					FunctionCallNode* createdict = new FunctionCallNode;
 					createdict->FunctionName = name;
@@ -346,8 +387,11 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 		if (tker->IsNextLeftParen())
 		{
 			FunctionCallNode* function = new FunctionCallNode;
-
+			//skip the left parenthesis
+			tker->NextToken();
 			ParseParameters(tker, function->Parameters);
+			//right parenthesis
+			tker->NextToken();
 
 			function->FunctionName = frsttk->Symbol;
 			
@@ -394,21 +438,25 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 
 void ParseTree::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters)
 {
-	//skip the parenthesis
-	tker->NextToken();
+
 
 	while (true)
 	{
-		if (tker->IsNextRightParen())
-		{ 
-			//skipt the right parenthesis
-			tker->NextToken();
-			break;
-		}
+
+
 		ExpressionNode *exp = new ExpressionNode;
 		ParseExpression(tker, exp);
 		parameters->push_back(exp);
-		if (!tker->IsNextComma() && !tker->IsNextRightParen())
+		if (tker->IsNextRightParen()||tker->IsNextRightBracket())
+		{
+			break;
+		}
+		else if (tker->IsNextComma())
+		{
+			//skip the comma
+			tker->NextToken();
+		}
+		else
 			throw SYNTAX_INVALID_FUNCTION_CALL;
 
 	}

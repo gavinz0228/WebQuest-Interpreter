@@ -17,9 +17,10 @@ enum TokenType :char{
 	TK_IF='U',
 	TK_ELSE='X',
 	TK_ELSEIF='Y',
-	TK_END='Z',
-	TK_CREATELIST,
-	TK_CREATEDICT
+	TK_END='Z'
+	//,
+	//TK_CREATELIST,
+	//TK_CREATEDICT
 };
 
 
@@ -63,6 +64,8 @@ public:
 	bool IsNextLeftParen();
 	bool IsNextLeftBracket();
 	bool IsNextRightBracket();
+	bool IsNextRightCurlyBracket();
+	bool IsNextLeftCurlyBracket();
 	bool IsNextComparisonOperator();
 	bool IsNextArithmeticOperator();
 	bool IsNextColon();
@@ -125,8 +128,7 @@ private:
 #define				KW_END						"end"
 #define				KW_CONTINUE					"continue"
 #define				KW_BREAK					"break"
-#define				KW_CREATELIST				"[]"
-#define				KW_CREATEDICT				"{}"
+
 
 
 #endif

@@ -1,5 +1,23 @@
 #include "WQState.h"
 
+WQObject* WQState::GetReturnObject()
+{
+	if (ReferencedObject == NULL)
+	{
+		return &ReturnObject;
+	}
+	else
+	{
+		WQObject* holder = ReferencedObject;
+		ReferencedObject = NULL;
+		return holder;
+
+	}
+}
+void WQState::ReturnReference(WQObject* ref)
+{
+	ReferencedObject = ref;
+}
 void WQState::ReturnNull()
 {
 	this->ReturnObject;
@@ -27,7 +45,17 @@ WQObject* WQState::GetParam()
 	else
 		return NULL;
 }
-void WQState::AddParam(WQObject& obj)
+void WQState::AddParam(WQObject* obj)
 {
-	CallingParams.push_back(&obj);
+	//WQObject * param = new WQObject;
+	//param->GetAssigned(&obj);
+	CallingParams.push_back(obj);
+}
+void WQState::ClearParams()
+{
+	while (!CallingParams.empty())
+	{
+		//delete CallingParams.front();
+		CallingParams.pop_front();
+	}
 }

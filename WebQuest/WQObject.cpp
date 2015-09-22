@@ -3,7 +3,7 @@
 WQObject::WQObject()
 {
 	Type = DT_NULL;
-	data = NULL;
+	Data = NULL;
 }
 WQObject::~WQObject()
 {
@@ -11,22 +11,26 @@ WQObject::~WQObject()
 }
 long long WQObject::GetIntValue() const
 {
-	return *(long long *)data;
+	return *(long long *)Data;
 }
 long double WQObject::GetFloatValue() const
 {
-	return *(long double *)data;
+	return *(long double *)Data;
 }
 bool WQObject::GetBoolValue() const
 {
-	return *(bool*)data;
+	return *(bool*)Data;
+}
+vector<WQObject*>* WQObject::GetListValue() const
+{
+	return (vector<WQObject*>*)Data;
 }
 void WQObject::ClearValue()
 {
-	if (data != NULL&&Type!=DT_NULL)
+	if (Data != NULL&&Type!=DT_NULL)
 	{
-		delete data;
-		data = NULL;
+		delete Data;
+		Data = NULL;
 	}
 }
 
@@ -38,40 +42,80 @@ void WQObject::SetFloatValue(long double value)
 {
 	ClearValue();
 	Type = DT_FLOAT;
-	data = new long double;
-	*((long double*)data) = value;
+	Data = new long double;
+	*((long double*)Data) = value;
 	assigned = true;
 }
 void WQObject::SetIntValue(long long value)
 {
 	ClearValue();
 	Type = DT_INTEGER;
-	data = new long long;
-	*((long long*)data) = value;
+	Data = new long long;
+	*((long long*)Data) = value;
 	assigned = true;
 }
 void WQObject::SetStringValue(string& value)
 {
 	ClearValue();
 	Type = DT_STRING;
-	data = new string(value);
-	//*((string*)data) = value;
+	Data = new string(value);
+	//*((string*)Data) = value;
 	assigned = true;
 }
-void WQObject::SetListValue(list<WQObject> &value)
+void WQObject::InitList()
 {
 	ClearValue();
 	Type = DT_LIST;
-	data = new list < WQObject > ;
-	*((list<WQObject>*)data) = value; 
+	Data = new vector < WQObject* > ;
 	assigned = true;
+}
+//void WQObject::SetListValue(list<WQObject> &value)
+//{
+//	ClearValue();
+//	Type = DT_LIST;
+//	Data = new list < WQObject > ;
+//	*((list<WQObject>*)Data) = value; 
+//	assigned = true;
+//}
+
+void WQObject::AppendListValue(WQObject& obj)
+{
+	if (Type == DT_LIST)
+	{
+		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
+		WQObject* newobj = new WQObject;
+		newobj->GetAssigned(&obj);
+		ls->push_back(newobj);
+	}
+	else
+	{
+		throw RUNTIME_NON_LIST_APPENDING;
+	}
+}
+WQObject* WQObject::GetListElement(long index)
+{
+	if (Type == DT_LIST)
+	{
+		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
+		if (index < ls->size() && index >= 0)
+		{
+			return ls->at(index);
+		}
+		else
+			return NULL;
+	}
+	else
+	{
+		throw RUNTIME_NON_LIST_INDEXING;
+	}
+	return NULL;
 }
 void WQObject::SetBoolValue(bool val)
 {
 	ClearValue();
 	Type = DT_BOOLEAN;
-	data = new bool;
-	*((bool*)data) = val;
+	Data = new bool;
+	*((bool*)Data) = val;
 	assigned = true;
 
 }
@@ -98,6 +142,19 @@ void WQObject::GetAssigned(WQObject* obj)
 	else if (obj->Type == DT_BOOLEAN)
 	{
 		SetBoolValue(obj->GetBoolValue());
+	}
+	else if (obj->Type == DT_LIST)
+	{
+		ClearValue();
+		InitList();
+		vector < WQObject* >* newlist = GetListValue();
+		vector < WQObject* >* income = obj->GetListValue();
+		for (int i = 0; i < income->size(); i++)
+		{
+			WQObject* newobj = new WQObject;
+			newobj->GetAssigned(income->at(i));
+			newlist->push_back(newobj);
+		}
 	}
 	else if (obj->Type == DT_NULL)
 	{
@@ -146,18 +203,29 @@ long double WQObject::ToFloat() const
 	}
 }
 
+string WQObject::ToElementString() const
+{
+	if (Type == DT_STRING)
+	{
+		return "\"" + *((string*)Data) + "\"";
+	}
+	else
+	{
+		return ToString();
+	}
+}
 
 string WQObject::ToString() const
 {
 	if (Type == DT_STRING)
 	{
-		return *((string*)data);
+		return *((string*)Data);
 	}
 
 	else if (Type == DT_INTEGER)
 	{
-		//Convertion::ToString(*((long long*)data));
-		return Converter::IntegerToString(*((long long*)data));
+		//Convertion::ToString(*((long long*)Data));
+		return Converter::IntegerToString(*((long long*)Data));
 	}
 	else if (this->Type == DT_NULL)
 		return "Null";
@@ -171,6 +239,20 @@ string WQObject::ToString() const
 		}
 		else
 			return "false";
+	}
+	else if (Type == DT_LIST)
+	{
+		string output;
+		output = "[";
+		vector<WQObject*>* ls = GetListValue();
+		for (int i = 0; i < ls->size(); i++)
+		{
+			output += ls->at(i)->ToElementString();
+			if (i != ls->size() - 1)
+				output += ",";
+		}
+		output += "]";
+		return output;
 	}
 	return "None";
 }

@@ -6,7 +6,8 @@
 #define		SYNTAX_INVALID_FUNCTION_CALL					"Expecting a comma or right parenthesis"
 #define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
 #define		SYNTAX_EXPECTING_END							"Expecting an 'end' for the block"
-#define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting an right parentheise"
+#define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting a right parentheise"
+#define		SYNTAX_EXPECTING_RIGHT_BRACKET					"Expecting a right bracket"
 #define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
 
 #define		SYNTAX_CAN_NOT_ASSIGN							"Variable cannot be assigned"		
@@ -20,6 +21,9 @@
 
 #define		RUNTIME_INVALID_TYPE_FOR_EQUAL					"Invalid type for == operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_EQUAL			"Invalid type for >= operator"
+
+#define		RUNTIME_NON_LIST_APPENDING						"Cannot append value to a non-list variable"
+#define		RUNTIME_NON_LIST_INDEXING						"Target variable is not a list"
 class Exception :std::exception
 {
 public:

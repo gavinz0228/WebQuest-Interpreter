@@ -24,7 +24,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		if (assignment->TargetType == AT_VARIABLE)
 		{
 			VariableNode* var = (VariableNode*)((NodeBase*)assignment->LeftSide);
-			environment->SetVariable(*var->Value, &(state->ReturnObject));
+			environment->SetVariable(*var->Value, state->GetReturnObject());
 
 		}
 		else if (assignment->TargetType == AT_ELEMENT)
@@ -40,24 +40,24 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		WQObject* obj=environment->GetVariable(*varnode->Value);
 		if (obj == NULL)
 		{
-			state->ReturnObject.GetAssigned(environment->CreateVariable(*(varnode->Value)));
+			state->ReturnReference(environment->CreateVariable(*(varnode->Value)));
 		}
 		else
 		{
-			state->ReturnObject.GetAssigned(obj);
+			state->ReturnReference(obj);
 		}
 
 	}
 	else if (node->GetType() == NT_STRING)
 	{
 		StringNode* strnode = (StringNode*)node;
-		state->ReturnObject.SetStringValue( *strnode->Value);
+		state->GetReturnObject()->SetStringValue( *strnode->Value);
 
 	}
 	else if (node->GetType() == NT_BOOLEAN)
 	{
 		BooleanNode * boolnode = (BooleanNode*)node;
-		state->ReturnObject.SetBoolValue(boolnode->Value);
+		state->GetReturnObject()->SetBoolValue(boolnode->Value);
 
 	}
 	else if (node->GetType() == NT_OPERATION)
@@ -69,14 +69,14 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		list<string*>::iterator opit = opnode->Operators->begin();
 		Evaluate(*expit, state);
 		WQObject left,right;
-		left.GetAssigned(&state->ReturnObject);
+		left.GetAssigned(state->GetReturnObject());
 		expit++;
 		Evaluate(*expit, state);
-		right.GetAssigned(&state->ReturnObject);
+		right.GetAssigned(state->GetReturnObject());
 		string* op = (*opit);
 		if (*op == "+")
 		{
-			state->ReturnObject.GetAssigned (&(left + right));
+			state->GetReturnObject()->GetAssigned (&(left + right));
 		}
 		////
 		//printf("Operation(  Terms: ");
@@ -105,11 +105,11 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			
 			Evaluate(it->first,state);
-			if (state->ReturnObject.Type != DT_BOOLEAN)
+			if (state->GetReturnObject()->Type != DT_BOOLEAN)
 			{
 				throw RUNTIME_EXPECTING_BOOLEAN;
 			}
-			if (state->ReturnObject.GetBoolValue())
+			if (state->GetReturnObject()->GetBoolValue())
 				Evaluate(it->second, state);
 			anyifexecuted = true;
 		}
@@ -120,11 +120,11 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			{
 
 				Evaluate(it->first, state);
-				if (state->ReturnObject.Type != DT_BOOLEAN)
+				if (state->GetReturnObject()->Type != DT_BOOLEAN)
 				{
 					throw RUNTIME_EXPECTING_BOOLEAN;
 				}
-				if (state->ReturnObject.GetBoolValue())
+				if (state->GetReturnObject()->GetBoolValue())
 				{
 					Evaluate(it->second, state);
 					break;
@@ -143,11 +143,11 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		while (true)
 		{
 			Evaluate(whilenode->Condition, state);
-			if (state->ReturnObject.Type != DT_BOOLEAN)
+			if (state->GetReturnObject()->Type != DT_BOOLEAN)
 			{
 				throw RUNTIME_EXPECTING_BOOLEAN;
 			}
-			if (state->ReturnObject.GetBoolValue() == false)
+			if (state->GetReturnObject()->GetBoolValue() == false)
 			{
 				break;
 			}
@@ -160,31 +160,31 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		Evaluate(comnode->LeftSide, state);
 		
 		WQObject lhs;
-		lhs.GetAssigned(&state->ReturnObject);
+		lhs.GetAssigned(state->GetReturnObject());
 
 		Evaluate(comnode->RightSide, state);
 		bool result=false;
 		if (*comnode->Operator == "==")
 		{
-			result = lhs == state->ReturnObject;
+			result = lhs == *state->GetReturnObject();
 		}
 		else if (*comnode->Operator == ">")
 		{
-			result = lhs > state->ReturnObject;
+			result = lhs > *state->GetReturnObject();
 		}
 		else if (*comnode->Operator == "<")
 		{
-			result = lhs < state->ReturnObject;
+			result = lhs < *state->GetReturnObject();
 		}
 		else if (*comnode->Operator == ">=")
 		{
-			result = lhs >= state->ReturnObject;
+			result = lhs >= *state->GetReturnObject();
 		}
 		else if (*comnode->Operator == "<=")
 		{
-			result = lhs <= state->ReturnObject;
+			result = lhs <= *state->GetReturnObject();
 		}
-		state->ReturnObject.SetBoolValue(result);
+		state->GetReturnObject()->SetBoolValue(result);
 	}
 	else if (node->GetType() == NT_LOGIC)
 	{
@@ -208,12 +208,12 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_FLOAT)
 	{
 		FloatNode* fltnode = (FloatNode*)node;
-		state->ReturnObject.SetFloatValue(fltnode->Value);
+		state->GetReturnObject()->SetFloatValue(fltnode->Value);
 	}
 	else if (node->GetType() == NT_INTEGER)
 	{
 		IntegerNode* intnode = (IntegerNode*)node;
-		state->ReturnObject.SetIntValue(intnode->Value);
+		state->GetReturnObject()->SetIntValue(intnode->Value);
 	}
 	else if (node->GetType() == NT_FUNCTIONCALL)
 	{
@@ -230,11 +230,31 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		for (list<ExpressionNode*>::iterator it = funcnode->Parameters->begin(); it != funcnode->Parameters->end(); it++)
 		{
 			Evaluate(*it, state);
-			string aa = state->ReturnObject.ToString();
-			state->AddParam(state->ReturnObject);
+			state->AddParam(state->GetReturnObject());
 		}
+		state->ReturnNull();
 		//call the function 
 		func(state);
+
+		WQObject* ls=environment->GetVariable(string("aa"));
+		vector<WQObject*>* objs= ls->GetListValue();
+
+		//clear the parameters in the list
+		state->ClearParams();
+	}
+	else if (node->GetType() == NT_CREATELIST)
+	{
+		CreateListNode* lsnode = (CreateListNode*)node;
+		WQObject result;
+		result.InitList();
+		for (list<ExpressionNode*>::iterator it = lsnode->Parameters->begin();
+			it != lsnode->Parameters->end(); it++)
+		{
+			Evaluate(*it, state);
+			result.AppendListValue(*state->GetReturnObject());
+		}
+		state->GetReturnObject()->GetAssigned(&result);
+
 	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
