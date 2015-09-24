@@ -10,6 +10,7 @@ public:
 	WQObject* GetVariable(string& name);
 	void AddVariable(string& name, WQObject* obj);
 	void SetVariable(string& name, WQObject* obj);
+	void SetVariable(WQObject* oldobj, WQObject* newobj);
 	WQObject* CreateVariable(string& name);
 
 	Environment()

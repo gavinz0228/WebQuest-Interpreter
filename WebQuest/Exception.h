@@ -9,7 +9,7 @@
 #define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting a right parentheise"
 #define		SYNTAX_EXPECTING_RIGHT_BRACKET					"Expecting a right bracket"
 #define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
-
+#define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
 #define		SYNTAX_CAN_NOT_ASSIGN							"Variable cannot be assigned"		
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
@@ -24,6 +24,7 @@
 
 #define		RUNTIME_NON_LIST_APPENDING						"Cannot append value to a non-list variable"
 #define		RUNTIME_NON_LIST_INDEXING						"Target variable is not a list"
+#define		RUNTIME_INDEX_OUT_OF_BOUND						"Index out of bound"
 class Exception :std::exception
 {
 public:

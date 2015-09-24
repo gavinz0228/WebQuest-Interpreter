@@ -25,7 +25,12 @@ void Evaluate()
 	//rt.Run("a='yea' b=true print(b)");
 	//rt.Run("if true a='yes' else a='no' end print(a)");
 	//rt.Run("a=0 while a<10  a=a+1 print(a) end");
-	rt.Run("aa=[234,234,234] append(aa,'aa') append(aa,'bb') append(aa,123)  print(aa)");
+	//rt.Run("aa=[234,234,234] append(aa,'aa') append(aa,'bb') append(aa,123)  print(aa)");
+	//rt.Run("aa=['wer'] aa[0]=1 print(aa) ");
+	//rt.Run("aa=0 aa=aa==2+2-4 print(aa)");
+	//rt.Run("aa=1==2+5*3 print(aa)");
+	rt.Run("result=get(\"http://higavin.com\") print(result)");
+
 }
 void Parse()
 {

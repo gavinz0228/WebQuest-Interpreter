@@ -119,14 +119,14 @@ void ParseTree::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				//assign the first side
 				if (exp.ExpressionType == NT_VARIABLE)
 				{
-					assignment->LeftSide = (Assignable*)exp.Expression;
+					assignment->LeftSideVariable = (VariableNode*)exp.Expression;
 					assignment->TargetType = AT_VARIABLE;
 					//char tp=assignment->LeftSide->GetAssignableType();
 					//char b = tp;
 				}
-				else if (exp.ExpressionType == AT_ELEMENT)
+				else if (exp.ExpressionType == NT_ELEMENT)
 				{
-					assignment->LeftSide = (Assignable*)exp.Expression;
+					assignment->LeftSideElement = (ElementNode*)exp.Expression;
 					assignment->TargetType = AT_ELEMENT;
 				}
 
@@ -416,6 +416,11 @@ void ParseTree::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 			if (tker->IsNextRightBracket())
 			{
 				tker->NextToken();
+				ElementNode * elenode = new ElementNode;
+				elenode->Variable->Value = frsttk->Symbol;
+				elenode->key = firstitem;
+				exp->Expression = (NodeBase*)elenode;
+				exp->ExpressionType = NT_ELEMENT;
 			}
 			else
 			{
@@ -501,14 +506,14 @@ void ParseTree::PrintTreeNode(NodeBase* node,int level)
 		printf("\n");
 		printf(Padding(level).c_str());
 		printf("Assignment:");
-		if (assignment->LeftSide->GetAssignableType() == AT_VARIABLE)
+		if (assignment->TargetType == AT_VARIABLE)
 		{
-			VariableNode* var = (VariableNode*)((NodeBase*)assignment->LeftSide);
+			VariableNode* var = assignment->LeftSideVariable;
 			PrintTreeNode(var, level + 1);
 		}
-		else if (assignment->LeftSide->GetAssignableType() == AT_ELEMENT)
+		else if (assignment->TargetType == AT_ELEMENT)
 		{
-			PrintTreeNode((NodeBase*)assignment->LeftSide, level + 1);
+			PrintTreeNode((NodeBase*)assignment->LeftSideElement, level + 1);
 		}
 
 		printf("=");

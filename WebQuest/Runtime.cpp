@@ -7,6 +7,29 @@ void Runtime::Run(char* script)
 	Evaluate((NodeBase*)parser.program, &state);
 
 }
+void Calculate(WQObject& left, string* op, WQObject& right)
+{
+	if (*op == "+")
+	{
+		left.GetAssigned(&(left + right));
+	}
+	else if (*op == "-")
+	{
+		left.GetAssigned(&(left - right));
+	}
+	else if (*op == "/")
+	{
+		left.GetAssigned(&(left / right));
+	}
+	else if (*op == "*")
+	{
+		left.GetAssigned(&(left * right));
+	}
+	else if (*op == "%")
+	{
+		left.GetAssigned(&(left % right));
+	}
+}
 void Runtime::Evaluate(NodeBase* node,WQState* state)
 {
 	if (node->GetType() == NT_EXPRESSION)
@@ -17,19 +40,30 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_ASSIGNMENT)
 	{
 		AssignmentNode* assignment = (AssignmentNode*)node; 
-		char i = assignment->LeftSide->GetAssignableType();
 		//Evaluate the right side
 		Evaluate((NodeBase*)assignment->RightSide, state);
 
 		if (assignment->TargetType == AT_VARIABLE)
 		{
-			VariableNode* var = (VariableNode*)((NodeBase*)assignment->LeftSide);
+			VariableNode* var = assignment->LeftSideVariable;
 			environment->SetVariable(*var->Value, state->GetReturnObject());
 
 		}
 		else if (assignment->TargetType == AT_ELEMENT)
 		{
-			Evaluate((NodeBase*)assignment->LeftSide,state);
+			ElementNode* ele = assignment->LeftSideElement;
+			Evaluate(ele->Variable, state);
+			WQObject* lsobj = state->GetReturnObject();
+			if (lsobj->Type == DT_LIST)
+			{
+				Evaluate(ele->key, state);
+				//get the index
+				int index = state->GetReturnObject()->GetIntValue();
+				Evaluate(assignment->RightSide, state);
+				lsobj->SetListElement(index,*state->GetReturnObject());
+			}
+			//environment->GetVariable()
+
 		}
 	}
 	else if (node->GetType() == NT_VARIABLE)
@@ -46,8 +80,15 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			state->ReturnReference(obj);
 		}
-
 	}
+	//else if (node->GetType() == NT_ELEMENT)
+	//{
+	//	ElementNode* elenode = (ElementNode*)node;
+	//	Evaluate(elenode->key, state);
+	//	int index = state->GetReturnObject()->GetIntValue();
+	//	WQObject* obj = environment->GetVariable(*elenode->Variable->Value)->GetListElement(index);
+	//	state->ReturnReference(obj);
+	//}
 	else if (node->GetType() == NT_STRING)
 	{
 		StringNode* strnode = (StringNode*)node;
@@ -67,33 +108,62 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		//
 		list<ExpressionNode*>::iterator expit = opnode->Terms->begin();
 		list<string*>::iterator opit = opnode->Operators->begin();
+		stack<string*> lowops;
+		stack<WQObject*> lowexps;
+		WQObject left, right;
+		if (opnode->Terms->size() - opnode->Operators->size() != 1)
+		{
+			throw SYNTAX_INVALID_EXPRESSION;
+		}
 		Evaluate(*expit, state);
-		WQObject left,right;
 		left.GetAssigned(state->GetReturnObject());
 		expit++;
-		Evaluate(*expit, state);
-		right.GetAssigned(state->GetReturnObject());
-		string* op = (*opit);
-		if (*op == "+")
+		WQObject* term;
+		string* op;
+		while (expit!=opnode->Terms->end())
 		{
-			state->GetReturnObject()->GetAssigned (&(left + right));
+			op = *opit;
+			Evaluate( *expit,state);
+			//notice I new an object, needs to be delete later
+			term = new WQObject;
+			term->GetAssigned(state->GetReturnObject());
+			//if sees - or +, always push , means save it for later
+			if (*op == "-" || *op == "+" )
+			{
+				lowops.push(op);
+				lowexps.push(term);
+			}
+			else
+			{
+				//if it's a * / %, pop the one element from the stack and evaluate, then push it back
+				if (lowexps.size() > 0)
+				{
+					//
+					WQObject* exp= lowexps.top();					
+					Calculate(*exp, op,*term);
+				}
+				else
+				{
+					//the most left one, which is not in the stack
+					Calculate(left, op, *term);
+				}
+			}
+			//Evaluate(term, state);
+			//Calculate(left, op, *state->GetReturnObject());
+
+			++expit;
+			++opit;
 		}
-		////
-		//printf("Operation(  Terms: ");
-		//for (;
-		//	expit != opnode->Terms->end();
-		//	expit++)
-		//{
-		//	Evaluate((*expit),state);
-		//}
-		//printf("  Operators: ");
-		//for (;
-		//	opit != opnode->Operators->end();
-		//	opit++)
-		//{
-		//	printf("%s ", (*opit)->c_str());
-		//}
-		//printf(")");
+		while (lowops.size() != 0)
+		{
+			WQObject* term= lowexps.top();
+			string* op = lowops.top();
+			Calculate(left, op, *term);
+			delete term;
+			lowexps.pop();
+			lowops.pop();
+		}
+		state->GetReturnObject()->GetAssigned(&left);
 
 	}
 	else if (node->GetType() == NT_IF)
@@ -236,8 +306,6 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		//call the function 
 		func(state);
 
-		WQObject* ls=environment->GetVariable(string("aa"));
-		vector<WQObject*>* objs= ls->GetListValue();
 
 		//clear the parameters in the list
 		state->ClearParams();

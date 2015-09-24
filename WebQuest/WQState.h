@@ -8,6 +8,9 @@ class WQState
 public:
 	WQState(){ ReferencedObject = NULL; }
 	WQObject* GetParam();
+	string GetStringParam();
+	long long GetIntegerParam();
+	long double GetFloatParam();
 	void AddParam(WQObject* obj);
 	void ClearParams();
 	void ReturnInteger(long long& integer);

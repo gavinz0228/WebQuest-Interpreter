@@ -21,7 +21,12 @@ WQFunction GlobalFunctions::Get(string* name)
 void func(WQState* state)
 {
 }
-
+static void WQGet(WQState* state)
+{
+	WebRequest request;
+	string url =state-> GetStringParam();
+	state->GetReturnObject()->SetStringValue( request.Get(url));
+}
 static void WQPrint(WQState* state)
 {
 	WQObject* obj = state->GetParam();
@@ -44,4 +49,5 @@ void GlobalFunctions::LoadFunctions()
 {
 	Add("print", WQPrint);
 	Add("append", WQAppend);
+	Add("get", WQGet);
 }

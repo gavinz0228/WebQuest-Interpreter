@@ -3,7 +3,7 @@
 #include <vector>
 #include "Exception.h"
 #include "Converter.h"
-#include <sstream>;
+#include <sstream>
 using namespace std;
 #ifndef WQOBJECT_H
 #define WQOBJECT_H
@@ -32,6 +32,7 @@ public:
 	//void AppendListvalue(bool val);
 	void AppendListValue(WQObject& obj);
 	WQObject* GetListElement(long index);
+	void SetListElement(long index, WQObject& ele);
 
 	void AppendKeyValue(string& key, string& value);
 	void AppendKeyValue(string& key, long long value);
@@ -53,6 +54,10 @@ public:
 	bool operator >= (const WQObject& right);
 	bool operator == (const WQObject& right);
 	WQObject& operator+=(const WQObject& right);
+	WQObject& operator-=(const WQObject& right);
+	WQObject& operator*=(const WQObject& right);
+	WQObject& operator/=(const WQObject& right);
+	WQObject& operator%=(const WQObject& right);
 private:
 	
 	void * Data;
@@ -61,4 +66,8 @@ private:
 };
 
 WQObject& operator+(WQObject& left, const WQObject& right);
+WQObject& operator-(WQObject& left, const WQObject& right);
+WQObject& operator*(WQObject& left, const WQObject& right);
+WQObject& operator/(WQObject& left, const WQObject& right);
+WQObject& operator%(WQObject& left, const WQObject& right);
 #endif

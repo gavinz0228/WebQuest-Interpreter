@@ -1,4 +1,5 @@
 #include "WQState.h"
+#include "WebRequest.h"
 #include <list>
 #include <map>
 using namespace std;

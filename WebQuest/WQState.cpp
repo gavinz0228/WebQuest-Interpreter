@@ -11,8 +11,12 @@ WQObject* WQState::GetReturnObject()
 		WQObject* holder = ReferencedObject;
 		ReferencedObject = NULL;
 		return holder;
-
 	}
+}
+string WQState::GetStringParam()
+{
+	WQObject* obj=GetParam();
+	return obj->ToString();
 }
 void WQState::ReturnReference(WQObject* ref)
 {

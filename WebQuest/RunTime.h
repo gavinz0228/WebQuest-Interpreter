@@ -1,5 +1,6 @@
 #include "Environment.h"
 #include "ParseTree.h"
+#include <stack>
 using namespace std;
 #ifndef RUNTIME_H
 #define RUNTIME_H

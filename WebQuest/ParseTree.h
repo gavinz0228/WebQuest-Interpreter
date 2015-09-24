@@ -85,6 +85,33 @@ public:
 	bool Value;
 	int GetType(){ return NT_BOOLEAN; }
 };
+
+class ExpressionNode;
+class ElementNode :public Assignable, public NodeBase
+{
+public:
+	ElementNode(){
+		Variable = new VariableNode;
+	}
+	~ElementNode()
+	{
+		delete Variable;
+	}
+	VariableNode* Variable;
+	ExpressionNode* key;
+	int GetType(){ return NT_ELEMENT; }
+	char GetAssignableType(){ return AT_ELEMENT; }
+	bool IsAssignable(){ return true; }
+};
+class SlicingNode:NodeBase
+{
+public:
+	SlicingNode(){ Variable = new VariableNode; }
+	~SlicingNode(){}
+	VariableNode* Variable;
+	long StartIndex;
+	long EndIndex;
+};
 /*
 Non-terminal Node
 */
@@ -128,12 +155,15 @@ public:
 	list<string*>* Operators;
 	int GetType(){ return NT_OPERATION; }
 };
+
 class AssignmentNode :public NodeBase
 {
 public:
-	AssignmentNode(){ LeftSide = new VariableNode; RightSide = new ExpressionNode; }
-	~AssignmentNode(){ delete LeftSide; delete RightSide; }
-	Assignable* LeftSide;
+	AssignmentNode(){ LeftSideElement = new ElementNode; LeftSideVariable = new VariableNode;  RightSide = new ExpressionNode; }
+	~AssignmentNode(){ delete LeftSideVariable;delete LeftSideElement; delete RightSide; }
+
+	ElementNode* LeftSideElement;
+	VariableNode* LeftSideVariable;
 	ExpressionNode* RightSide;
 	AssignmentTargetType TargetType;
 	static int Type;
@@ -223,14 +253,7 @@ public:
 	ExpressionNode* RightSide;
 	int GetType(){ return NT_COMPARISON; }
 };
-class ElementNode :public Assignable
-{
-public:
-	VariableNode* Variable;
-	ExpressionNode* key;
-	int GetType(){ return NT_ELEMENT; }
-	char GetAssignableType(){ return AT_ELEMENT; }
-};
+
 
 class CreateListNode :public NodeBase
 {

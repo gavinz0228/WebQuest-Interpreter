@@ -17,7 +17,10 @@ void Environment::AddVariable(string& name, WQObject* obj)
 	string varname = name;
 	Variables.insert(pair<string, WQObject*>(varname, obj));
 }
+void Environment::SetVariable(WQObject* oldobj, WQObject* newobj)
+{
 
+}
 void Environment::SetVariable(string& name, WQObject* newobj)
 {
 	WQObject* oldvar = GetVariable(name);

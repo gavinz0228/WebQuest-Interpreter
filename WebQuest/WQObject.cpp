@@ -110,6 +110,26 @@ WQObject* WQObject::GetListElement(long index)
 	}
 	return NULL;
 }
+void WQObject::SetListElement(long index, WQObject& ele)
+{
+	if (Type == DT_LIST)
+	{
+		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
+		if (index < ls->size() && index >= 0)
+		{
+			delete ls->at(index);
+			WQObject* newObj = new WQObject;
+			newObj->GetAssigned(&ele);
+			(*ls)[index] = newObj;
+		}
+		else
+			throw RUNTIME_INDEX_OUT_OF_BOUND;
+	}
+	else
+	{
+		throw RUNTIME_NON_LIST_INDEXING;
+	}
+}
 void WQObject::SetBoolValue(bool val)
 {
 	ClearValue();
@@ -367,8 +387,93 @@ WQObject& WQObject::operator+=(const WQObject& right)
 	return *this;
 
 }
+WQObject& WQObject::operator-=( const WQObject& right)
+{
+	if (IsNumeric() && right.IsNumeric())
+	{
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		{
+			SetIntValue(ToInteger() - right.ToInteger());
+			return *this;
+		}
+		else
+		{
+			SetFloatValue(ToFloat() - right.ToFloat());
+			return *this;
+		}
+	}
+}
+WQObject& WQObject::operator*=(const WQObject& right)
+{
+	if (IsNumeric() && right.IsNumeric())
+	{
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		{
+			SetIntValue(ToInteger() * right.ToInteger());
+			return *this;
+		}
+		else
+		{
+			SetFloatValue(ToFloat() * right.ToFloat());
+			return *this;
+		}
+	}
+}
+WQObject& WQObject::operator/=(const WQObject& right)
+{
+	if (IsNumeric() && right.IsNumeric())
+	{
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		{
+			SetIntValue(ToInteger() / right.ToInteger());
+			return *this;
+		}
+		else
+		{
+			SetFloatValue(ToFloat() / right.ToFloat());
+			return *this;
+		}
+	}
+}
+WQObject& WQObject::operator%=(const WQObject& right)
+{
+	if (IsNumeric() && right.IsNumeric())
+	{
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		{
+			SetIntValue(ToInteger() % right.ToInteger());
+			return *this;
+		}
+		else
+		{
+			SetFloatValue(fmod(ToFloat() , right.ToFloat()));
+			return *this;
+		}
+	}
+}
+
 WQObject& operator+(WQObject& left, const WQObject& right)
 {
 	left += right;
+	return left;
+}
+WQObject& operator-(WQObject& left, const WQObject& right)
+{
+	left -= right;
+	return left;
+}
+WQObject& operator*(WQObject& left, const WQObject& right)
+{
+	left *= right;
+	return left;
+}
+WQObject& operator/(WQObject& left, const WQObject& right)
+{
+	left /= right;
+	return left;
+}
+WQObject& operator%(WQObject& left, const WQObject& right)
+{
+	left %= right;
 	return left;
 }
