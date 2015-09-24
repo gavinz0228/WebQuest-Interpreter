@@ -25,6 +25,8 @@ Language Usage:
             print("abc")
             
     3. Flow Control
+        a.
+        
         if <boolean expression> 
             <statements>
             <statements>
@@ -46,7 +48,33 @@ Language Usage:
                 .
                 .  
         ]
+        end
         
+        Example:
+            condi=5
+            if cond>5
+                print("greater than 5")
+            elseif codi<5
+                print("less than 5")
+            else
+                print("equal to 5")
+            end
+            
+    b.while loop
+        while <bool expression>
+            <statement>
+                .
+                .
+                .
+        end
+        
+        Example:
+            a=1
+            while a<10
+                print(a)
+                a+=1
+            end
+            
     4. List Operation 
         a. list assignment
             Format:
@@ -62,6 +90,12 @@ Language Usage:
             Example:
                 var ls=[]
                 append(ls,"asdf")
+        c. list modification
+            Format:
+                <list variable>[<index expression>]= <expresion>
+            Example:
+                lsvar=[12,31,55]
+                lsvar[0]=16
     5. Dictionary Operation
 
 Important Functions
