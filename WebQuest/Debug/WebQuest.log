@@ -1,20 +1,23 @@
-﻿Build started 9/17/2015 12:59:30 AM.
+﻿Build started 9/24/2015 9:12:43 PM.
      1>Project "C:\Users\Gavin\OneDrive\WebQuest\WebQuest\WebQuest.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Tokenizer.cpp
-         Tokenizer.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.lib" /MACHINE:X86 Debug\Converter.obj
-         Debug\Evaluation.obj
+         Debug\Environment.obj
+         Debug\Runtime.obj
+         Debug\GlobalFunctions.obj
          Debug\main.obj
-         Debug\ParseTree.obj
+         Debug\Parser.obj
          Debug\Tokenizer.obj
          Debug\WebRequest.obj
          Debug\Uri.obj
          Debug\WQObject.obj
+         Debug\WQState.obj
          WebQuest.vcxproj -> C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.exe
      1>Done Building Project "C:\Users\Gavin\OneDrive\WebQuest\WebQuest\WebQuest.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.01
+Time Elapsed 00:00:02.82
