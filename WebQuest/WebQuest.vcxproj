@@ -69,7 +69,7 @@
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="GlobalFunctions.h" />
-    <ClInclude Include="ParseTree.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="WebRequest.h" />
     <ClInclude Include="Uri.h" />
@@ -82,7 +82,7 @@
     <ClCompile Include="Runtime.cpp" />
     <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ParseTree.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
     <ClCompile Include="WebRequest.cpp" />
     <ClCompile Include="Uri.cpp" />

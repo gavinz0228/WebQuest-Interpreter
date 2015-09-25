@@ -1,6 +1,6 @@
 #include "Tokenizer.h"
 #include "WebRequest.h"
-#include "ParseTree.h"
+#include "Parser.h"
 #include "RunTime.h"
 
 using namespace std;
@@ -29,16 +29,18 @@ void Evaluate()
 	//rt.Run("aa=['wer'] aa[0]=1 print(aa) ");
 	//rt.Run("aa=0 aa=aa==2+2-4 print(aa)");
 	//rt.Run("aa=1==2+5*3 print(aa)");
-	rt.Run("result=get(\"http://higavin.com\") print(result)");
+	//rt.Run("result=get(\"http://higavin.com\") print(result)");
+	rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
 
 }
 void Parse()
 {
 
-	ParseTree parser;
+	Parser parser;
 	//parser.Parse("ab=1+2\r\n");
 	//parser.Parse("a=!3>2");
-	parser.Parse("if a==3 && b==2 a=1 b=2 elseif a==43 accc=5 else b=2 end");
+	//parser.Parse("if (a==3 && b==2) a=1 b=2 elseif a==43 accc=5 else b=2 end");
+	parser.Parse("if (a==3) a=1 else b=2 end");
 	parser.PrintTree();
 }
 void Tokenize()

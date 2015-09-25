@@ -79,6 +79,7 @@ public:
 	bool IsNextEndBlock();
 	bool IsNextWhileKeyword();
 
+
 	//void MoveBack();
 private:
 	bool StartGettingToken;

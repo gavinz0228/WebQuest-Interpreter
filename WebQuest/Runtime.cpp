@@ -1,7 +1,7 @@
 #include "Runtime.h"
 void Runtime::Run(char* script)
 {
-	ParseTree parser;
+	Parser parser;
 	parser.Parse(script);
 	WQState state;
 	Evaluate((NodeBase*)parser.program, &state);
@@ -9,23 +9,23 @@ void Runtime::Run(char* script)
 }
 void Calculate(WQObject& left, string* op, WQObject& right)
 {
-	if (*op == "+")
+	if (*op == OP_PLUS)
 	{
 		left.GetAssigned(&(left + right));
 	}
-	else if (*op == "-")
+	else if (*op == OP_MINUS)
 	{
 		left.GetAssigned(&(left - right));
 	}
-	else if (*op == "/")
+	else if (*op == OP_DEVIDE)
 	{
 		left.GetAssigned(&(left / right));
 	}
-	else if (*op == "*")
+	else if (*op == OP_MULTIPLY)
 	{
 		left.GetAssigned(&(left * right));
 	}
-	else if (*op == "%")
+	else if (*op == OP_MODULO)
 	{
 		left.GetAssigned(&(left % right));
 	}
@@ -234,23 +234,23 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 
 		Evaluate(comnode->RightSide, state);
 		bool result=false;
-		if (*comnode->Operator == "==")
+		if (*comnode->Operator == OP_EQUAL)
 		{
 			result = lhs == *state->GetReturnObject();
 		}
-		else if (*comnode->Operator == ">")
+		else if (*comnode->Operator == OP_GREATER)
 		{
 			result = lhs > *state->GetReturnObject();
 		}
-		else if (*comnode->Operator == "<")
+		else if (*comnode->Operator ==OP_LESS)
 		{
 			result = lhs < *state->GetReturnObject();
 		}
-		else if (*comnode->Operator == ">=")
+		else if (*comnode->Operator ==OP_GREATEQUAL)
 		{
 			result = lhs >= *state->GetReturnObject();
 		}
-		else if (*comnode->Operator == "<=")
+		else if (*comnode->Operator == OP_LESSEQUAL)
 		{
 			result = lhs <= *state->GetReturnObject();
 		}
@@ -259,6 +259,64 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_LOGIC)
 	{
 		LogicNode* lgnode = (LogicNode*)node;
+		stack<string> lowops;
+		stack<bool> lowexps;
+		bool left;
+		list<string*>::iterator opit = lgnode->Operators->begin();
+		list<ExpressionNode*>::iterator expit = lgnode->Expressions->begin();
+
+		string* op;
+		ExpressionNode* exp;
+		exp = *expit;
+		expit++;
+		Evaluate(exp, state);
+		left=(state->GetReturnObject()->GetBoolValue());
+		while (expit != lgnode->Expressions->end())
+		{
+			op = *opit;
+			exp = *expit;
+			if (opit==lgnode->Operators->end())
+			{
+				throw SYNTAX_INVALID_EXPRESSION;
+			}
+			Evaluate(exp, state);
+			if (*op == OP_NOT)
+			{
+				lowexps.push(!state->GetReturnObject()->GetBoolValue());
+			}
+			else if (*op == OP_AND)
+			{
+				//if there is something in the stack, deal with the stack first
+				if (lowexps.size() > 0)
+				{
+					lowexps.top() = lowexps.top()&&state->GetReturnObject()->GetBoolValue();
+				}
+				else
+					left = left&&state->GetReturnObject()->GetBoolValue();
+			}
+			//if it's ||, it has lower priority than &&, so push it to the stack for later
+			else if (*op == OP_OR)
+			{
+				lowexps.push(state->GetReturnObject()->GetBoolValue());
+				lowops.push(*op);
+			}
+			opit++;
+			expit++;
+		}
+		while (lowexps.size() > 0)
+		{
+			string op = lowops.top();
+			bool val = lowexps.top();
+			//it must be OR operation!!
+			//if (op == OP_OR)
+			//{
+			left = left || val;
+			//}
+			lowops.pop();
+			lowexps.pop();
+		}
+		state->GetReturnObject()->SetBoolValue(left);
+		/*
 		printf("Logic Node(Expressions:");
 		for (list<ExpressionNode*>::iterator expit = lgnode->Expressions->begin();
 			expit != lgnode->Expressions->end();
@@ -274,6 +332,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			printf((*lgit)->c_str());
 		}
 		printf(")");
+		*/
 	}
 	else if (node->GetType() == NT_FLOAT)
 	{

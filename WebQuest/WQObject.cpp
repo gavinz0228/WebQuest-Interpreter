@@ -19,7 +19,36 @@ long double WQObject::GetFloatValue() const
 }
 bool WQObject::GetBoolValue() const
 {
-	return *(bool*)Data;
+	if (Type == DT_BOOLEAN)
+		return *(bool*)Data;
+	else if (Type == DT_NULL)
+		return false;
+	else if (Type == DT_FLOAT)
+	{
+		if (GetFloatValue() == 0)
+			return false;
+		else
+			return true;
+	}
+	else if (Type == DT_INTEGER)
+	{
+		if (GetIntValue() == 0)
+			return false;
+		else
+			return true;
+	}
+	else if (Type == DT_LIST)
+	{
+		if (GetListValue()->size()==0)
+			return false;
+		else
+			return true;
+	}
+	else if (Type == DT_DICTIONARY)
+	{
+		return true;
+	}
+
 }
 vector<WQObject*>* WQObject::GetListValue() const
 {
@@ -351,6 +380,10 @@ bool WQObject::operator == (const WQObject& right)
 	else if (Type == DT_STRING)
 	{
 		return ToString().compare(right.ToString()) == 0;
+	}
+	else if (Type == DT_BOOLEAN)
+	{
+		return GetBoolValue() == right.GetBoolValue();
 	}
 	else
 		throw RUNTIME_INVALID_TYPE_FOR_EQUAL;
