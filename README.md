@@ -75,12 +75,13 @@ Language Usage:
             end
             
     b.while loop
-        while <bool expression>
-            <statement>
-                .
-                .
-                .
-        end
+        Format:
+            while <bool expression>
+                <statement>
+                    .
+                    .
+                    .
+            end
         
         Example:
             a=1
@@ -88,7 +89,18 @@ Language Usage:
                 print(a)
                 a+=1
             end
-            
+    c.for loop
+        Format:
+            for <variable> in <expression>
+                <statement>
+                    .
+                    .
+                    .
+            end
+        Example:
+            lsval=[123,456,789]
+            for i in lsval
+                print(i)
     4. List Operation 
         a. list assignment
             Format:

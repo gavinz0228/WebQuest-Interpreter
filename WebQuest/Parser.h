@@ -25,7 +25,9 @@ enum ParserNodeType{ NT_ASSIGNMENT,
 	NT_WHILE,
 	NT_CREATELIST,
 	NT_CREATEDICT,
-	NT_ELEMENT};
+	NT_ELEMENT,
+	NT_FOR,
+	NT_BREAK};
 enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -48,6 +50,10 @@ class Assignable
 public:
 	bool IsAssignable(){ return true; }
 	virtual char GetAssignableType(){ return 0; }
+};
+class BreakNode :public TerminalNodeBase
+{
+	int GetType(){ return NT_BREAK; }
 };
 class StringNode :public  TerminalNodeBase
 {
@@ -138,7 +144,7 @@ public:
 	//ExpressionNode();
 	NodeBase* Expression;
 	int ExpressionType;
-	static int Type;
+	int Type;
 	int GetType(){ return NT_EXPRESSION; };
 };
 
@@ -166,6 +172,7 @@ public:
 	VariableNode* LeftSideVariable;
 	ExpressionNode* RightSide;
 	AssignmentTargetType TargetType;
+	string* AssignmentOperator;
 	static int Type;
 	int GetType(){ return NT_ASSIGNMENT; };
 };
@@ -277,6 +284,17 @@ public:
 	~CreateDictionaryNode(){ delete Parameter; }
 	ExpressionNode* Parameter;
 	int GetType(){ return NT_CREATEDICT; }
+};
+
+class ForNode :public NodeBase
+{
+public:
+	ForNode(){ CodeBlock = new CodeBlockNode; TempVariable = new VariableNode; IterableVariable = new ExpressionNode; }
+	~ForNode(){ delete CodeBlock; delete IterableVariable; delete CodeBlock; }
+	VariableNode* TempVariable;
+	ExpressionNode* IterableVariable;
+	CodeBlockNode* CodeBlock;
+	int GetType(){ return NT_FOR; }
 };
 
 /*

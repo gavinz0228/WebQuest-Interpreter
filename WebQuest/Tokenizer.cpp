@@ -27,11 +27,12 @@ Token::~Token()
 //== before =
 //etc...
 char*  Tokenizer::OPERATORS[] {OP_COMMA,OP_AND, OP_OR, OP_NOT, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, OP_GREATER, OP_LESS,
+OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
 	OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
 
 OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
 
-OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
+
  NULL};
 
 Tokenizer::Tokenizer()
@@ -143,6 +144,18 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (len == strlen(KW_WHILE) && strncmp(start, KW_WHILE, len) == 0)
 			{
 				tk = new Token(start, len, TK_WHILE);
+			}
+			else if (len == strlen(KW_FOR) && strncmp(start, KW_FOR, len) == 0)
+			{
+				tk = new Token(start, len, TK_FOR);
+			}
+			else if (len == strlen(KW_IN) && strncmp(start, KW_IN, len) == 0)
+			{
+				tk = new Token(start, len, TK_IN);
+			}
+			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
+			{
+				tk = new Token(start, len, TK_BREAK);
 			}
 			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
 				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
@@ -424,4 +437,29 @@ bool Tokenizer::IsNextRightCurlyBracket()
 {
 	Token* next = LookAhead();
 	return next != NULL&&next->Type == TK_OPERATOR && (*next->Symbol == OP_R_CURLYBRAC);
+}
+bool Tokenizer::IsNextAssignment()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_OPERATOR && (*next->Symbol ==OP_ASSIGN ||
+		*next->Symbol == OP_PLUSASSIGN ||
+		*next->Symbol == OP_MINUSASSIGN ||
+		*next->Symbol == OP_DEVIDEASSIGN ||
+		*next->Symbol == OP_MULTIPLYASSIGN ||
+		*next->Symbol == OP_MODULOASSIGN);
+}
+bool Tokenizer::IsNextForKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_FOR;
+}
+bool Tokenizer::IsNextInKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_IN;
+}
+bool Tokenizer::IsNextBreakKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_BREAK;
 }

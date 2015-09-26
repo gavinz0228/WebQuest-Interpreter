@@ -6,7 +6,7 @@ using namespace std;
 class WQState
 {
 public:
-	WQState(){ ReferencedObject = NULL; }
+	WQState(){ ReferencedObject = NULL; BreakOccurred = false; }
 	WQObject* GetParam();
 	string GetStringParam();
 	long long GetIntegerParam();
@@ -19,6 +19,7 @@ public:
 	void ReturnNull();
 	void ReturnReference(WQObject*);
 	WQObject* GetReturnObject();
+	bool BreakOccurred;
 	
 	int ParamSize;
 	//void SetReturnObject(WQObject& obj);

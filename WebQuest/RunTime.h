@@ -15,8 +15,9 @@ public:
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	Environment* environment;
-
 private:
+	void EnterNewEnvironment();
+	void BackToParentEnvironment();
 
 };
 #endif

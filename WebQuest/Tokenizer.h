@@ -11,13 +11,16 @@ enum TokenType :char{
 	TK_INTEGER = 'I',
 	TK_FLOAT = 'F',
 	TK_BOOLEAN = 'B',
-	TK_NEWLINE = 'N',
+	TK_NEWLINE = 'L',
 	TK_TAB = 'T',
 	TK_WHILE = 'W',
-	TK_IF='U',
-	TK_ELSE='X',
-	TK_ELSEIF='Y',
-	TK_END='Z'
+	TK_IF = 'U',
+	TK_ELSE = 'X',
+	TK_ELSEIF = 'Y',
+	TK_END = 'Z',
+	TK_FOR = 'R',
+	TK_IN = 'N',
+	TK_BREAK = 'K'
 	//,
 	//TK_CREATELIST,
 	//TK_CREATEDICT
@@ -78,7 +81,11 @@ public:
 	bool IsNextEndKeyword();
 	bool IsNextEndBlock();
 	bool IsNextWhileKeyword();
-
+	//+=,-=,*= etc..
+	bool IsNextAssignment();
+	bool IsNextForKeyword();
+	bool IsNextInKeyword();
+	bool IsNextBreakKeyword();
 
 	//void MoveBack();
 private:
@@ -128,6 +135,9 @@ private:
 #define				KW_ELSEIF					"elseif"
 #define				KW_END						"end"
 #define				KW_CONTINUE					"continue"
+#define				KW_BREAK					"break"
+#define				KW_FOR						"for"
+#define				KW_IN						"in"
 #define				KW_BREAK					"break"
 
 

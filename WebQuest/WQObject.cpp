@@ -406,12 +406,14 @@ WQObject& WQObject::operator+=(const WQObject& right)
 			return *this;
 		}
 	}
-	else if (Type == DT_STRING)
+	else if (Type == DT_STRING||right.Type==DT_STRING)
 	{
-		stringstream ss;
-		//use string stream as a buffer
-		ss >> ToString() >> right.ToString();
-		SetStringValue(ss.str());
+		//stringstream ss;
+		////use string stream as a buffer
+		//ss >> ToString() >> right.ToString();
+		//ss.flush();
+		//string cc = ss.str();
+		SetStringValue(ToString()+ right.ToString());
 
 	}
 	else

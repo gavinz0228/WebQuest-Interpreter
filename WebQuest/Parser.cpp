@@ -52,9 +52,7 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 					ParseExpression(tker, elseifcondition);
 					ParseCodeBlock(tker, elseifblock);
 					ifnode->IfBlock->insert(pair<ExpressionNode*, CodeBlockNode*>(elseifcondition, elseifblock));
-
 				}
-
 			}
 			if (tker->IsNextElseKeyword())
 			{
@@ -105,26 +103,27 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//3. list operation?
 			//4. dictionary operation?
 			
-			if (tker->IsNextOperator() && *tker->LookAhead()->Symbol == OP_ASSIGN)
+			if (tker->IsNextAssignment())
 			{
 				
 				if (!exp.Expression->IsAssignable())
 				{
 					throw SYNTAX_CAN_NOT_ASSIGN;
 				}
-				//get rid of the OP_ASSIGN/=
-				tker->NextToken();
+
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
+				//get the assignment operator
+				assignment->AssignmentOperator = tker->NextToken()->Symbol;
 				//assign the first side
-				if (exp.ExpressionType == NT_VARIABLE)
+				if (assignment->TargetType==AT_VARIABLE)
 				{
 					assignment->LeftSideVariable = (VariableNode*)exp.Expression;
 					assignment->TargetType = AT_VARIABLE;
 					//char tp=assignment->LeftSide->GetAssignableType();
 					//char b = tp;
 				}
-				else if (exp.ExpressionType == NT_ELEMENT)
+				else if (assignment->TargetType == AT_ELEMENT)
 				{
 					assignment->LeftSideElement = (ElementNode*)exp.Expression;
 					assignment->TargetType = AT_ELEMENT;
@@ -216,6 +215,40 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				//throw exception
 				// syntax error ,unexpected token
 			}
+		}
+		else if (tker->IsNextForKeyword())
+		{
+			//skip 'for'
+			tker->NextToken();
+			ForNode* fornode = new ForNode;
+			ExpressionNode exp;
+			ParseTerm(tker, &exp);
+			if (exp.ExpressionType != NT_VARIABLE)
+			{
+				throw SYNTAX_INVALID_FOR_TEMP_VARIABLE;
+			}
+			if (!tker->IsNextInKeyword())
+			{
+				throw SYNTAX_NOT_IN_KEYWORD_IN_FOR;
+			}
+			//skip 'in'
+			tker->NextToken();
+			fornode->TempVariable->Value = ((VariableNode*)exp.Expression)->Value;
+			ParseExpression(tker, fornode->IterableVariable);
+			ParseCodeBlock(tker, fornode->CodeBlock);
+			if (!tker->IsNextEndKeyword())
+			{
+				throw SYNTAX_EXPECTING_END;
+			}
+			//skip 'end'
+			tker->NextToken();
+			program->Statements->push_back(fornode);
+
+		}
+		else if (tker->IsNextBreakKeyword())
+		{
+			tker->NextToken();
+			program->Statements->push_back(new BreakNode);
 		}
 	}
 }
@@ -448,7 +481,6 @@ void Parser::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters)
 	while (true)
 	{
 
-
 		ExpressionNode *exp = new ExpressionNode;
 		ParseExpression(tker, exp);
 		parameters->push_back(exp);
@@ -516,7 +548,7 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 			PrintTreeNode((NodeBase*)assignment->LeftSideElement, level + 1);
 		}
 
-		printf("=");
+		printf(assignment->AssignmentOperator->c_str());
 		PrintTreeNode((NodeBase*)assignment->RightSide, level + 1);
 	}
 	else if (node->GetType() == NT_VARIABLE)
@@ -560,6 +592,18 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 		}
 		printf(")");
 
+	}
+	else if (node->GetType() == NT_CREATELIST)
+	{
+		CreateListNode* lsnode = (CreateListNode*)node;
+		list<ExpressionNode*>::iterator it = lsnode->Parameters->begin();
+		printf("[ ");
+		for (; it != lsnode->Parameters->end(); it++)
+		{
+			PrintTreeNode(*it, level + 1);
+			printf(",");
+		}
+		printf("]");
 	}
 	else if (node->GetType() == NT_IF)
 	{
@@ -649,6 +693,15 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 			printf(" ");
 		}
 	}
+	else if (node->GetType() == NT_FOR)
+	{
+		ForNode* fornode = (ForNode*)node;
+		printf("for ");
+		PrintTreeNode(fornode->TempVariable, level + 1);
+		printf(" in ");
+		PrintTreeNode(fornode->IterableVariable, level + 1);
+		PrintTreeNode(fornode->CodeBlock, level + 1);
+	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
 		printf(Padding(level).c_str());
@@ -657,8 +710,11 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 		{
 			NodeBase* nxt = *it;
 			PrintTreeNode(*it, level + 1);
-
 		}
+	}
+	else if (node->GetType() == NT_BREAK)
+	{
+		printf(" break ");
 	}
 }
 //

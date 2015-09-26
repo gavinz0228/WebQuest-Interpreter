@@ -11,6 +11,9 @@
 #define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
 #define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
 #define		SYNTAX_CAN_NOT_ASSIGN							"Variable cannot be assigned"		
+#define		SYNTAX_INVALID_OPERATOR							"Invalid operator"
+#define		SYNTAX_INVALID_FOR_TEMP_VARIABLE				"Invalid temporary variable of a for loop"
+#define		SYNTAX_NOT_IN_KEYWORD_IN_FOR					"Expecing a 'in' keyword in a for loop"
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
 #define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"
@@ -18,6 +21,7 @@
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_THAN				"Invalid type for < operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_THAN			"Invalid type for > operator"
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_EQUAL				"Invalid type for <= operator"
+#define		RUNTIME_ITERATE_NON_LIST_VARIABLE				"Non-list variable cannot be iterated"
 
 #define		RUNTIME_INVALID_TYPE_FOR_EQUAL					"Invalid type for == operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_EQUAL			"Invalid type for >= operator"

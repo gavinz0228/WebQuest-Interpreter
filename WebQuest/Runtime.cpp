@@ -30,6 +30,37 @@ void Calculate(WQObject& left, string* op, WQObject& right)
 		left.GetAssigned(&(left % right));
 	}
 }
+void PerformAssignment(WQObject* left, string *optr,WQObject* right)
+{
+	if (*optr == OP_ASSIGN)
+	{
+		left->GetAssigned(right);
+	}
+	else if (*optr == OP_PLUSASSIGN)
+	{
+		left->GetAssigned(&((*left) + (*right)));
+	}
+	else if (*optr == OP_MINUSASSIGN)
+	{
+		left->GetAssigned(&((*left) - (*right)));
+	}
+	else if (*optr == OP_MULTIPLYASSIGN)
+	{
+		left->GetAssigned(&((*left) * (*right)));
+	}
+	else if (*optr == OP_DEVIDEASSIGN)
+	{
+		left->GetAssigned(&((*left) / (*right)));
+	}
+	else if (*optr == OP_MODULOASSIGN)
+	{
+		left->GetAssigned(&((*left) % (*right)));
+	}
+	else
+	{
+		throw SYNTAX_INVALID_OPERATOR;
+	}
+}
 void Runtime::Evaluate(NodeBase* node,WQState* state)
 {
 	if (node->GetType() == NT_EXPRESSION)
@@ -43,10 +74,15 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		//Evaluate the right side
 		Evaluate((NodeBase*)assignment->RightSide, state);
 
+		
 		if (assignment->TargetType == AT_VARIABLE)
 		{
 			VariableNode* var = assignment->LeftSideVariable;
-			environment->SetVariable(*var->Value, state->GetReturnObject());
+			Evaluate(var, state);
+			WQObject* left =state->GetReturnObject();
+			Evaluate(assignment->RightSide, state);
+			PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
+			environment->SetVariable(*var->Value,left );
 
 		}
 		else if (assignment->TargetType == AT_ELEMENT)
@@ -59,8 +95,11 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				Evaluate(ele->key, state);
 				//get the index
 				int index = state->GetReturnObject()->GetIntValue();
+
+				WQObject *left = lsobj->GetListElement(index);
 				Evaluate(assignment->RightSide, state);
-				lsobj->SetListElement(index,*state->GetReturnObject());
+				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
+				lsobj->SetListElement(index,*left);
 			}
 			//environment->GetVariable()
 
@@ -180,7 +219,11 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				throw RUNTIME_EXPECTING_BOOLEAN;
 			}
 			if (state->GetReturnObject()->GetBoolValue())
+			{
+				EnterNewEnvironment();
 				Evaluate(it->second, state);
+				BackToParentEnvironment();
+			}
 			anyifexecuted = true;
 		}
 		it++;
@@ -196,7 +239,9 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				}
 				if (state->GetReturnObject()->GetBoolValue())
 				{
+					EnterNewEnvironment();
 					Evaluate(it->second, state);
+					BackToParentEnvironment();
 					break;
 				}
 
@@ -221,11 +266,17 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			{
 				break;
 			}
+			state->BreakOccurred = false;
+			EnterNewEnvironment();
 			Evaluate(whilenode->CodeBlock, state);
+			BackToParentEnvironment();
+			if (state->BreakOccurred)
+				break;
 		}
 	}
 	else if (node->GetType() == NT_COMPARISON)
 	{
+		
 		ComparisonNode* comnode = (ComparisonNode*)node;
 		Evaluate(comnode->LeftSide, state);
 		
@@ -359,6 +410,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		for (list<ExpressionNode*>::iterator it = funcnode->Parameters->begin(); it != funcnode->Parameters->end(); it++)
 		{
 			Evaluate(*it, state);
+			//string str = state->GetReturnObject()->ToString();
 			state->AddParam(state->GetReturnObject());
 		}
 		state->ReturnNull();
@@ -383,15 +435,57 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		state->GetReturnObject()->GetAssigned(&result);
 
 	}
+	else if (node->GetType() == NT_FOR)
+	{
+		ForNode* fornode = (ForNode*)node;
+		Evaluate(fornode->IterableVariable, state);
+		WQObject* iterable = state->GetReturnObject();
+		if (iterable->Type != DT_LIST)
+			throw RUNTIME_ITERATE_NON_LIST_VARIABLE;
+		vector<WQObject*>* iterablelist = iterable->GetListValue();
+		for (int i = 0; i < iterablelist->size(); i++)
+		{
+			EnterNewEnvironment();
+			WQObject tempvar;
+			tempvar.GetAssigned(iterablelist->at(i));
+			environment->CreateVariable(*fornode->TempVariable->Value)->GetAssigned( &tempvar);
+			Evaluate(fornode->CodeBlock, state);
+			BackToParentEnvironment();
+			if (state->BreakOccurred)
+			{
+				break;
+			}
+		}
+	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
 		
 		CodeBlockNode* program = (CodeBlockNode*)node;
+
 		for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
 		{
 			NodeBase* nxt = *it;
+			if (nxt->GetType() == NT_BREAK)
+			{
+				state->BreakOccurred = true;
+				break;
+			}
 			Evaluate(*it, state);
 		}
+
 	}
+}
+
+void Runtime::EnterNewEnvironment()
+{
+	Environment* newevnt = new Environment;
+	newevnt->Parent = environment;
+	environment = newevnt;
+}
+void Runtime::BackToParentEnvironment()
+{
+	Environment* parentevnt = environment->Parent;
+	delete environment;
+	environment = parentevnt;
 }
 

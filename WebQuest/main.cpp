@@ -26,12 +26,15 @@ void Evaluate()
 	//rt.Run("if true a='yes' else a='no' end print(a)");
 	//rt.Run("a=0 while a<10  a=a+1 print(a) end");
 	//rt.Run("aa=[234,234,234] append(aa,'aa') append(aa,'bb') append(aa,123)  print(aa)");
-	//rt.Run("aa=['wer'] aa[0]=1 print(aa) ");
+	//rt.Run("aa=['stringtest'] aa[0]=1 print(aa) ");
 	//rt.Run("aa=0 aa=aa==2+2-4 print(aa)");
 	//rt.Run("aa=1==2+5*3 print(aa)");
 	//rt.Run("result=get(\"http://higavin.com\") print(result)");
-	rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
-
+	//rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
+	//rt.Run("a=1 while a<=10 b=2 a+=1 a+=1 print(a)  end print(a)");
+	//rt.Run("a=1 a+=1 print(a)");
+	//rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
+	rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
 }
 void Parse()
 {
@@ -40,7 +43,8 @@ void Parse()
 	//parser.Parse("ab=1+2\r\n");
 	//parser.Parse("a=!3>2");
 	//parser.Parse("if (a==3 && b==2) a=1 b=2 elseif a==43 accc=5 else b=2 end");
-	parser.Parse("if (a==3) a=1 else b=2 end");
+	//parser.Parse("if (a==3) a=1 else b=2 end");
+	parser.Parse("lsvar=[123,456,789] for a in lsvar print(a) end");
 	parser.PrintTree();
 }
 void Tokenize()

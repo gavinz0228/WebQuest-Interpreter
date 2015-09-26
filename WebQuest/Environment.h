@@ -8,6 +8,7 @@ class Environment
 {
 public:
 	WQObject* GetVariable(string& name);
+	WQObject* SearchVariableInCurrentEvironment(string& name);
 	void AddVariable(string& name, WQObject* obj);
 	void SetVariable(string& name, WQObject* obj);
 	void SetVariable(WQObject* oldobj, WQObject* newobj);
@@ -21,6 +22,16 @@ public:
 	~Environment()
 	{
 		delete Functions;
+		map<string, WQObject*>::iterator it = Variables.begin();
+		for (; it != Variables.end(); it++)
+		{
+			delete it->second;
+		}
+		map<string, WQObject*>::iterator gcit = GarbageVariables.begin();
+		for (; gcit != GarbageVariables.end(); gcit++)
+		{
+			delete gcit->second;
+		}
 	}
 
 	Environment* Parent;
