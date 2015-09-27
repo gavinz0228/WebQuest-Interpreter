@@ -26,11 +26,11 @@ void WQState::ReturnNull()
 {
 	this->ReturnObject;
 }
-void WQState::ReturnFloat(long double& num)
+void WQState::ReturnFloat(long double num)
 {
 	this->ReturnObject.SetFloatValue(num);
 }
-void WQState::ReturnInteger(long long& num)
+void WQState::ReturnInteger(long long num)
 {
 	this->ReturnObject.SetIntValue(num);
 }

@@ -125,7 +125,22 @@ Language Usage:
                 lsvar=[12,31,55]
                 lsvar[0]=16
     5. Dictionary Operation
+Important Features
+    1.List Slicing(string type and list type)
+    
+    
+Core Functions
 
-Important Functions
-    1. get(url[,data[,headers]])
-    2. post(url[,data[,headers]])
+    Basic Functions: 
+        len(object):
+            Gets the length of a list object or string object. If the parameter is a string, it will return the number of characters of the string. If the parameter is a list, it will return the number of elements of the list.
+        print(object)
+            Print out object to the standard output. Non-string object will be converted to string before being printed.
+    
+    Web Related Functions:
+        get(url[,data[,headers]])
+            Sends a get request, and only returns the body of the response returned by server. Parameters data is a dictionary variable which will be url-encoded. Parameters header is also a dictionary variable.
+        get_raw(url[,data[,headers]])
+            Sends a get request, and return the complete string returned by server. Function signature is the same as function get . 
+        post(url[,data[,headers]])
+    

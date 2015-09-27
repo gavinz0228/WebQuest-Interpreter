@@ -15,9 +15,11 @@ public:
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	Environment* environment;
+	long GetCurrentLineNumber(){ return CurrentLineNumber; }
 private:
 	void EnterNewEnvironment();
 	void BackToParentEnvironment();
+	long CurrentLineNumber;
 
 };
 #endif

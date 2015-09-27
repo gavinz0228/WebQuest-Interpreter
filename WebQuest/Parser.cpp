@@ -22,6 +22,7 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 
 	while (true)
 	{
+		long linenumber=tker->GetNextLineNumber();
 		if (tker->IsNextEndBlock())
 			return;
 		//------------------------------------------
@@ -113,6 +114,8 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
+				assignment->SetLineNumber( linenumber);
+
 				//get the assignment operator
 				assignment->AssignmentOperator = tker->NextToken()->Symbol;
 				//assign the first side
@@ -198,7 +201,7 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//function call
 			else if (exp.ExpressionType==NT_FUNCTIONCALL)
 			{
-
+				((FunctionCallNode*)exp.Expression)->SetLineNumber(linenumber);
 				program->Statements->push_back(exp.Expression);
 			}
 			else if (false)
@@ -249,6 +252,10 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 		{
 			tker->NextToken();
 			program->Statements->push_back(new BreakNode);
+		}
+		else
+		{
+			throw SYNTAX_UNEXPECTING_SYMBOL;
 		}
 	}
 }

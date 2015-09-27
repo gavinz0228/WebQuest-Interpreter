@@ -73,7 +73,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		AssignmentNode* assignment = (AssignmentNode*)node; 
 		//Evaluate the right side
 		Evaluate((NodeBase*)assignment->RightSide, state);
-
+		CurrentLineNumber = assignment->GetLineNumber();
 		
 		if (assignment->TargetType == AT_VARIABLE)
 		{
@@ -398,6 +398,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_FUNCTIONCALL)
 	{
 		FunctionCallNode* funcnode = (FunctionCallNode*)node;
+		CurrentLineNumber = funcnode->GetLineNumber();
 		//retrive the target function from the function library
 		WQFunction func = environment->Functions->Get(funcnode->FunctionName);
 		if (func == NULL)

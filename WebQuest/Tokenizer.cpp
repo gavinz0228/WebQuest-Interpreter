@@ -1,17 +1,20 @@
 #include "Tokenizer.h"
 
-Token::Token(char* str, int length, char type)
+Token::Token(char* str, int length, char type, long lineno)
 {
+	this->lineno = lineno;
 	Symbol =new string( str,length);
 	Type = type;
 }
-Token::Token(long long integer)
+Token::Token(long long integer, long lineno)
 {
+	this->lineno = lineno;
 	Integer = integer;
 	Type = TK_INTEGER;
 }
-Token::Token(long double number)
+Token::Token(long double number, long lineno)
 {
+	this->lineno = lineno;
 	Float = number;
 	Type = TK_FLOAT;
 }
@@ -49,6 +52,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 	this->Clear();
 	long long integer;
 	long double floatno;
+	long lineno=1;
 	string::iterator it = script.begin();
 	int charlen;
 	while (it!=script.end())
@@ -61,7 +65,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		else if (*it == '\t')
 		{
 			GetTab(it,script.end(), charlen);
-			Token* tk = new Token(&(*it),charlen, TK_TAB);
+			Token* tk = new Token(&(*it), charlen, TK_TAB, lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -73,8 +77,9 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		else if (*it == '\r' || *it == '\n')
 		{
 			int num = GetNewLine(it, script.end(),charlen);
-			Token* tk = new Token(&(*it), charlen, TK_NEWLINE);
+			Token* tk = new Token(&(*it), charlen, TK_NEWLINE, lineno);
 			Tokens->push_back(tk);
+			lineno += num;
 			while (charlen>0)
 			{
 				it++;
@@ -85,7 +90,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		{
 			Converter::StringToFloat(&(*it), charlen, floatno);
 
-			Token* tk = new Token(floatno);
+			Token* tk = new Token(floatno, lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -97,7 +102,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		{
 			Converter::StringToInteger(&(*it), charlen, integer);
 
-			Token* tk = new Token(integer);
+			Token* tk = new Token(integer,lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -109,7 +114,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		//return true if it's operator, operatorlen outputs the length of the operator
 		else if (IsOperator(&(*it), charlen))
 		{
-			Token* tk = new Token(&(*it), charlen, TK_OPERATOR);
+			Token* tk = new Token(&(*it), charlen, TK_OPERATOR, lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -158,7 +163,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				if (finishedString==true)
 				{
 					//skip the quote at the begining and the end;
-					tk = new Token(start+1, len-2, TK_STRING);
+					tk = new Token(start + 1, len - 2, TK_STRING, lineno);
 				}
 				else
 					throw SYNTAX_STRING_MISSING_QUOTE;
@@ -166,41 +171,41 @@ list<Token*>* Tokenizer::Tokenize(string script)
 
 			else if (len == strlen(KW_ELSEIF)&&strncmp(start, KW_ELSEIF, len) == 0)
 			{
-				tk = new Token(start, len, TK_ELSEIF);
+				tk = new Token(start, len, TK_ELSEIF, lineno);
 			}
 			else if (len == strlen(KW_IF) && strncmp(start, KW_IF, len) == 0)
 			{
-				tk = new Token(start, len, TK_IF);
+				tk = new Token(start, len, TK_IF, lineno);
 			}
 			else if (len == strlen(KW_ELSE) && strncmp(start, KW_ELSE, len) == 0)
 			{
-				tk = new Token(start, len, TK_ELSE);
+				tk = new Token(start, len, TK_ELSE, lineno);
 			}
 			else if (len == strlen(KW_END) && strncmp(start, KW_END, len) == 0)
 			{
-				tk = new Token(start, len, TK_END);
+				tk = new Token(start, len, TK_END, lineno);
 			}
 			else if (len == strlen(KW_WHILE) && strncmp(start, KW_WHILE, len) == 0)
 			{
-				tk = new Token(start, len, TK_WHILE);
+				tk = new Token(start, len, TK_WHILE, lineno);
 			}
 			else if (len == strlen(KW_FOR) && strncmp(start, KW_FOR, len) == 0)
 			{
-				tk = new Token(start, len, TK_FOR);
+				tk = new Token(start, len, TK_FOR, lineno);
 			}
 			else if (len == strlen(KW_IN) && strncmp(start, KW_IN, len) == 0)
 			{
-				tk = new Token(start, len, TK_IN);
+				tk = new Token(start, len, TK_IN, lineno);
 			}
 			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
 			{
-				tk = new Token(start, len, TK_BREAK);
+				tk = new Token(start, len, TK_BREAK, lineno);
 			}
 			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
 				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
 				)
 			{
-				tk = new Token(start, len, TK_BOOLEAN);
+				tk = new Token(start, len, TK_BOOLEAN, lineno);
 			}
 			//else if (Converter::StringToInteger(start, len, integer))
 			//{
@@ -220,7 +225,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			//}
 			else
 			{
-				tk = new Token(start, len, TK_VARIABLE);
+				tk = new Token(start, len, TK_VARIABLE, lineno);
 			}
 			while (len > 0)
 			{
@@ -232,6 +237,14 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		}
 	}
 	return Tokens;
+}
+long Tokenizer::GetNextLineNumber()
+{
+	Token* next = LookAhead();
+	if (next == NULL)
+		return 0;
+	else
+		return next->lineno;
 }
 bool Tokenizer::IsInteger(string::iterator startit, string::iterator endit, int &charlen)
 {

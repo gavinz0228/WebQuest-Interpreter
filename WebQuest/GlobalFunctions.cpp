@@ -21,11 +21,32 @@ WQFunction GlobalFunctions::Get(string* name)
 void func(WQState* state)
 {
 }
-static void WQGet(WQState* state)
+static void WQGetRaw(WQState* state)
 {
 	WebRequest request;
 	string url =state-> GetStringParam();
 	state->GetReturnObject()->SetStringValue( request.Get(url));
+}
+static void WQGet(WQState* state)
+{
+	WebRequest request;
+	string beginSign = "\r\n\r\n";
+	string url = state->GetStringParam();
+	string result=request.Get(url);
+
+	size_t bodybegin = result.find(beginSign);
+	if (bodybegin != string::npos)
+	{
+		string body = result.substr(bodybegin + beginSign.size(), result.size() - bodybegin - beginSign.size());
+		//printf(body.c_str());
+		state->GetReturnObject()->SetStringValue(body);
+	}
+	else
+	{
+		state->GetReturnObject()->SetStringValue(string(""));
+	}
+	
+
 }
 static void WQPrint(WQState* state)
 {
@@ -44,10 +65,28 @@ static void WQAppend(WQState* state)
 		ls->AppendListValue(*state->GetParam());
 	}
 }
+void WQLen(WQState* state)
+{
+	WQObject* param = state->GetParam();
+	if (param->Type == DT_STRING)
+	{
+		state->ReturnInteger(param->ToString().size());
+	}
+	else if (param->Type == DT_LIST)
+	{
+		state->ReturnInteger(param->GetListValue()->size());
+	}
+	else
+	{
+		throw "len function can only used for string type and lsit type";
+	}
+}
 
 void GlobalFunctions::LoadFunctions()
 {
 	Add("print", WQPrint);
 	Add("append", WQAppend);
+	Add("len", WQLen);
+	Add("get_raw", WQGetRaw);
 	Add("get", WQGet);
 }

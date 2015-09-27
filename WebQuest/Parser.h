@@ -155,7 +155,16 @@ public:
 	int GetType(){ return NT_OPERATION; }
 };
 
-class AssignmentNode :public NodeBase
+class Statement
+{
+public:
+
+	long GetLineNumber(){ return LineNumber; }
+	void SetLineNumber(long number){ LineNumber=number; }
+private:
+	long LineNumber;
+};
+class AssignmentNode :public NodeBase, public Statement
 {
 public:
 	AssignmentNode(){ LeftSideElement = new ElementNode; LeftSideVariable = new VariableNode;  RightSide = new ExpressionNode; }
@@ -170,7 +179,7 @@ public:
 	int GetType(){ return NT_ASSIGNMENT; };
 };
 
-class FunctionCallNode :public NodeBase
+class FunctionCallNode :public NodeBase, public Statement
 {
 public:
 	FunctionCallNode(){ Parameters = new  list < ExpressionNode* > ; };

@@ -278,7 +278,6 @@ string WQObject::ToString() const
 	{
 		return *((string*)Data);
 	}
-
 	else if (Type == DT_INTEGER)
 	{
 		//Convertion::ToString(*((long long*)Data));
@@ -287,7 +286,7 @@ string WQObject::ToString() const
 	else if (this->Type == DT_NULL)
 		return "Null";
 	else if (Type == DT_FLOAT)
-		return "float";
+		return to_string(GetFloatValue());
 	else if (Type==DT_BOOLEAN)
 	{
 		if (GetBoolValue() == true)
@@ -549,6 +548,21 @@ void WQObject::GetSlicingWithLeftIndexValue(long start, WQObject* targetlist)
 			targetlist->AppendListValue(*original->at(i));
 		}
 	}
+	else if (Type == DT_STRING)
+	{
+		string original = ToString();
+		string result;
+		long startindex;
+		//if it's 0, start from the begingning
+		if (start >= 0)
+			startindex = start;
+		else if (start < 0)
+			startindex = original.size() + start;
+		//make sure the start index is greater than 0
+		if (startindex< 0)  startindex = 0;
+		result = original.substr(startindex, original.size() - startindex );
+		targetlist->SetStringValue(result);
+	}
 	else
 	{
 		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
@@ -575,6 +589,21 @@ void WQObject::GetSlicingWithRightIndexValue(long end, WQObject* targetlist)
 			targetlist->AppendListValue(*original->at(i));
 		}
 		// otherwise ,return the empty list
+	}
+	
+	else if (Type == DT_STRING)
+	{
+		string original = ToString();
+		string result;
+		long endindex;
+		// if it's greater than 0 ,normal index
+		//if it's 0, don't need slicing
+		if (end >= 0)
+			endindex = end;
+		else if (end < 0)
+			endindex = original.size() + end;
+		result = original.substr(0, original.size() - endindex);
+		targetlist->SetStringValue(result);
 	}
 	else
 	{
@@ -612,6 +641,32 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 		{
 			targetlist->AppendListValue(*original->at(i));
 		}
+
+	}
+	else if (Type == DT_STRING)
+	{
+		string original = ToString();
+		long endindex;
+		long startindex;
+		//make sure the end index is good
+		if (end >= 0)
+			endindex = end<original.size() ? end : original.size();
+		else
+			//if (end < 0)
+		{
+			endindex = original.size() + end;
+			if (endindex < 0) endindex = 0;
+		}
+		//make sure the start index is good
+		if (start >= 0)
+			startindex = start < original.size() ? start : original.size();
+		else {
+			//if (start<0)
+			startindex = start + original.size();
+			if (startindex < 0) startindex = 0;
+		}
+		string result = original.substr(startindex, endindex-startindex);
+		targetlist->SetStringValue(result);
 
 	}
 	else

@@ -13,9 +13,9 @@ public:
 	long double GetFloatParam();
 	void AddParam(WQObject* obj);
 	void ClearParams();
-	void ReturnInteger(long long& integer);
+	void ReturnInteger(long long integer);
 	void ReturnString(string& str);
-	void ReturnFloat(long double&);
+	void ReturnFloat(long double);
 	void ReturnNull();
 	void ReturnReference(WQObject*);
 	WQObject* GetReturnObject();

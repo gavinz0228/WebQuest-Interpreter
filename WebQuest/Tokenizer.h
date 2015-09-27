@@ -32,9 +32,9 @@ enum TokenType :char{
 class Token
 {
 public:
-	Token(char* str,int length,char type);
-	Token(long long integer);
-	Token(long double number);
+	Token(char* str,int length,char type,long lineno);
+	Token(long long integer, long lineno);
+	Token(long double number, long lineno);
 	~Token();
 	char Type;
 	string* Symbol;
@@ -57,6 +57,7 @@ public:
 	int GetTab(string::iterator startit, string::iterator endit, int &charlen);
 	int GetNewLine(string::iterator startit, string::iterator endit, int &charlen);
 	static char* OPERATORS[];
+	long GetNextLineNumber();
 	void Clear();
 	Token* NextToken();
 	Token* LookAhead();
@@ -91,7 +92,6 @@ public:
 	bool IsNextForKeyword();
 	bool IsNextInKeyword();
 	bool IsNextBreakKeyword();
-
 	//void MoveBack();
 private:
 	bool StartGettingToken;
