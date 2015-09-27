@@ -51,6 +51,8 @@ public:
 	list<Token*>* Tokenize(string script);
 	bool IsOperator(char* script, int &charlen);
 	bool IsInteger(string::iterator startit, string::iterator endit, int &charlen);
+	bool IsFloat(string::iterator startit, string::iterator endit, int &charlen);
+
 	bool IsSpaceTabOrNewLine(char* script);
 	int GetTab(string::iterator startit, string::iterator endit, int &charlen);
 	int GetNewLine(string::iterator startit, string::iterator endit, int &charlen);

@@ -35,7 +35,7 @@ void Evaluate()
 	//rt.Run("a=1 a+=1 print(a)");
 	//rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
 	//rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
-	rt.Run("a=[123,456,789] print(a[0:2]) print(a[0:-1])");
+	rt.Run("a=[123,456,7890.02] print(a[0:2]) print(a[0:-1])");
 
 }
 void Parse()

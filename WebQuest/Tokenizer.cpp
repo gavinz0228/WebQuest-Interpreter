@@ -81,6 +81,18 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				charlen--;
 			}
 		}
+		else if (IsFloat(it, script.end(), charlen))
+		{
+			Converter::StringToFloat(&(*it), charlen, floatno);
+
+			Token* tk = new Token(floatno);
+			Tokens->push_back(tk);
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+		}
 		else if (IsInteger(it, script.end(), charlen))
 		{
 			Converter::StringToInteger(&(*it), charlen, integer);
@@ -93,6 +105,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				charlen--;
 			}
 		}
+
 		//return true if it's operator, operatorlen outputs the length of the operator
 		else if (IsOperator(&(*it), charlen))
 		{
@@ -193,10 +206,10 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			//{
 			//	tk = new Token(integer);
 			//}
-			else if (Converter::StringToFloat(start, len, floating))
-			{
-				tk = new Token(floating);
-			}
+			//else if (Converter::StringToFloat(start, len, floating))
+			//{
+			//	tk = new Token(floating);
+			//}
 			//else if (len == strlen(KW_CREATEDICT) && strncmp(start, KW_CREATEDICT, len) == 0)
 			//{
 			//	tk = new Token(start, len, TK_CREATEDICT);
@@ -222,13 +235,26 @@ list<Token*>* Tokenizer::Tokenize(string script)
 }
 bool Tokenizer::IsInteger(string::iterator startit, string::iterator endit, int &charlen)
 {
-	smatch match;
-	regex integer("(\\+|-)?[[:digit:]]+");
+	regex integer("^(\\+|-)?[[:digit:]]+");
 	regex_iterator<std::string::iterator> wordstart(startit, endit, integer, regex_constants::match_continuous);
 	std::regex_iterator<std::string::iterator> wordend;
 	if (wordstart != wordend)
 	{
 		charlen=wordstart->str().length();
+		//charlen = distance(words_begin, words_end);
+		return true;
+	}
+	else
+		return false;
+}
+bool Tokenizer::IsFloat(string::iterator startit, string::iterator endit, int &charlen)
+{
+	regex floatexp("^[\\d]*[.]{1}\\d+");
+	regex_iterator<std::string::iterator> wordstart(startit, endit, floatexp, regex_constants::match_continuous);
+	std::regex_iterator<std::string::iterator> wordend;
+	if (wordstart != wordend)
+	{
+		charlen = wordstart->str().length();
 		//charlen = distance(words_begin, words_end);
 		return true;
 	}
