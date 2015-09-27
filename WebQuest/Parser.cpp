@@ -436,28 +436,101 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 			//parse a list or a dictionary,for example,
 			//<variable>[<exp>]
 			//<variable>[<exp>:<exp>]
+			//<variable>[:]
+			//<variable>[:<exp>]
+			//<variable>[<exp>:]
 			//skip the [
 			tker->NextToken();
-			ExpressionNode* firstitem = new ExpressionNode;
-			ParseExpression(tker, firstitem);
 			if (tker->IsNextColon())
 			{
+				//skip :
 				tker->NextToken();
-				FunctionCallNode* slicing;
+				//<variable>[:]
+				if (tker->IsNextRightBracket())
+				{
+					//skip ]
+					tker->NextToken();
+					SlicingNode* slicenode = new SlicingNode;
+					slicenode->Variable->Value = frsttk->Symbol;
+					slicenode->HasEndIndex = false;
+					slicenode->HasStartIndex = false;
+					exp->Expression = (NodeBase*)slicenode;
+					exp->ExpressionType = NT_SLICING;
+				}
+				//<variable>[:<exp>]
+				else
+				{
+					SlicingNode* slicenode = new SlicingNode;
+					slicenode->HasEndIndex = true;
+					slicenode->Variable->Value = frsttk->Symbol;
+					ParseExpression(tker, slicenode->EndIndex);
+					if (!tker->IsNextRightBracket())
+					{
+						throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+					}
+					//skip ]
+					tker->NextToken();
+					exp->Expression = (NodeBase*)slicenode;
+					exp->ExpressionType = NT_SLICING;
+				}
 			}
-			
-			if (tker->IsNextRightBracket())
-			{
-				tker->NextToken();
-				ElementNode * elenode = new ElementNode;
-				elenode->Variable->Value = frsttk->Symbol;
-				elenode->key = firstitem;
-				exp->Expression = (NodeBase*)elenode;
-				exp->ExpressionType = NT_ELEMENT;
-			}
-			else
-			{
-				throw SYNTAX_INVALID_EXPRESSION;
+
+			else{
+				ExpressionNode* firstitem = new ExpressionNode;
+				ParseExpression(tker, firstitem);
+				if (tker->IsNextColon())
+				{
+					//<variable>[<exp>:] or <variable>[<exp>:<exp>]
+					//skip :
+					tker->NextToken();
+					//<variable>[<exp>:]
+					if (tker->IsNextRightBracket())
+					{
+						//skip ]
+						tker->NextToken();
+						SlicingNode* slicenode = new SlicingNode;
+						slicenode->Variable->Value = frsttk->Symbol;
+						slicenode->StartIndex->Expression = firstitem->Expression;
+						slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
+						slicenode->HasStartIndex = true;
+						exp->Expression = (NodeBase*)slicenode;
+						exp->ExpressionType = NT_SLICING;
+					}
+					//<variable>[<exp>:<exp>]
+					else
+					{
+						SlicingNode* slicenode = new SlicingNode;
+						slicenode->Variable->Value = frsttk->Symbol;
+						slicenode->StartIndex->Expression = firstitem->Expression;
+						slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
+						slicenode->HasStartIndex = true;
+						slicenode->HasEndIndex = true;
+						ParseExpression(tker, slicenode->EndIndex);
+						if (!tker->IsNextRightBracket())
+						{
+							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+						}
+						//skip the ]
+						tker->NextToken();
+						exp->Expression = (NodeBase*)slicenode;
+						exp->ExpressionType = NT_SLICING;
+					}
+				}
+				//<variable>[<exp>]
+				else if (tker->IsNextRightBracket())
+				{
+					tker->NextToken();
+					ElementNode * elenode = new ElementNode;
+					elenode->Variable->Value = frsttk->Symbol;
+					elenode->key = firstitem;
+					exp->Expression = (NodeBase*)elenode;
+					exp->ExpressionType = NT_ELEMENT;
+				}
+
+				else
+				{
+					throw SYNTAX_INVALID_EXPRESSION;
+				}
 			}
 		}
 
@@ -471,6 +544,10 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 	else if (tker->LookAhead() == NULL)
 	{
 		return;
+	}
+	else
+	{
+		throw SYNTAX_INVALID_SYMBOL;
 	}
 }
 
@@ -701,6 +778,19 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 		printf(" in ");
 		PrintTreeNode(fornode->IterableVariable, level + 1);
 		PrintTreeNode(fornode->CodeBlock, level + 1);
+	}
+	else if (node->GetType() == NT_SLICING)
+	{
+		SlicingNode* slicenode = (SlicingNode*)node;
+		
+		printf(slicenode->Variable->Value->c_str());
+		printf("[");
+		if (slicenode->HasStartIndex)
+			PrintTreeNode(slicenode->StartIndex, level + 1);
+		printf(":");
+		if (slicenode->HasEndIndex)
+			PrintTreeNode(slicenode->EndIndex, level + 1);
+		printf("]");
 	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{

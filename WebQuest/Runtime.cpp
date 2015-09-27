@@ -94,7 +94,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			{
 				Evaluate(ele->key, state);
 				//get the index
-				int index = state->GetReturnObject()->GetIntValue();
+				long index = state->GetReturnObject()->GetIntValue();
 
 				WQObject *left = lsobj->GetListElement(index);
 				Evaluate(assignment->RightSide, state);
@@ -456,6 +456,71 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				break;
 			}
 		}
+	}
+	else if (node->GetType() == NT_SLICING)
+	{
+		SlicingNode* slicenode = (SlicingNode*)node;
+		//has start index
+		if (slicenode->HasStartIndex)
+		{
+			Evaluate(slicenode->StartIndex, state);
+			if (state->GetReturnObject()->Type != DT_INTEGER)
+			{
+				throw RUNTIME_NON_INTERGER_INDEX;
+			}
+			long startIndex = (long)state->GetReturnObject()->GetIntValue();
+			if (slicenode->HasEndIndex)
+			{
+				
+				Evaluate(slicenode->EndIndex, state);
+				if (state->GetReturnObject()->Type != DT_INTEGER)
+				{
+					throw RUNTIME_NON_INTERGER_INDEX;
+				}
+				long endIndex = (long)state->GetReturnObject()->GetIntValue();
+				//<variable>[<exp>:<exp>]
+				Evaluate(slicenode->Variable, state);
+				WQObject *lsvar = state->GetReturnObject();
+
+				lsvar->GetSlicing(startIndex,endIndex,state->GetReturnObject());
+			}
+			else
+			{
+				//<variable>[<exp>:]
+				Evaluate(slicenode->Variable, state);
+				WQObject *lsvar = state->GetReturnObject();
+				lsvar->GetSlicingWithLeftIndexValue(startIndex,state->GetReturnObject());
+			}
+		}
+		//no start index
+		else
+		{
+			if (slicenode->HasEndIndex)
+			{
+				Evaluate(slicenode->EndIndex, state);
+				if (state->GetReturnObject()->Type != DT_INTEGER)
+				{
+					throw RUNTIME_NON_INTERGER_INDEX;
+				}
+				long endIndex = (long)state->GetReturnObject()->GetIntValue();
+				//<variable>[:<exp>]
+				Evaluate(slicenode->Variable, state);
+				WQObject *lsvar = state->GetReturnObject();
+				lsvar->GetSlicingWithRightIndexValue(endIndex,state->GetReturnObject());
+			}
+			else
+			{
+				//<variable>[:]
+				//just copy the list
+				Evaluate(slicenode->Variable, state);
+				WQObject cpyobj;
+				cpyobj.GetAssigned(state->GetReturnObject());
+				state->GetReturnObject()->GetAssigned(&cpyobj);
+			}
+		}
+
+		
+
 	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{

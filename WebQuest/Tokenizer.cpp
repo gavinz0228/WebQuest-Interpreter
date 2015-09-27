@@ -29,7 +29,7 @@ Token::~Token()
 char*  Tokenizer::OPERATORS[] {OP_COMMA,OP_AND, OP_OR, OP_NOT, OP_GREATEQUAL, OP_LESSEQUAL, OP_EQUAL, OP_GREATER, OP_LESS,
 OP_PLUSASSIGN, OP_MINUSASSIGN, OP_MULTIPLYASSIGN, OP_DEVIDEASSIGN, OP_MODULOASSIGN,
 	OP_L_PAREN, OP_R_PAREN, OP_L_BRAC, OP_R_BRAC, OP_L_CURLYBRAC, OP_R_CURLYBRAC, OP_L_ANGLEBRAC, OP_R_ANGLEBRAC,
-
+	OP_COLON,
 OP_MULTIPLY, OP_DEVIDE, OP_PLUS, OP_MINUS, OP_MODULO, OP_ASSIGN,
 
 
@@ -47,53 +47,79 @@ Tokenizer::~Tokenizer()
 list<Token*>* Tokenizer::Tokenize(string script)
 {
 	this->Clear();
-
-	char * ch = (char*)script.c_str();
-	char * end = ch + script.length();
+	long long integer;
+	long double floatno;
+	string::iterator it = script.begin();
 	int charlen;
-	while (ch < end)
+	while (it!=script.end())
 	{
-		if (*ch==' ')
+		if (*it==' ')
 		{
 			//just to skip the space
-			ch++;
+			it++;
 		}
-		else if (*ch == '\t')
+		else if (*it == '\t')
 		{
-			GetTab(ch, charlen);
-			Token* tk = new Token(ch,charlen, TK_TAB);
+			GetTab(it,script.end(), charlen);
+			Token* tk = new Token(&(*it),charlen, TK_TAB);
 			Tokens->push_back(tk);
-			ch += charlen;
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+			
 		}
-		else if (*ch == '\r' || *ch == '\n')
+		else if (*it == '\r' || *it == '\n')
 		{
-			int num = GetNewLine(ch, charlen);
-			Token* tk = new Token(ch, charlen, TK_NEWLINE);
+			int num = GetNewLine(it, script.end(),charlen);
+			Token* tk = new Token(&(*it), charlen, TK_NEWLINE);
 			Tokens->push_back(tk);
-			ch += charlen;
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
 		}
+		else if (IsInteger(it, script.end(), charlen))
+		{
+			Converter::StringToInteger(&(*it), charlen, integer);
 
+			Token* tk = new Token(integer);
+			Tokens->push_back(tk);
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+		}
 		//return true if it's operator, operatorlen outputs the length of the operator
-		else if (IsOperator(ch, charlen))
+		else if (IsOperator(&(*it), charlen))
 		{
-
-			Token* tk=new Token(ch, charlen,TK_OPERATOR);
+			Token* tk = new Token(&(*it), charlen, TK_OPERATOR);
 			Tokens->push_back(tk);
-			ch += charlen;
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
 		}
+
 		//must be variable name,string, or numbers
 		else
 		{
-			char* start = ch;
+			char* start = &(*it);
+			char* ch = &(*it);
 			bool gettingString = false;
 			bool finishedString = false;
+			int len = 0;
 			if (*start == '\'' || *start == '\"')
 			{
 				gettingString = true;
 			}
 			//not a operator , then see it as a symbol at this stage
 
-			while (ch < end)
+			while (it < script.end())
 			{					
 				ch++;
 				if (gettingString == false && (IsOperator(ch, charlen) || IsSpaceTabOrNewLine(ch)))
@@ -111,7 +137,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			}
 			long long integer;
 			long double floating;
-			int len = ch - start;
+			len = ch - start;
 			Token* tk;
 			//if the first character is a slash, then it's a string
 			if (gettingString==true )
@@ -163,11 +189,10 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, len, TK_BOOLEAN);
 			}
-			else if (Converter::StringToInteger(start, len, integer))
-			{
-				tk = new Token(integer);
-				
-			}
+			//else if (Converter::StringToInteger(start, len, integer))
+			//{
+			//	tk = new Token(integer);
+			//}
 			else if (Converter::StringToFloat(start, len, floating))
 			{
 				tk = new Token(floating);
@@ -184,11 +209,31 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, len, TK_VARIABLE);
 			}
-			
+			while (len > 0)
+			{
+				it++;
+				len--;
+			}
+
 			Tokens->push_back(tk);
 		}
 	}
 	return Tokens;
+}
+bool Tokenizer::IsInteger(string::iterator startit, string::iterator endit, int &charlen)
+{
+	smatch match;
+	regex integer("(\\+|-)?[[:digit:]]+");
+	regex_iterator<std::string::iterator> wordstart(startit, endit, integer, regex_constants::match_continuous);
+	std::regex_iterator<std::string::iterator> wordend;
+	if (wordstart != wordend)
+	{
+		charlen=wordstart->str().length();
+		//charlen = distance(words_begin, words_end);
+		return true;
+	}
+	else
+		return false;
 }
 void Tokenizer::InitIterator()
 {
@@ -233,27 +278,27 @@ void Tokenizer::Clear()
 	}
 	Tokens->clear();
 }
-int Tokenizer::GetTab(char* script,int& charlen)
+int Tokenizer::GetTab(string::iterator startit, string::iterator endit, int &charlen)
 {
-	char* pos = script;
-	while (*pos == '\t')
+	charlen = 0;
+	while (*startit == '\t'&&startit!=endit)
 	{
-		pos++;
+		charlen++;
+		startit++;
 	}
-	charlen = pos - script;
 	return charlen;
 }
-int Tokenizer::GetNewLine(char* script, int& charlen)
+int Tokenizer::GetNewLine(string::iterator startit, string::iterator endit, int &charlen)
 {
-	char * pos = script;
-	int linenum = 0;
-	while (*pos == '\r' || *pos == '\n')
+	charlen = 0;
+	int linenum=0;
+	while ((*startit=='\r' || *startit == '\n')&&startit!=endit)
 	{
-		pos++;
-		if (*pos == '\n')
+		charlen++;
+		if (*startit == '\n')
 			linenum++;
+		startit++;
 	}
-	charlen = pos - script;
 	return linenum;
 }
 bool Tokenizer::IsSpaceTabOrNewLine(char *script)
@@ -359,7 +404,7 @@ bool Tokenizer::IsNextRightParen()
 bool Tokenizer::IsNextColon()
 {
 	Token* next = LookAhead();
-	return next != NULL&&*next->Symbol == OP_COLON;
+	return next != NULL&&next->Type==TK_OPERATOR&&*next->Symbol == OP_COLON;
 
 }
 bool Tokenizer::IsNextArithmeticOperator()

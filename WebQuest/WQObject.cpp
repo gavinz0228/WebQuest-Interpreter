@@ -58,8 +58,16 @@ void WQObject::ClearValue()
 {
 	if (Data != NULL&&Type!=DT_NULL)
 	{
+		if (Type == DT_LIST)
+		{
+			//delete every element of the list
+			vector<WQObject*>* ls = GetListValue();
+			for (int i = 0; i < ls->size(); i++)
+				delete ls->at(i);
+		}
 		delete Data;
 		Data = NULL;
+
 	}
 }
 
@@ -437,6 +445,8 @@ WQObject& WQObject::operator-=( const WQObject& right)
 			return *this;
 		}
 	}
+	else
+		throw RUNTIME_EXPECTING_NUMERIC;
 }
 WQObject& WQObject::operator*=(const WQObject& right)
 {
@@ -453,6 +463,8 @@ WQObject& WQObject::operator*=(const WQObject& right)
 			return *this;
 		}
 	}
+	else
+		throw RUNTIME_EXPECTING_NUMERIC;
 }
 WQObject& WQObject::operator/=(const WQObject& right)
 {
@@ -469,6 +481,8 @@ WQObject& WQObject::operator/=(const WQObject& right)
 			return *this;
 		}
 	}
+	else
+		throw RUNTIME_EXPECTING_NUMERIC;
 }
 WQObject& WQObject::operator%=(const WQObject& right)
 {
@@ -485,6 +499,8 @@ WQObject& WQObject::operator%=(const WQObject& right)
 			return *this;
 		}
 	}
+	else
+		throw RUNTIME_EXPECTING_NUMERIC;
 }
 
 WQObject& operator+(WQObject& left, const WQObject& right)
@@ -511,4 +527,95 @@ WQObject& operator%(WQObject& left, const WQObject& right)
 {
 	left %= right;
 	return left;
+}
+void WQObject::GetSlicingWithLeftIndexValue(long start, WQObject* targetlist)
+{
+	if (Type == DT_LIST)
+	{
+
+		targetlist->InitList();
+		vector<WQObject*>* original = GetListValue();
+		long startindex;
+		//if it's 0, start from the begingning
+		if (start>= 0)
+			startindex = start;
+		else if (start < 0)
+			startindex = original->size() + start;
+		//make sure the start index is greater than 0
+		if (startindex< 0)  startindex = 0;
+		//copy values to new list
+		for (int i = startindex; i <original->size(); i++)
+		{
+			targetlist->AppendListValue(*original->at(i));
+		}
+	}
+	else
+	{
+		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
+	}
+	
+}
+void WQObject::GetSlicingWithRightIndexValue(long end, WQObject* targetlist)
+{
+	if (Type == DT_LIST)
+	{
+
+		targetlist->InitList();
+		vector<WQObject*>* original = GetListValue();
+		long endindex;
+		// if it's greater than 0 ,normal index
+		//if it's 0, don't need slicing
+		if (end >= 0)
+			endindex = end;
+		else if (end < 0)
+			endindex = original->size() + end;
+		//copy values to new list
+		for (int i = 0; i < endindex&&i<original->size(); i++)
+		{
+			targetlist->AppendListValue(*original->at(i));
+		}
+		// otherwise ,return the empty list
+	}
+	else
+	{
+		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
+	}
+}
+void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
+{
+	if (Type == DT_LIST)
+	{
+
+		targetlist->InitList();
+		vector<WQObject*>* original = GetListValue();
+		long endindex;
+		long startindex;
+		//make sure the end index is good
+		if (end >= 0)
+			endindex = end<original->size()?end:original->size();
+		else 
+			//if (end < 0)
+		{
+			endindex = original->size() + end;
+			if (endindex < 0) endindex = 0;
+		}
+		//make sure the start index is good
+		if (start >= 0)
+			startindex = start < original->size() ? start : original->size();
+		else {
+			//if (start<0)
+			startindex = start + original->size();
+			if (startindex < 0) startindex = 0;
+		}
+		//copy values to new list
+		for (int i = startindex; i < endindex; i++)
+		{
+			targetlist->AppendListValue(*original->at(i));
+		}
+
+	}
+	else
+	{
+		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
+	}
 }

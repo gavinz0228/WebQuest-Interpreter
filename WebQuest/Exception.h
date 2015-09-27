@@ -14,14 +14,18 @@
 #define		SYNTAX_INVALID_OPERATOR							"Invalid operator"
 #define		SYNTAX_INVALID_FOR_TEMP_VARIABLE				"Invalid temporary variable of a for loop"
 #define		SYNTAX_NOT_IN_KEYWORD_IN_FOR					"Expecing a 'in' keyword in a for loop"
+#define		SYNTAX_INVALID_SYMBOL							"Invalid symbol"
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
 #define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"
+#define		RUNTIME_EXPECTING_NUMERIC						"Expecting a numeric value"
 #define		RUNTIME_NON_NUMERIC_CASTING						"Non numeric variable cannot be casted to numeric value"
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_THAN				"Invalid type for < operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_THAN			"Invalid type for > operator"
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_EQUAL				"Invalid type for <= operator"
 #define		RUNTIME_ITERATE_NON_LIST_VARIABLE				"Non-list variable cannot be iterated"
+#define		RUNTIME_NON_INTERGER_INDEX						"Non-integer index for a list is not allowed"
+#define		RUNTIME_SLICING_NON_LIST_VARIABLE				"Slicing a non-list variable is not allowed"
 
 #define		RUNTIME_INVALID_TYPE_FOR_EQUAL					"Invalid type for == operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_EQUAL			"Invalid type for >= operator"

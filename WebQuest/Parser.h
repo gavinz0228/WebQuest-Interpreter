@@ -27,7 +27,8 @@ enum ParserNodeType{ NT_ASSIGNMENT,
 	NT_CREATEDICT,
 	NT_ELEMENT,
 	NT_FOR,
-	NT_BREAK};
+	NT_BREAK,
+	NT_SLICING};
 enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -109,15 +110,7 @@ public:
 	char GetAssignableType(){ return AT_ELEMENT; }
 	bool IsAssignable(){ return true; }
 };
-class SlicingNode:NodeBase
-{
-public:
-	SlicingNode(){ Variable = new VariableNode; }
-	~SlicingNode(){}
-	VariableNode* Variable;
-	long StartIndex;
-	long EndIndex;
-};
+
 /*
 Non-terminal Node
 */
@@ -141,7 +134,7 @@ public:
 class ExpressionNode :public NodeBase
 {
 public:
-	//ExpressionNode();
+	ExpressionNode(){};
 	NodeBase* Expression;
 	int ExpressionType;
 	int Type;
@@ -189,6 +182,24 @@ public:
 	list<ExpressionNode*>* Parameters;
 	static int Type;
 	int GetType(){ return NT_FUNCTIONCALL; };
+};
+class SlicingNode :NodeBase
+{
+public:
+	SlicingNode(){
+		Variable = new VariableNode;
+	StartIndex = new ExpressionNode;
+	EndIndex = new ExpressionNode;
+	HasStartIndex = false;
+	HasEndIndex = false;
+	}
+	~SlicingNode(){ delete Variable; delete StartIndex; delete EndIndex; }
+	VariableNode* Variable;
+	ExpressionNode* StartIndex;
+	ExpressionNode* EndIndex;
+	bool HasStartIndex;
+	bool HasEndIndex;
+	int GetType(){ return NT_SLICING; }
 };
 class IfNode :public NodeBase
 {

@@ -34,7 +34,9 @@ void Evaluate()
 	//rt.Run("a=1 while a<=10 b=2 a+=1 a+=1 print(a)  end print(a)");
 	//rt.Run("a=1 a+=1 print(a)");
 	//rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
-	rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
+	//rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
+	rt.Run("a=[123,456,789] print(a[0:2]) print(a[0:-1])");
+
 }
 void Parse()
 {
@@ -44,7 +46,8 @@ void Parse()
 	//parser.Parse("a=!3>2");
 	//parser.Parse("if (a==3 && b==2) a=1 b=2 elseif a==43 accc=5 else b=2 end");
 	//parser.Parse("if (a==3) a=1 else b=2 end");
-	parser.Parse("lsvar=[123,456,789] for a in lsvar print(a) end");
+	//parser.Parse("lsvar=[123,456,789] for a in lsvar print(a) end");
+	parser.Parse("a=[123,456,789] print(a[12:])");
 	parser.PrintTree();
 }
 void Tokenize()

@@ -14,6 +14,8 @@ Current Achievement:
 	rt.Run("aa=1==2+5*3 print(aa)");
 	rt.Run("result=get(\"http://higavin.com\") print(result)");
 	rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
+    rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
+	rt.Run("a=[123,456,789] print(a[0:2]) print(a[0:-1])");
 
 Language Usage:
     

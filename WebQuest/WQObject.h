@@ -42,6 +42,9 @@ public:
 	long double GetFloatValue() const;
 	bool GetBoolValue() const;
 	vector<WQObject*>* GetListValue() const;
+	void GetSlicingWithLeftIndexValue(long start, WQObject* targetlist);
+	void GetSlicingWithRightIndexValue(long end, WQObject* targetlist);
+	void GetSlicing(long start, long end,WQObject* targetlist);
 
 	bool Assigned();
 	bool IsNumeric() const;

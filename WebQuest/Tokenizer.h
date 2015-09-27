@@ -1,4 +1,6 @@
 #include <list>
+#include <regex>
+#include<iostream>
 #include "Converter.h"
 #include "Exception.h"
 using namespace std;
@@ -48,9 +50,10 @@ public:
 	~Tokenizer();
 	list<Token*>* Tokenize(string script);
 	bool IsOperator(char* script, int &charlen);
+	bool IsInteger(string::iterator startit, string::iterator endit, int &charlen);
 	bool IsSpaceTabOrNewLine(char* script);
-	int GetTab(char* script,int &charlen);
-	int GetNewLine(char* script,int &charlen);
+	int GetTab(string::iterator startit, string::iterator endit, int &charlen);
+	int GetNewLine(string::iterator startit, string::iterator endit, int &charlen);
 	static char* OPERATORS[];
 	void Clear();
 	Token* NextToken();
