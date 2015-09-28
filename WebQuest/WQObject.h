@@ -25,23 +25,28 @@ public:
 	void SetBoolValue(bool val);
 	void SetNull();
 	void InitList();
-
+	void InitDictionary();
 	//void AppendListValue(long long val);
 	//void AppendListValue(long double val);
 	//void AppendListValue(string &val);
 	//void AppendListvalue(bool val);
 	void AppendListValue(WQObject& obj);
 	WQObject* GetListElement(long index);
+	WQObject* GetDictionaryElement(string& key);
 	void SetListElement(long index, WQObject& ele);
 
 	void AppendKeyValue(string& key, string& value);
 	void AppendKeyValue(string& key, long long value);
+	void SetKeyValue(string key, WQObject& value);
+	void SetKeyValue(string key, string value);
+	void SetKeyValue(string key, long long value);
 
 	void GetAssigned(WQObject* obj);
 	long long GetIntValue() const;
 	long double GetFloatValue() const;
 	bool GetBoolValue() const;
 	vector<WQObject*>* GetListValue() const;
+	map<string, WQObject*>* GetDictionaryValue() const;
 	void GetSlicingWithLeftIndexValue(long start, WQObject* targetlist);
 	void GetSlicingWithRightIndexValue(long end, WQObject* targetlist);
 	void GetSlicing(long start, long end,WQObject* targetlist);

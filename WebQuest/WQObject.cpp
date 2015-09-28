@@ -54,6 +54,10 @@ vector<WQObject*>* WQObject::GetListValue() const
 {
 	return (vector<WQObject*>*)Data;
 }
+map<string,WQObject*>* WQObject::GetDictionaryValue() const
+{
+	return (map<string, WQObject*>*)Data;
+}
 void WQObject::ClearValue()
 {
 	if (Data != NULL&&Type!=DT_NULL)
@@ -106,6 +110,51 @@ void WQObject::InitList()
 	Data = new vector < WQObject* > ;
 	assigned = true;
 }
+void WQObject::InitDictionary()
+{
+	ClearValue();
+	Type = DT_DICTIONARY;
+	Data = new map <string,WQObject* >;
+	assigned = true;
+}
+void WQObject:: SetKeyValue(string key, WQObject& value)
+{
+	if (Type == DT_DICTIONARY)
+	{
+		map<string, WQObject*>* dict = GetDictionaryValue();
+		WQObject* newvalue = new WQObject;
+		newvalue->GetAssigned(&value);
+		dict->insert(pair<string, WQObject*>(key, newvalue));
+	}
+	else
+		throw RUNTIME_NON_DICT_APPENDING;
+}
+void WQObject::SetKeyValue(string key, long long value){
+	if (Type == DT_DICTIONARY)
+	{
+		map<string, WQObject*>* dict = GetDictionaryValue();
+		WQObject* newvalue = new WQObject;
+		newvalue->SetIntValue(value);
+		dict->insert(pair<string, WQObject*>(key, newvalue));
+	}
+	else
+		throw RUNTIME_NON_DICT_APPENDING;
+}
+void WQObject::SetKeyValue(string key, string value)
+{
+	if (Type == DT_DICTIONARY)
+	{
+		map<string, WQObject*>* dict = GetDictionaryValue();
+		WQObject* newvalue = new WQObject;
+		newvalue->SetStringValue(value);
+		//dict->insert(pair<string, WQObject*>(key, newvalue));
+		(*dict)[key] = newvalue;
+	}
+	else
+		throw RUNTIME_NON_DICT_APPENDING;
+}
+
+
 //void WQObject::SetListValue(list<WQObject> &value)
 //{
 //	ClearValue();
@@ -114,6 +163,7 @@ void WQObject::InitList()
 //	*((list<WQObject>*)Data) = value; 
 //	assigned = true;
 //}
+
 
 void WQObject::AppendListValue(WQObject& obj)
 {
@@ -146,6 +196,29 @@ WQObject* WQObject::GetListElement(long index)
 		throw RUNTIME_NON_LIST_INDEXING;
 	}
 	return NULL;
+}
+WQObject* WQObject::GetDictionaryElement(string& key)
+{
+	if (Type == DT_DICTIONARY)
+	{
+		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>::iterator it = dict->find(key);
+		{
+			if (it != dict->end())
+			{
+				return it->second;
+			}
+			else
+			{
+				WQObject* obj = new WQObject;
+				obj->InitDictionary();
+				(*dict)[key] = obj;
+				return obj;
+			}
+		}
+	}
+	else
+		throw RUNTIME_NON_DICT_VALUE_ASSIGNMENT;
 }
 void WQObject::SetListElement(long index, WQObject& ele)
 {
@@ -211,6 +284,20 @@ void WQObject::GetAssigned(WQObject* obj)
 			WQObject* newobj = new WQObject;
 			newobj->GetAssigned(income->at(i));
 			newlist->push_back(newobj);
+		}
+	}
+	else if (obj->Type == DT_DICTIONARY)
+	{
+		ClearValue();
+		InitDictionary();
+		map<string, WQObject*>* newdict = GetDictionaryValue();
+		map<string, WQObject*>* olddict = obj->GetDictionaryValue();
+		map<string, WQObject*>::iterator it = olddict->begin();
+		for (; it != olddict->end(); it++)
+		{
+			WQObject* obj=new WQObject;
+			obj->GetAssigned(it->second);
+			newdict->insert(pair<string, WQObject*>(it->first, obj));
 		}
 	}
 	else if (obj->Type == DT_NULL)
@@ -308,6 +395,22 @@ string WQObject::ToString() const
 				output += ",";
 		}
 		output += "]";
+		return output;
+	}
+	else if (Type == DT_DICTIONARY)
+	{
+		string output="{";
+		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>::iterator it = dict->begin();
+		for (; it != dict->end(); it++)
+		{
+			output += "\"" + it->first + "\"" + ":";
+			output += it->second->ToElementString();
+			if (next(it) != dict->end())
+				output += ",";
+			
+		}
+		output += "}";
 		return output;
 	}
 	return "None";

@@ -101,6 +101,18 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
 				lsobj->SetListElement(index,*left);
 			}
+			else if (lsobj->Type == DT_DICTIONARY)
+			{
+
+				Evaluate(ele->key, state);
+				//get the index
+				string key = state->GetReturnObject()->ToString();
+
+				WQObject *left = lsobj->GetDictionaryElement(key);
+				Evaluate(assignment->RightSide, state);
+				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
+				
+			}
 			//environment->GetVariable()
 
 		}
@@ -435,6 +447,13 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		}
 		state->GetReturnObject()->GetAssigned(&result);
 
+	}
+	else if (node->GetType() == NT_CREATEDICT)
+	{
+		CreateDictionaryNode* dictnode = (CreateDictionaryNode*)node;
+		WQObject result;
+		result.InitDictionary();
+		state->GetReturnObject()->GetAssigned(&result);
 	}
 	else if (node->GetType() == NT_FOR)
 	{

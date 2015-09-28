@@ -119,14 +119,14 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				//get the assignment operator
 				assignment->AssignmentOperator = tker->NextToken()->Symbol;
 				//assign the first side
-				if (assignment->TargetType==AT_VARIABLE)
+				if (exp.ExpressionType==NT_VARIABLE)
 				{
 					assignment->LeftSideVariable = (VariableNode*)exp.Expression;
 					assignment->TargetType = AT_VARIABLE;
 					//char tp=assignment->LeftSide->GetAssignableType();
 					//char b = tp;
 				}
-				else if (assignment->TargetType == AT_ELEMENT)
+				else if (exp.ExpressionType == NT_ELEMENT)
 				{
 					assignment->LeftSideElement = (ElementNode*)exp.Expression;
 					assignment->TargetType = AT_ELEMENT;
@@ -185,11 +185,11 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 					}
 
 
-					string* name = tker->NextToken()->Symbol;
-					FunctionCallNode* createdict = new FunctionCallNode;
-					createdict->FunctionName = name;
-					assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
-					assignment->RightSide->Expression = (NodeBase*)createdict;
+					//string* name = tker->NextToken()->Symbol;
+					//FunctionCallNode* createdict = new FunctionCallNode;
+					//createdict->FunctionName = name;
+					//assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
+					//assignment->RightSide->Expression = (NodeBase*)createdict;
 				}
 				else
 					ParseExpression(tker, assignment->RightSide);
@@ -560,15 +560,18 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 
 void Parser::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters)
 {
-
+	if (tker->IsNextRightParen() || tker->IsNextRightBracket() || tker->IsNextRightCurlyBracket())
+	{
+		return;
+	}
 
 	while (true)
 	{
-
 		ExpressionNode *exp = new ExpressionNode;
 		ParseExpression(tker, exp);
 		parameters->push_back(exp);
-		if (tker->IsNextRightParen()||tker->IsNextRightBracket())
+
+		if (tker->IsNextRightParen() || tker->IsNextRightBracket() || tker->IsNextRightCurlyBracket())
 		{
 			break;
 		}
@@ -688,6 +691,10 @@ void Parser::PrintTreeNode(NodeBase* node,int level)
 			printf(",");
 		}
 		printf("]");
+	}
+	else if (node->GetType() == NT_CREATEDICT)
+	{
+		printf("{}");
 	}
 	else if (node->GetType() == NT_IF)
 	{

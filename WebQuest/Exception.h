@@ -34,6 +34,8 @@
 #define		RUNTIME_NON_LIST_APPENDING						"Cannot append value to a non-list variable"
 #define		RUNTIME_NON_LIST_INDEXING						"Target variable is not a list"
 #define		RUNTIME_INDEX_OUT_OF_BOUND						"Index out of bound"
+#define		RUNTIME_NON_DICT_APPENDING						"Cannot append a key value pair to a non-dictionary object"
+#define		RUNTIME_NON_DICT_VALUE_ASSIGNMENT				"Connot set value by key on a non-dictionary object"
 class Exception :std::exception
 {
 public:

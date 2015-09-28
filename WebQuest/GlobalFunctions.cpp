@@ -81,7 +81,15 @@ void WQLen(WQState* state)
 		throw "len function can only used for string type and lsit type";
 	}
 }
-
+static void WQDumpJson(WQState* state)
+{
+	//WQObject obj;
+	//obj.InitDictionary();
+	auto obj = state->GetParam();
+	//obj->SetKeyValue("key", "val");
+	//obj->SetKeyValue("numkey", 123);
+ 	printf(obj->ToString().c_str());
+}
 void GlobalFunctions::LoadFunctions()
 {
 	Add("print", WQPrint);
@@ -89,4 +97,5 @@ void GlobalFunctions::LoadFunctions()
 	Add("len", WQLen);
 	Add("get_raw", WQGetRaw);
 	Add("get", WQGet);
+	Add("dump_json", WQDumpJson);
 }
