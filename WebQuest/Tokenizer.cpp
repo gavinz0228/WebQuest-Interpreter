@@ -52,9 +52,12 @@ list<Token*>* Tokenizer::Tokenize(string script)
 	this->Clear();
 	long long integer;
 	long double floatno;
+	char* operatorStart=NULL;
+	int operatorlen;
 	long lineno=1;
 	string::iterator it = script.begin();
 	int charlen;
+	bool gettingcomment = false;
 	while (it!=script.end())
 	{
 		if (*it==' ')
@@ -86,6 +89,14 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				charlen--;
 			}
 		}
+		else if (*it == '#')
+		{
+			//skip this line of comment
+			while (it != script.end()&&*it != '\n' && *it != '\r')
+			{
+				it++;
+			}
+		}
 		else if (IsFloat(it, script.end(), charlen))
 		{
 			Converter::StringToFloat(&(*it), charlen, floatno);
@@ -112,9 +123,9 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		}
 
 		//return true if it's operator, operatorlen outputs the length of the operator
-		else if (IsOperator(&(*it), charlen))
+		else if (IsOperator(&(*it), charlen,operatorStart,operatorlen))
 		{
-			Token* tk = new Token(&(*it), charlen, TK_OPERATOR, lineno);
+			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -140,7 +151,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			while (it < script.end())
 			{					
 				ch++;
-				if (gettingString == false && (IsOperator(ch, charlen) || IsSpaceTabOrNewLine(ch)))
+				if (gettingString == false && (IsOperator(ch, charlen,operatorStart,operatorlen) || IsSpaceTabOrNewLine(ch)))
 					break;
 				else if (gettingString == true)
 				{
@@ -355,16 +366,21 @@ bool Tokenizer::IsSpaceTabOrNewLine(char *script)
 	}
 }
 
-bool Tokenizer::IsOperator(char* script, int &operatorlen)
+bool Tokenizer::IsOperator(char* script, int &scriptlen, char*& operatorstr, int& operatorlen)
 {
 	bool matched ;
 	for (char** op = Tokenizer::OPERATORS; *op != NULL; op++)
 	{
 		matched = true;
 		int oplen = strlen(*op);
-		for (int i = 0; i < oplen; i++)
+		int scriptindex = 0;
+		for (int i = 0; i < oplen; i++,scriptindex++)
 		{
-			if (*(*op + i) != *(script + i))
+			while (*(script + scriptindex)==' ')
+			{
+				scriptindex++;
+			}
+			if (*(*op + i) != *(script + scriptindex))
 			{
 				matched = false;
 				break;
@@ -372,6 +388,8 @@ bool Tokenizer::IsOperator(char* script, int &operatorlen)
 		}
 		if (matched)
 		{
+			scriptlen = scriptindex;
+			operatorstr = *op;
 			operatorlen = oplen;
 			return true;
 		}

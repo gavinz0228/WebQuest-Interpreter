@@ -16,6 +16,8 @@ Current Achievement:
 	rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
     rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
 	rt.Run("a=[123,456,789] print(a[0:2]) print(a[0:-1])");
+    rt.Run("res=get_raw('http://google.com') print(len(res))");
+    rt.Run("res=get_raw('http://google.com') print(res)");
 
 Language Usage:
     
@@ -124,6 +126,16 @@ Language Usage:
             Example:
                 lsvar=[12,31,55]
                 lsvar[0]=16
+        d. list slicing
+            Format:
+                <list variable>[<start index>:<end index>]
+                    from <start index> to <end index>
+                <list variable>[:<end index>]
+                    from the beginning to <end index>
+                <list variable>[<start index>:]
+                    from the <start index> to the end
+                <list variable>[:]
+                    a copy of the original list
     5. Dictionary Operation
 Important Features
     1.List Slicing(string type and list type)
@@ -136,7 +148,8 @@ Core Functions
             Gets the length of a list object or string object. If the parameter is a string, it will return the number of characters of the string. If the parameter is a list, it will return the number of elements of the list.
         print(object)
             Print out object to the standard output. Non-string object will be converted to string before being printed.
-    
+        append(object,element)
+            Appends an element to a list object.
     Web Related Functions:
         get(url[,data[,headers]])
             Sends a get request, and only returns the body of the response returned by server. Parameters data is a dictionary variable which will be url-encoded. Parameters header is also a dictionary variable.

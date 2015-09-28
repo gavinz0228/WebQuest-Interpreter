@@ -32,14 +32,15 @@ void Evaluate()
 		//rt.Run("aa=0 aa=aa==2+2-4 print(aa)");
 		//rt.Run("aa=1==2+5*3 print(aa)");
 		//rt.Run("result=get(\"http://higavin.com\") print(result)");
+		rt.Run("aa=1 aa+  =1 print(aa)");
 		//rt.Run("if (0==4-4+2+1-3 && true==1) print('good!') else print('bad') end ");
 		//rt.Run("a=1 while a<=10 b=2 a+=1 a+=1 print(a)  end print(a)");
 		//rt.Run("a=1 a+=1 print(a)");
 		//rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
 		//rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
 		//rt.Run("a=[123,456,7890.02] print(a[0:3]) print(a[0:-1])");
-		//rt.Run("res=get_raw('http://google.com') print(len(res))");
-		rt.Run("res=get_raw('http://google.com') print(res)");
+		// rt.Run("res=get_raw('http://google.com') print(len(res))");
+		//rt.Run("res=get_raw('http://google.com') print(res) #print(res)");
 	}
 	catch(string &str){
 		cout << "Line: " << rt.GetCurrentLineNumber() << endl;

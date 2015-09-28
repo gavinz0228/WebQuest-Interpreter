@@ -49,7 +49,7 @@ public:
 	Tokenizer();
 	~Tokenizer();
 	list<Token*>* Tokenize(string script);
-	bool IsOperator(char* script, int &charlen);
+	bool IsOperator(char* script, int &charlen, char*& operatorstr,int& operatorlen);
 	bool IsInteger(string::iterator startit, string::iterator endit, int &charlen);
 	bool IsFloat(string::iterator startit, string::iterator endit, int &charlen);
 
@@ -101,7 +101,7 @@ private:
 };
 
 
-
+#define				OP_COMMENT_SYMBOL			"#"
 #define				OP_L_PAREN					"("
 #define				OP_R_PAREN					")"
 #define				OP_L_BRAC					"["
