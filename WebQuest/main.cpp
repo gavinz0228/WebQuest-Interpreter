@@ -3,23 +3,50 @@
 #include "Parser.h"
 #include "RunTime.h"
 #include <iostream>
+#include <fstream>
 using namespace std;
 void Request();
 void Tokenize();
 void Parse();
-void Evaluate();
+void Test();
 int main(int argc, char **argv)
 {
+	//no parameter is passed in, then run test method
+	if (argc==1)
+		Test();
+	else
+		//read script from the file
+	{
+		string script;
+		ifstream file(argv[1]);
 
+		file.seekg(0, std::ios::end);
+		script.reserve(file.tellg());
+		file.seekg(0, std::ios::beg);
+
+		script.assign((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
+		//printf(script.c_str());
+		Runtime rt;
+		try{
+			rt.Run(script);
+		}
+		catch (char* msg){
+			cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;
+		}
+		catch (string &str){
+			cout << "Line: " << rt.GetCurrentLineNumber() << ":" << str << endl;
+		}
+
+	}
 	//Request();
 	//Tokenize();
 	//Parse();
-	Evaluate();
-	char wait;
-	scanf_s(&wait);
+	//char wait;
+	//scanf_s(&wait);
 	return 0;
 }
-void Evaluate()
+void Test()
 {
 	Runtime rt;
 	try{
@@ -40,73 +67,78 @@ void Evaluate()
 		//rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
 		//rt.Run("a=[123,456,7890.02] print(a[0:3]) print(a[0:-1])");
 		// rt.Run("res=get_raw('http://google.com') print(len(res))");
-		//rt.Run("res=get('http://google.com') print(res) #print(res)");
+		//rt.Run("res=get('http://www.google.com') print(res) #print(res)");
 		//rt.Run("aa={} aa['key']='value' dump_json(aa)");
-		rt.Run("for i in range(0,10) print(i) end");
-		rt.Run("for i in range(10) print(i) end");
+		//rt.Run("for i in range(0,500) print(i+' ') end");
+		//rt.Run("for i in range(10) print(i) end");
 		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
 		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
-			    header=parse_headers(res) print(header) \
-				print('---------------------------------------\n') \
-			");
+			   			    header=parse_headers(res) print(header)  \
+											print('---------------------------------------\n') \
+														");
+	}
+	catch (char* msg){
+		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;
+	}
+	catch (string &str){
+		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << str << endl;
+	}
+	char wait;
+	scanf_s(&wait);
 
-	}
-	catch(string &str){
-		cout << "Line: " << rt.GetCurrentLineNumber() << ":"<<str<<endl;
-	}
 
 }
-void Parse()
-{
-
-	Parser parser;
-	//parser.Parse("ab=1+2\r\n");
-	//parser.Parse("a=!3>2");
-	//parser.Parse("if (a==3 && b==2) a=1 b=2 elseif a==43 accc=5 else b=2 end");
-	//parser.Parse("if (a==3) a=1 else b=2 end");
-	//parser.Parse("lsvar=[123,456,789] for a in lsvar print(a) end");
-	parser.Parse("a=[123,456,789] print(a[12:])");
-	parser.PrintTree();
-}
-void Tokenize()
-{
-	Tokenizer tker;
-	tker.Tokenize("dd=12.2\r\naa={}\r\n");
-	while (true)
-	{
-		Token* token = tker.NextToken();
-		if (token == NULL)
-			break;
-		if (token->Type==TK_OPERATOR||token->Type==TK_STRING)
-			printf((*token).Symbol->c_str());
-		else if (token->Type == TK_INTEGER)
-		{
-			printf("%d", token->Integer);
-		}
-		else if (token->Type == TK_FLOAT)
-		{
-			printf("%f", token->Float);
-		}
-		printf("\n");
-	}
-}
-
-void Request()
-{
-	WebRequest req;
-	string response;
-	map<string, string> params;
-	try
-	{
-		//req.AddHeader("User-Agent","Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36");
-		//response = req.PostBinary("http://posttestserver.com/post.php", "sa=a&ss=s&sdfa=asdfasdfasdfasdfasdfasdfasdf");
-
-		params.insert(pair<string, string>("asdf", "d&s"));
-		response = req.PostForm("http://posttestserver.com/post.php", params);
-		printf(response.c_str());
-	}
-	catch (const char* msg)
-	{
-		printf(msg);
-	}
-}
+//void Parse()
+//{
+//
+//	Parser parser;
+//	//parser.Parse("ab=1+2\r\n");
+//	//parser.Parse("a=!3>2");
+//	//parser.Parse("if (a==3 && b==2) a=1 b=2 elseif a==43 accc=5 else b=2 end");
+//	//parser.Parse("if (a==3) a=1 else b=2 end");
+//	//parser.Parse("lsvar=[123,456,789] for a in lsvar print(a) end");
+//	parser.Parse("a=[123,456,789] print(a[12:])");
+//	parser.PrintTree();
+//}
+//void Tokenize()
+//{
+//	Tokenizer tker;
+//	tker.Tokenize("dd=12.2\r\naa={}\r\n");
+//	while (true)
+//	{
+//		Token* token = tker.NextToken();
+//		if (token == NULL)
+//			break;
+//		if (token->Type==TK_OPERATOR||token->Type==TK_STRING)
+//			printf((*token).Symbol->c_str());
+//		else if (token->Type == TK_INTEGER)
+//		{
+//			printf("%d", token->Integer);
+//		}
+//		else if (token->Type == TK_FLOAT)
+//		{
+//			printf("%f", token->Float);
+//		}
+//		printf("\n");
+//	}
+//}
+//
+//void Request()
+//{
+//	WebRequest req;
+//	string response;
+//	map<string, string> params;
+//	try
+//	{
+//		//req.AddHeader("User-Agent","Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36");
+//		//response = req.PostBinary("http://posttestserver.com/post.php", "sa=a&ss=s&sdfa=asdfasdfasdfasdfasdfasdfasdf");
+//
+//		params.insert(pair<string, string>("asdf", "d&s"));
+//		response = req.PostForm("http://posttestserver.com/post.php", params);
+//		printf(response.c_str());
+//	}
+//	catch (const char* msg)
+//	{
+//		printf(msg);
+//	}
+//}

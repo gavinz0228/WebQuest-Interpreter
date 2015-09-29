@@ -7,6 +7,14 @@ void Runtime::Run(char* script)
 	Evaluate((NodeBase*)parser.program, &state);
 
 }
+void Runtime::Run(string& script)
+{
+	Parser parser;
+	parser.Parse(script.c_str());
+	WQState state;
+	Evaluate((NodeBase*)parser.program, &state);
+
+}
 void Calculate(WQObject& left, string* op, WQObject& right)
 {
 	if (*op == OP_PLUS)
@@ -469,10 +477,12 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	{
 		ForNode* fornode = (ForNode*)node;
 		Evaluate(fornode->IterableVariable, state);
-		WQObject* iterable = state->GetReturnObject();
-		if (iterable->Type != DT_LIST)
+		WQObject iterable;
+		iterable.GetAssigned(state->GetReturnObject());
+
+		if (iterable.Type != DT_LIST)
 			throw RUNTIME_ITERATE_NON_LIST_VARIABLE;
-		vector<WQObject*>* iterablelist = iterable->GetListValue();
+		vector<WQObject*>* iterablelist = iterable.GetListValue();
 		for (int i = 0; i < iterablelist->size(); i++)
 		{
 			EnterNewEnvironment();

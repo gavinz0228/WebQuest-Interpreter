@@ -14,6 +14,7 @@ public:
 	}
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
+	void Run(string& script);
 	Environment* environment;
 	long GetCurrentLineNumber(){ return CurrentLineNumber; }
 private:

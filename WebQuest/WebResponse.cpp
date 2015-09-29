@@ -58,15 +58,16 @@ string WebResponse::ProcessChunkedBody(string& str)
 	{
 		findres = str.find(newline, start);
 		//get the line and remove extra spaces
-		string line = Trim(str.substr(start, findres + newlinelen));
+		string line = Trim(str.substr(start, findres -start));
 		//convert the hex string to integer
 		int length = HexStrToInt(line);
 		if (length == 0)
 			break;
 		//got a chunk of data, write it to the buffer
 		ss << str.substr(findres + newlinelen, length);
+		string sstr = str.substr(findres + newlinelen, length);
 		//printf(str.substr(findres + newlinelen, length).c_str());
-		start = findres + newlinelen + length;
+		start = findres + newlinelen + length + newlinelen;
 	}
 	return ss.str();
 	

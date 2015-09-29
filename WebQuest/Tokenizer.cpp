@@ -80,8 +80,8 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		else if (*it == '\r' || *it == '\n')
 		{
 			int num = GetNewLine(it, script.end(),charlen);
-			Token* tk = new Token(&(*it), charlen, TK_NEWLINE, lineno);
-			Tokens->push_back(tk);
+			//Token* tk = new Token(&(*it), charlen, TK_NEWLINE, lineno);
+			//Tokens->push_back(tk);
 			lineno += num;
 			while (charlen>0)
 			{
