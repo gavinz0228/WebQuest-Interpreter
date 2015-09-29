@@ -68,8 +68,8 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		else if (*it == '\t')
 		{
 			GetTab(it,script.end(), charlen);
-			Token* tk = new Token(&(*it), charlen, TK_TAB, lineno);
-			Tokens->push_back(tk);
+			//Token* tk = new Token(&(*it), charlen, TK_TAB, lineno);
+			//Tokens->push_back(tk);
 			while (charlen>0)
 			{
 				it++;
@@ -141,27 +141,34 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			char* ch = &(*it);
 			bool gettingString = false;
 			bool finishedString = false;
+			char quotechar = '\"';
 			int len = 0;
 			if (*start == '\'' || *start == '\"')
 			{
 				gettingString = true;
+				quotechar = *start;
+				ch++;
+				it++;
 			}
 			//not a operator , then see it as a symbol at this stage
 
-			while (it < script.end())
-			{					
-				ch++;
+			while (it != script.end())
+			{	
+
 				if (gettingString == false && (IsOperator(ch, charlen,operatorStart,operatorlen) || IsSpaceTabOrNewLine(ch)))
 					break;
 				else if (gettingString == true)
 				{
-					if (*ch == '\'' || *ch == '\"')
+					if (*ch == quotechar)
 					{
 						ch++;
+						it++;
 						finishedString = true;
 						break;
 					}
 				}
+				ch++;
+				it++;
 
 			}
 			long long integer;
@@ -238,11 +245,11 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, len, TK_VARIABLE, lineno);
 			}
-			while (len > 0)
-			{
-				it++;
-				len--;
-			}
+			//while (len > 0)
+			//{
+			//	it++;
+			//	len--;
+			//}
 
 			Tokens->push_back(tk);
 		}
@@ -331,7 +338,7 @@ void Tokenizer::Clear()
 int Tokenizer::GetTab(string::iterator startit, string::iterator endit, int &charlen)
 {
 	charlen = 0;
-	while (*startit == '\t'&&startit!=endit)
+	while (startit != endit&&*startit == '\t')
 	{
 		charlen++;
 		startit++;

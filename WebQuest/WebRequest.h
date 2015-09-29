@@ -34,7 +34,7 @@ public:
 	void AddHeader(string key,string value);
 	string Get(string url);
 	string PostBinary(string url, const char* data);
-	string PostPairs(string url, map<string, string> data);
+	string PostForm(string url, map<string, string> data);
 
 private:
 	string SendRequest(const char* hostName, const char* port, const char* data);

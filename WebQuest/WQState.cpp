@@ -13,10 +13,24 @@ WQObject* WQState::GetReturnObject()
 		return holder;
 	}
 }
+long long WQState::GetIntegerParam()
+{
+	WQObject* param = GetParam();
+	if (param->Type == DT_INTEGER)
+	{
+
+		return param->GetIntValue();
+	}
+	else
+		throw RUNTIME_EXPECTING_A_INTEGER_PARAMETER;
+}
 string WQState::GetStringParam()
 {
 	WQObject* obj=GetParam();
-	return obj->ToString();
+	if (obj->Type == DT_STRING)
+		return obj->ToString();
+	else
+		throw RUNTIME_EXPECTING_A_STRING_PARAM;
 }
 void WQState::ReturnReference(WQObject* ref)
 {
@@ -47,7 +61,7 @@ WQObject* WQState::GetParam()
 		return param;
 	}
 	else
-		return NULL;
+		throw RUNTIME_TOO_FEW_ARGUMENTS;;
 }
 void WQState::AddParam(WQObject* obj)
 {

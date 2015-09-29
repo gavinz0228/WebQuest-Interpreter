@@ -32,7 +32,7 @@ string WebRequest::Get(string url)
 	return SendRequest(uri.Host.c_str(),uri.Port.c_str(),GetHeaders(METHOD_GET,uri).c_str());
 }
 
-string WebRequest::PostPairs(string url, map<string, string> data)
+string WebRequest::PostForm(string url, map<string, string> data)
 {
 	string param;
 	if (data.size() > 0)

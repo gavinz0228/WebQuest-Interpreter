@@ -36,6 +36,9 @@
 #define		RUNTIME_INDEX_OUT_OF_BOUND						"Index out of bound"
 #define		RUNTIME_NON_DICT_APPENDING						"Cannot append a key value pair to a non-dictionary object"
 #define		RUNTIME_NON_DICT_VALUE_ASSIGNMENT				"Connot set value by key on a non-dictionary object"
+#define		RUNTIME_TOO_FEW_ARGUMENTS						"Too few arguments to call the function"
+#define		RUNTIME_EXPECTING_A_INTEGER_PARAMETER			"Expecting a integer parameter"
+#define		RUNTIME_EXPECTING_A_STRING_PARAM				"Expecting a string parameter"
 class Exception :std::exception
 {
 public:

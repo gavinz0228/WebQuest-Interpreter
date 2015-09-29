@@ -73,6 +73,7 @@
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="WebRequest.h" />
     <ClInclude Include="Uri.h" />
+    <ClInclude Include="WebResponse.h" />
     <ClInclude Include="WQObject.h" />
     <ClInclude Include="WQState.h" />
   </ItemGroup>
@@ -86,6 +87,7 @@
     <ClCompile Include="Tokenizer.cpp" />
     <ClCompile Include="WebRequest.cpp" />
     <ClCompile Include="Uri.cpp" />
+    <ClCompile Include="WebResponse.cpp" />
     <ClCompile Include="WQObject.cpp" />
     <ClCompile Include="WQState.cpp" />
   </ItemGroup>
