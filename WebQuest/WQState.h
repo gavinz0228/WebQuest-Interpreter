@@ -20,12 +20,12 @@ public:
 	void ReturnReference(WQObject*);
 	WQObject* GetReturnObject();
 	bool BreakOccurred;
-	
+	WQObject* ReferencedObject;
 	int ParamSize;
 	//void SetReturnObject(WQObject& obj);
 	//WQObject* GetReturnObject();
 private:
-	WQObject* ReferencedObject;
+	
 	WQObject ReturnObject;
 	//void CleanReturnObject();
 	

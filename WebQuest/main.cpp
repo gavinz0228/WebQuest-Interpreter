@@ -42,8 +42,9 @@ void Evaluate()
 		// rt.Run("res=get_raw('http://google.com') print(len(res))");
 		//rt.Run("res=get('http://google.com') print(res) #print(res)");
 		//rt.Run("aa={} aa['key']='value' dump_json(aa)");
-		//rt.Run("for i in range(9) print(i) end");
-		rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
+		rt.Run("for i in range(0,10) print(i) end");
+		rt.Run("for i in range(10) print(i) end");
+		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
 		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			    header=parse_headers(res) print(header) \
 				print('---------------------------------------\n') \

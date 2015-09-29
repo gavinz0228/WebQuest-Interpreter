@@ -20,10 +20,11 @@ Current Achievement:
 		rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
 		rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
 		rt.Run("a=[123,456,7890.02] print(a[0:3]) print(a[0:-1])");
-		 rt.Run("res=get_raw('http:google.com') print(len(res))");
+		rt.Run("res=get_raw('http:google.com') print(len(res))");
 		rt.Run("res=get('http:google.com') print(res) #print(res)");
 		rt.Run("aa={} aa['key']='value' dump_json(aa)");
-		rt.Run("for i in range(9) print(i) end");
+		rt.Run("for i in range(0,10) print(i) end");
+		rt.Run("for i in range(10) print(i) end");
 		rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
 		rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			    header=parse_headers(res) print(header) \

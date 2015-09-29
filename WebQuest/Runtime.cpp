@@ -424,7 +424,17 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			Evaluate(*it, state);
 			//string str = state->GetReturnObject()->ToString();
-			state->AddParam(state->GetReturnObject());
+			
+			//if returning a reference, so don't copy it
+			if (state->ReferencedObject!=NULL)
+				state->AddParam(state->GetReturnObject());
+			//it's returning a copy, so I can copy it it
+			else
+			{
+				WQObject* param = new WQObject;
+				param->GetAssigned(state->GetReturnObject());
+				state->AddParam(param);
+			}
 		}
 		state->ReturnNull();
 		//call the function 
