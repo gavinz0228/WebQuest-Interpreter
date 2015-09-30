@@ -21,11 +21,16 @@ WQFunction GlobalFunctions::Get(string* name)
 void func(WQState* state)
 {
 }
+static void WQMilli(WQState* state)
+{
+	long milli = time(0) * 1000;
+	return state->ReturnInteger(milli);
+}
 static void WQGetRaw(WQState* state)
 {
 	WebRequest request;
 	string url =state-> GetStringParam();
-	state->GetReturnObject()->SetStringValue( request.Get(url));
+	state->ReturnString( request.Get(url));
 }
 static void WQGet(WQState* state)
 {
@@ -34,7 +39,7 @@ static void WQGet(WQState* state)
 	string url = state->GetStringParam();
 	string result=request.Get(url);
 	response.ParseResponse(result);
-	state->GetReturnObject()->SetStringValue(response.ResponseBody);
+	state->ReturnString(response.ResponseBody);
 }
 static void WQParseHeader(WQState* state)
 {
@@ -71,7 +76,7 @@ static void WQAppend(WQState* state)
 	else
 	{
  		WQObject* ls = state->GetParam();
-		ls->AppendListValue(*state->GetParam());
+		ls->AppendList(state->GetParam());
 	}
 }
 void WQLen(WQState* state)
@@ -83,7 +88,7 @@ void WQLen(WQState* state)
 	}
 	else if (param->Type == DT_LIST)
 	{
-		state->ReturnInteger(param->GetListValue()->size());
+		state->ReturnInteger(param->GetList()->size());
 	}
 	else
 	{
@@ -92,8 +97,8 @@ void WQLen(WQState* state)
 }
 static void WQRange(WQState* state)
 {
-	WQObject ls;
-	ls.InitList();
+	WQObject* ls=new WQObject;
+	ls->InitList();
 	if (state->ParamSize == 1)
 	{
 		long long endindex=state->GetIntegerParam();
@@ -101,7 +106,7 @@ static void WQRange(WQState* state)
 		{
 			WQObject* obj = new WQObject;
 			obj->SetIntValue(i);
-			ls.AppendListValue(*obj);
+			ls->AppendList(obj);
 		}
 	}
 	else if (state->ParamSize == 2)
@@ -112,10 +117,10 @@ static void WQRange(WQState* state)
 		{
 			WQObject* obj = new WQObject;
 			obj->SetIntValue(i);
-			ls.AppendListValue(*obj);
+			ls->AppendList(obj);
 		}
 	}
-	state->GetReturnObject()->GetAssigned(&ls);
+	state->ReturnNewReference(ls);
 }
 static void WQDumpJson(WQState* state)
 {
@@ -125,6 +130,7 @@ static void WQDumpJson(WQState* state)
 	//obj->SetKeyValue("key", "val");
 	//obj->SetKeyValue("numkey", 123);
  	printf(obj->ToString().c_str());
+	state->ReturnString(obj->ToString());
 }
 void GlobalFunctions::LoadFunctions()
 {
@@ -133,6 +139,7 @@ void GlobalFunctions::LoadFunctions()
 	Add("len", WQLen);
 	Add("range", WQRange);
 	Add("dump_json", WQDumpJson);
+	Add("milli", WQMilli);
 	Add("get_raw", WQGetRaw);
 	Add("parse_headers",WQParseHeader);
 	Add("parse_body", WQParseBody);

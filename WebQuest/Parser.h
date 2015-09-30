@@ -28,7 +28,8 @@ enum ParserNodeType{ NT_ASSIGNMENT,
 	NT_ELEMENT,
 	NT_FOR,
 	NT_BREAK,
-	NT_SLICING};
+	NT_SLICING,
+	NT_BEGIN};
 enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -315,6 +316,14 @@ public:
 	ExpressionNode* IterableVariable;
 	CodeBlockNode* CodeBlock;
 	int GetType(){ return NT_FOR; }
+};
+class BeginNode :public NodeBase
+{
+public:
+	BeginNode(){ CodeBlock = new CodeBlockNode; }
+	~BeginNode(){ delete CodeBlock; }
+	CodeBlockNode* CodeBlock;
+	int GetType(){ return NT_BEGIN; }
 };
 
 /*

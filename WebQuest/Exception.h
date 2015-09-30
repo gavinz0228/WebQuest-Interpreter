@@ -15,7 +15,7 @@
 #define		SYNTAX_INVALID_FOR_TEMP_VARIABLE				"Invalid temporary variable of a for loop"
 #define		SYNTAX_NOT_IN_KEYWORD_IN_FOR					"Expecing a 'in' keyword in a for loop"
 #define		SYNTAX_INVALID_SYMBOL							"Invalid symbol"
-#define		SYNTAX_UNEXPECTING_SYMBOL						"Unexpected symbol"
+#define		SYNTAX_UNEXPECTED_SYMBOL						"Unexpected symbol"
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
 #define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"

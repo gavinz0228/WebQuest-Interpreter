@@ -1,12 +1,30 @@
-#include <list>
-#include "WQObject.h"
+
 using namespace std;
 #ifndef WQSTATE_H
 #define WQSTATE_H
+#include <list>
+#include "WQObject.h"
+#include "Environment.h"
+class Environment;
 class WQState
 {
 public:
-	WQState(){ ReferencedObject = NULL; BreakOccurred = false; }
+
+	WQState(){
+		ReferencedObject = NULL; 
+		BreakOccurred = false;
+		CurrentEnvironment = new Environment;
+	}
+	~WQState(){
+		Environment* current = CurrentEnvironment;
+		while (current != NULL)
+		{
+			//delete its parent environment until the parent is null
+			Environment* temp = current->Parent;
+			delete current;
+			current = temp;
+		}
+	}
 	WQObject* GetParam();
 	string GetStringParam();
 	long long GetIntegerParam();
@@ -17,18 +35,25 @@ public:
 	void ReturnString(string& str);
 	void ReturnFloat(long double);
 	void ReturnNull();
+	void ReturnBoolean(bool val);
 	void ReturnReference(WQObject*);
-	WQObject* GetReturnObject();
+	void ReturnNewReference(WQObject* ref);
+	WQObject* GetReturnedReference();
+	//WQObject* GetReturnObject();
 	bool BreakOccurred;
-	WQObject* ReferencedObject;
+
+	void EnterNewEnvironment();
+	void BackToParentEnvironment();
+
 	int ParamSize;
+	Environment* CurrentEnvironment;
 	//void SetReturnObject(WQObject& obj);
 	//WQObject* GetReturnObject();
 private:
 	
 	WQObject ReturnObject;
 	//void CleanReturnObject();
-	
+	WQObject* ReferencedObject;
 	list<WQObject*> CallingParams;
 };
 #endif

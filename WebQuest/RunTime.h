@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include "GlobalFunctions.h"
 #include "Parser.h"
 #include <stack>
 using namespace std;
@@ -7,19 +8,18 @@ using namespace std;
 class Runtime{
 public:
 	Runtime(){
-		environment = new Environment;
+		//environment = new Environment;
 	}
 	~Runtime(){
-		delete environment;
 	}
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	void Run(string& script);
-	Environment* environment;
+	void Calculate(WQObject* left, string* op, WQObject* right, WQState* state);
+	//Environment* environment;
 	long GetCurrentLineNumber(){ return CurrentLineNumber; }
 private:
-	void EnterNewEnvironment();
-	void BackToParentEnvironment();
+	GlobalFunctions Functions;
 	long CurrentLineNumber;
 
 };

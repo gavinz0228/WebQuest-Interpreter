@@ -18,6 +18,9 @@ public:
 	WQObject(DataType type);
 	string ToString() const;
 	string ToElementString() const;
+	
+	void SetReference(WQObject* obj);
+
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
 	void SetStringValue(string& val);
@@ -30,25 +33,24 @@ public:
 	//void AppendListValue(long double val);
 	//void AppendListValue(string &val);
 	//void AppendListvalue(bool val);
-	void AppendListValue(WQObject& obj);
+	void AppendList(WQObject* obj);
 	WQObject* GetListElement(long index);
 	WQObject* GetDictionaryElement(string& key);
-	void SetListElement(long index, WQObject& ele);
+	WQObject* SetListElement(long index, WQObject* ele);
 
-	void AppendKeyValue(string& key, string& value);
-	void AppendKeyValue(string& key, long long value);
-	void SetKeyValue(string key, WQObject& value);
+
+	WQObject* SetKeyValue(string key, WQObject* value);
 	void SetKeyValue(string key, string value);
 	void SetKeyValue(string key, long long value);
 
-	void GetAssigned(WQObject* obj);
+	void DeepCopy(WQObject* obj);
 	long long GetIntValue() const;
 	long double GetFloatValue() const;
 	bool GetBoolValue() const;
-	vector<WQObject*>* GetListValue() const;
-	map<string, WQObject*>* GetDictionaryValue() const;
-	void GetSlicingWithLeftIndexValue(long start, WQObject* targetlist);
-	void GetSlicingWithRightIndexValue(long end, WQObject* targetlist);
+	vector<WQObject*>* GetList() const;
+	map<string, WQObject*>* GetDictionary() const;
+	void GetSlicingWithLeftIndex(long start, WQObject* targetlist);
+	void GetSlicingWithRightIndex(long end, WQObject* targetlist);
 	void GetSlicing(long start, long end,WQObject* targetlist);
 
 	bool Assigned();
@@ -66,8 +68,9 @@ public:
 	WQObject& operator*=(const WQObject& right);
 	WQObject& operator/=(const WQObject& right);
 	WQObject& operator%=(const WQObject& right);
+	bool IsReference = false;
 private:
-	
+	WQObject* Reference;
 	void * Data;
 	bool assigned;
 	void ClearValue();

@@ -253,9 +253,23 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			tker->NextToken();
 			program->Statements->push_back(new BreakNode);
 		}
+		else if (tker->IsNextBeginKeyword())
+		{
+			tker->NextToken();
+			//skip begin
+			BeginNode* bgnode = new BeginNode;
+			ParseCodeBlock(tker, bgnode->CodeBlock);
+			if (!tker->IsNextEndBlock())
+			{
+				throw SYNTAX_EXPECTING_END;
+			}
+			tker->NextToken();
+			program->Statements->push_back(bgnode);
+			
+		}
 		else
 		{
-			throw SYNTAX_UNEXPECTING_SYMBOL;
+			throw SYNTAX_UNEXPECTED_SYMBOL;
 		}
 	}
 }
@@ -548,6 +562,7 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 			exp->ExpressionType = NT_VARIABLE;
 		}
 	}
+
 	else if (tker->LookAhead() == NULL)
 	{
 		return;

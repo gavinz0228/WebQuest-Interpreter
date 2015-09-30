@@ -44,10 +44,7 @@ void Environment::AddVariable(string& name, WQObject* obj)
 	string varname = name;
 	Variables.insert(pair<string, WQObject*>(varname, obj));
 }
-void Environment::SetVariable(WQObject* oldobj, WQObject* newobj)
-{
 
-}
 void Environment::SetVariable(string& name, WQObject* newobj)
 {
 	WQObject* targetobj=NULL;
@@ -68,23 +65,20 @@ void Environment::SetVariable(string& name, WQObject* newobj)
 	{
 		//the variable doesn't exist yet,
 		//create that variable
-		WQObject* newvar=CreateVariable(name);
-		//assign the value to the leftside
-		newvar->GetAssigned(newobj);
+		AddVariable(name, newobj);
 	}
 	else
 	{
-
-		WQObject* replacement = new WQObject;
-		replacement->GetAssigned(newobj);
-		GarbageVariables.insert(pair<string,WQObject*>(name, targetobj));
+		//GarbageVariables.insert(pair<string,WQObject*>(name, newobj));
+		//TemporaryVariables.push_back(targetobj);
 		tempevnt->Variables.erase(name);
-		tempevnt-> Variables.insert(pair<string, WQObject*>(name, replacement));
+		tempevnt-> Variables.insert(pair<string, WQObject*>(name, newobj));
 	}
 }
 WQObject* Environment::CreateVariable(string& name)
 {
 	WQObject* newvar = new WQObject;
+	TemporaryVariables.push_back(newvar);
 	AddVariable(name,newvar);
 	return newvar;
 }

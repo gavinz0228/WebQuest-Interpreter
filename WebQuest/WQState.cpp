@@ -1,17 +1,17 @@
 #include "WQState.h"
 
-WQObject* WQState::GetReturnObject()
+
+void WQState::EnterNewEnvironment()
 {
-	if (ReferencedObject == NULL)
-	{
-		return &ReturnObject;
-	}
-	else
-	{
-		WQObject* holder = ReferencedObject;
-		ReferencedObject = NULL;
-		return holder;
-	}
+	Environment* newevnt = new Environment;
+	newevnt->Parent = CurrentEnvironment;
+	CurrentEnvironment = newevnt;
+}
+void WQState::BackToParentEnvironment()
+{
+	Environment* parentevnt = CurrentEnvironment->Parent;
+	delete CurrentEnvironment;
+	CurrentEnvironment = parentevnt;
 }
 long long WQState::GetIntegerParam()
 {
@@ -36,21 +36,42 @@ void WQState::ReturnReference(WQObject* ref)
 {
 	ReferencedObject = ref;
 }
+void WQState::ReturnNewReference(WQObject* ref)
+{
+	ReferencedObject = ref;
+	CurrentEnvironment->TemporaryVariables.push_back(ref);
+}
+WQObject* WQState::GetReturnedReference()
+{
+	return ReferencedObject;
+}
 void WQState::ReturnNull()
 {
-	this->ReturnObject;
+	ReferencedObject = NULL;
+}
+void WQState::ReturnBoolean(bool val)
+{
+	WQObject* obj = new WQObject;
+	obj->SetBoolValue(val);
+	this->ReturnReference(obj);
 }
 void WQState::ReturnFloat(long double num)
 {
-	this->ReturnObject.SetFloatValue(num);
+	WQObject* obj = new WQObject;
+	obj->SetFloatValue(num);
+	this->ReturnNewReference(obj);
 }
 void WQState::ReturnInteger(long long num)
 {
-	this->ReturnObject.SetIntValue(num);
+	WQObject* obj = new WQObject;
+	obj->SetIntValue(num);
+	this->ReturnNewReference(obj);
 }
 void WQState::ReturnString(string &str)
 {
-	this->ReturnObject.SetStringValue(str);
+	WQObject* obj = new WQObject;
+	obj->SetStringValue(str);
+	this->ReturnNewReference(obj);
 }
 WQObject* WQState::GetParam()
 {
@@ -65,8 +86,6 @@ WQObject* WQState::GetParam()
 }
 void WQState::AddParam(WQObject* obj)
 {
-	//WQObject * param = new WQObject;
-	//param->GetAssigned(&obj);
 	CallingParams.push_back(obj);
 }
 void WQState::ClearParams()

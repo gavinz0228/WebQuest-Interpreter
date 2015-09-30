@@ -1,9 +1,9 @@
-#include <map>
-#include <list>
-#include "GlobalFunctions.h"
-#include "WQObject.h"
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
+#include <map>
+#include <list>
+#include "WQObject.h"
+
 class Environment
 {
 public:
@@ -11,33 +11,34 @@ public:
 	WQObject* SearchVariableInCurrentEvironment(string& name);
 	void AddVariable(string& name, WQObject* obj);
 	void SetVariable(string& name, WQObject* obj);
-	void SetVariable(WQObject* oldobj, WQObject* newobj);
 	WQObject* CreateVariable(string& name);
 
 	Environment()
 	{
 		Parent = NULL;
-		Functions = new GlobalFunctions;
+
 	}
 	~Environment()
 	{
-		delete Functions;
+
 		map<string, WQObject*>::iterator it = Variables.begin();
-		for (; it != Variables.end(); it++)
+		//for (; it != Variables.end(); it++)
+		//{
+		//	TemporaryVariables.push_back(it->second);
+		//}
+		TemporaryVariables.sort();
+		TemporaryVariables.unique();
+		list<WQObject*>::iterator tempit = TemporaryVariables.begin();
+		for (; tempit != TemporaryVariables.end(); tempit++)
 		{
-			delete it->second;
-		}
-		map<string, WQObject*>::iterator gcit = GarbageVariables.begin();
-		for (; gcit != GarbageVariables.end(); gcit++)
-		{
-			delete gcit->second;
+				delete *tempit;
 		}
 	}
 
 	Environment* Parent;
 	map<string, WQObject*> Variables;
-	map<string, WQObject*> GarbageVariables;
-	GlobalFunctions* Functions;
+
+	list<WQObject*> TemporaryVariables;
 };
 
 

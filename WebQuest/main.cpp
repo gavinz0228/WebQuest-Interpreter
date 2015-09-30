@@ -65,7 +65,7 @@ void Test()
 		//rt.Run("a=1 a+=1 print(a)");
 		//rt.Run("lsvar=[123,456,789] for a in lsvar print(a) end");
 		//rt.Run("lsvar=[123,456,789] for a in lsvar print(a+' ') break end");
-		//rt.Run("a=[123,456,7890.02] print(a[0:3]) print(a[0:-1])");
+		//rt.Run("a=[123] b=[] append(b,a)  append(a,'a') print(b)");
 		// rt.Run("res=get_raw('http://google.com') print(len(res))");
 		//rt.Run("res=get('http://www.google.com') print(res) #print(res)");
 		//rt.Run("aa={} aa['key']='value' dump_json(aa)");
@@ -74,8 +74,11 @@ void Test()
 		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
 		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			   			    header=parse_headers(res) print(header)  \
-											print('---------------------------------------\n') \
+											print('\n---------------------------------------\n') \
 														");
+		//rt.Run("print(milli())  str=' ' i=0 while i<=10000 str=str+'1' i+=1 end print(str) print('\n')  print(milli()) ");
+		//rt.Run("a=[1,2,3] for i in a print(i) end");
+		rt.Run("a=100 begin a=range(100000) print(a) end print(a)");
 	}
 	catch (char* msg){
 		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;

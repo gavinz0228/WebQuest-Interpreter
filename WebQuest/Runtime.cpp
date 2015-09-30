@@ -15,54 +15,62 @@ void Runtime::Run(string& script)
 	Evaluate((NodeBase*)parser.program, &state);
 
 }
-void Calculate(WQObject& left, string* op, WQObject& right)
+void Runtime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
+	WQObject* result = new WQObject;
 	if (*op == OP_PLUS)
 	{
-		left.GetAssigned(&(left + right));
+		result->DeepCopy(&(*left + *right));
 	}
 	else if (*op == OP_MINUS)
 	{
-		left.GetAssigned(&(left - right));
+		result->DeepCopy(&(*left - *right));
 	}
 	else if (*op == OP_DEVIDE)
 	{
-		left.GetAssigned(&(left / right));
+		result->DeepCopy(&(*left / *right));
 	}
 	else if (*op == OP_MULTIPLY)
 	{
-		left.GetAssigned(&(left * right));
+		result->DeepCopy(&(*left * *right));
 	}
 	else if (*op == OP_MODULO)
 	{
-		left.GetAssigned(&(left % right));
+		result->DeepCopy(&(*left % *right));
 	}
+	state->ReturnNewReference(result);
 }
-void PerformAssignment(WQObject* left, string *optr,WQObject* right)
+void PerformAssignment(WQObject* left, string *optr,WQObject* right,WQState* state)
 {
+	WQObject* result=new WQObject;
 	if (*optr == OP_ASSIGN)
 	{
-		left->GetAssigned(right);
+		state->ReturnNewReference(right);
 	}
 	else if (*optr == OP_PLUSASSIGN)
 	{
-		left->GetAssigned(&((*left) + (*right)));
+		result->DeepCopy(&((*left) + (*right)));
+		state->ReturnNewReference(result);
 	}
 	else if (*optr == OP_MINUSASSIGN)
 	{
-		left->GetAssigned(&((*left) - (*right)));
+		result->DeepCopy(&((*left) - (*right)));
+		state->ReturnNewReference(result);
 	}
 	else if (*optr == OP_MULTIPLYASSIGN)
 	{
-		left->GetAssigned(&((*left) * (*right)));
+		result->DeepCopy(&((*left) * (*right)));
+		state->ReturnNewReference(result);
 	}
 	else if (*optr == OP_DEVIDEASSIGN)
 	{
-		left->GetAssigned(&((*left) / (*right)));
+		result->DeepCopy(&((*left) / (*right)));
+		state->ReturnNewReference(result);
 	}
 	else if (*optr == OP_MODULOASSIGN)
 	{
-		left->GetAssigned(&((*left) % (*right)));
+		result->DeepCopy(&((*left) % (*right)));
+		state->ReturnNewReference(result);
 	}
 	else
 	{
@@ -71,7 +79,7 @@ void PerformAssignment(WQObject* left, string *optr,WQObject* right)
 }
 void Runtime::Evaluate(NodeBase* node,WQState* state)
 {
-	if (node->GetType() == NT_EXPRESSION)
+ 	if (node->GetType() == NT_EXPRESSION)
 	{
 		ExpressionNode* expnode = (ExpressionNode*)node;
 		Evaluate(expnode->Expression, state);
@@ -87,38 +95,41 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			VariableNode* var = assignment->LeftSideVariable;
 			Evaluate(var, state);
-			WQObject* left =state->GetReturnObject();
+			WQObject* left =state->GetReturnedReference();
 			Evaluate(assignment->RightSide, state);
-			PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
-			environment->SetVariable(*var->Value,left );
+			PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(),state);
+			state->CurrentEnvironment->SetVariable(*var->Value, state->GetReturnedReference());
 
 		}
 		else if (assignment->TargetType == AT_ELEMENT)
 		{
 			ElementNode* ele = assignment->LeftSideElement;
 			Evaluate(ele->Variable, state);
-			WQObject* lsobj = state->GetReturnObject();
+			WQObject* lsobj = state->GetReturnedReference();
 			if (lsobj->Type == DT_LIST)
 			{
 				Evaluate(ele->key, state);
 				//get the index
-				long index = state->GetReturnObject()->GetIntValue();
+				long index = state->GetReturnedReference()->GetIntValue();
 
 				WQObject *left = lsobj->GetListElement(index);
 				Evaluate(assignment->RightSide, state);
-				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
-				lsobj->SetListElement(index,*left);
+				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(), state);
+
+				WQObject* oldobj=lsobj->SetListElement(index,state->GetReturnedReference());
+				state->CurrentEnvironment->TemporaryVariables.push_back(oldobj);
 			}
 			else if (lsobj->Type == DT_DICTIONARY)
 			{
 
 				Evaluate(ele->key, state);
 				//get the index
-				string key = state->GetReturnObject()->ToString();
+				string key = state->GetReturnedReference()->ToString();
 
 				WQObject *left = lsobj->GetDictionaryElement(key);
 				Evaluate(assignment->RightSide, state);
-				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnObject());
+				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(),state);
+				lsobj->SetKeyValue(key, state->GetReturnedReference());
 				
 			}
 			//environment->GetVariable()
@@ -130,10 +141,10 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		VariableNode* varnode = (VariableNode*)node;
 		//
 		//printf(varnode->Value->c_str());
-		WQObject* obj=environment->GetVariable(*varnode->Value);
+		WQObject* obj=state->CurrentEnvironment->GetVariable(*varnode->Value);
 		if (obj == NULL)
 		{
-			state->ReturnReference(environment->CreateVariable(*(varnode->Value)));
+			state->ReturnReference(state->CurrentEnvironment->CreateVariable(*(varnode->Value)));
 		}
 		else
 		{
@@ -151,13 +162,13 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_STRING)
 	{
 		StringNode* strnode = (StringNode*)node;
-		state->GetReturnObject()->SetStringValue( *strnode->Value);
+		state->ReturnString( *strnode->Value);
 
 	}
 	else if (node->GetType() == NT_BOOLEAN)
 	{
 		BooleanNode * boolnode = (BooleanNode*)node;
-		state->GetReturnObject()->SetBoolValue(boolnode->Value);
+		state->ReturnBoolean(boolnode->Value);
 
 	}
 	else if (node->GetType() == NT_OPERATION)
@@ -169,13 +180,13 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		list<string*>::iterator opit = opnode->Operators->begin();
 		stack<string*> lowops;
 		stack<WQObject*> lowexps;
-		WQObject left, right;
+		WQObject* left =new WQObject;
 		if (opnode->Terms->size() - opnode->Operators->size() != 1)
 		{
 			throw SYNTAX_INVALID_EXPRESSION;
 		}
 		Evaluate(*expit, state);
-		left.GetAssigned(state->GetReturnObject());
+		left->DeepCopy(state->GetReturnedReference());
 		expit++;
 		WQObject* term;
 		string* op;
@@ -184,8 +195,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			op = *opit;
 			Evaluate( *expit,state);
 			//notice I new an object, needs to be delete later
-			term = new WQObject;
-			term->GetAssigned(state->GetReturnObject());
+			term = state->GetReturnedReference();
 			//if sees - or +, always push , means save it for later
 			if (*op == "-" || *op == "+" )
 			{
@@ -198,13 +208,16 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				if (lowexps.size() > 0)
 				{
 					//
-					WQObject* exp= lowexps.top();					
-					Calculate(*exp, op,*term);
+					WQObject* exp= lowexps.top();		
+					lowexps.pop();
+					Calculate(exp, op,term,state);
+					lowexps.push(state->GetReturnedReference());
 				}
 				else
 				{
 					//the most left one, which is not in the stack
-					Calculate(left, op, *term);
+					Calculate(left, op, term,state);
+					left = state->GetReturnedReference();
 				}
 			}
 			//Evaluate(term, state);
@@ -217,12 +230,12 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			WQObject* term= lowexps.top();
 			string* op = lowops.top();
-			Calculate(left, op, *term);
-			delete term;
+			Calculate(left, op, term,state);
+			left = state->GetReturnedReference();
 			lowexps.pop();
 			lowops.pop();
 		}
-		state->GetReturnObject()->GetAssigned(&left);
+		state->ReturnNewReference(left);
 
 	}
 	else if (node->GetType() == NT_IF)
@@ -234,15 +247,15 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		{
 			
 			Evaluate(it->first,state);
-			if (state->GetReturnObject()->Type != DT_BOOLEAN)
+			if (state->GetReturnedReference()->Type != DT_BOOLEAN)
 			{
 				throw RUNTIME_EXPECTING_BOOLEAN;
 			}
-			if (state->GetReturnObject()->GetBoolValue())
+			if (state->GetReturnedReference()->GetBoolValue())
 			{
-				EnterNewEnvironment();
+				state->EnterNewEnvironment();
 				Evaluate(it->second, state);
-				BackToParentEnvironment();
+				state->BackToParentEnvironment();
 			}
 			anyifexecuted = true;
 		}
@@ -253,15 +266,15 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			{
 
 				Evaluate(it->first, state);
-				if (state->GetReturnObject()->Type != DT_BOOLEAN)
+				if (state->GetReturnedReference()->Type != DT_BOOLEAN)
 				{
 					throw RUNTIME_EXPECTING_BOOLEAN;
 				}
-				if (state->GetReturnObject()->GetBoolValue())
+				if (state->GetReturnedReference()->GetBoolValue())
 				{
-					EnterNewEnvironment();
+					state->EnterNewEnvironment();
 					Evaluate(it->second, state);
-					BackToParentEnvironment();
+					state->BackToParentEnvironment();
 					break;
 				}
 
@@ -278,21 +291,29 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		while (true)
 		{
 			Evaluate(whilenode->Condition, state);
-			if (state->GetReturnObject()->Type != DT_BOOLEAN)
+			if (state->GetReturnedReference()->Type != DT_BOOLEAN)
 			{
 				throw RUNTIME_EXPECTING_BOOLEAN;
 			}
-			if (state->GetReturnObject()->GetBoolValue() == false)
+			if (state->GetReturnedReference()->GetBoolValue() == false)
 			{
 				break;
 			}
 			state->BreakOccurred = false;
-			EnterNewEnvironment();
+			state->EnterNewEnvironment();
 			Evaluate(whilenode->CodeBlock, state);
-			BackToParentEnvironment();
+			state->BackToParentEnvironment();
 			if (state->BreakOccurred)
 				break;
 		}
+	}
+	else if (node->GetType() == NT_BEGIN)
+	{
+		BeginNode* bgnode = (BeginNode*)node;
+		state->EnterNewEnvironment();
+		Evaluate(bgnode->CodeBlock, state);
+		state->BackToParentEnvironment();
+
 	}
 	else if (node->GetType() == NT_COMPARISON)
 	{
@@ -300,32 +321,31 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		ComparisonNode* comnode = (ComparisonNode*)node;
 		Evaluate(comnode->LeftSide, state);
 		
-		WQObject lhs;
-		lhs.GetAssigned(state->GetReturnObject());
+		WQObject* left=state->GetReturnedReference();
 
 		Evaluate(comnode->RightSide, state);
 		bool result=false;
 		if (*comnode->Operator == OP_EQUAL)
 		{
-			result = lhs == *state->GetReturnObject();
+			result = *left == *state->GetReturnedReference();
 		}
 		else if (*comnode->Operator == OP_GREATER)
 		{
-			result = lhs > *state->GetReturnObject();
+			result = *left > *state->GetReturnedReference();
 		}
 		else if (*comnode->Operator ==OP_LESS)
 		{
-			result = lhs < *state->GetReturnObject();
+			result = *left< *state->GetReturnedReference();
 		}
 		else if (*comnode->Operator ==OP_GREATEQUAL)
 		{
-			result = lhs >= *state->GetReturnObject();
+			result = *left >= *state->GetReturnedReference();
 		}
 		else if (*comnode->Operator == OP_LESSEQUAL)
 		{
-			result = lhs <= *state->GetReturnObject();
+			result = *left <= *state->GetReturnedReference();
 		}
-		state->GetReturnObject()->SetBoolValue(result);
+		state->ReturnBoolean(result);
 	}
 	else if (node->GetType() == NT_LOGIC)
 	{
@@ -341,7 +361,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		exp = *expit;
 		expit++;
 		Evaluate(exp, state);
-		left=(state->GetReturnObject()->GetBoolValue());
+		left = (state->GetReturnedReference()->GetBoolValue());
 		while (expit != lgnode->Expressions->end())
 		{
 			op = *opit;
@@ -353,22 +373,22 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			Evaluate(exp, state);
 			if (*op == OP_NOT)
 			{
-				lowexps.push(!state->GetReturnObject()->GetBoolValue());
+				lowexps.push(!state->GetReturnedReference()->GetBoolValue());
 			}
 			else if (*op == OP_AND)
 			{
 				//if there is something in the stack, deal with the stack first
 				if (lowexps.size() > 0)
 				{
-					lowexps.top() = lowexps.top()&&state->GetReturnObject()->GetBoolValue();
+					lowexps.top() = lowexps.top() && state->GetReturnedReference()->GetBoolValue();
 				}
 				else
-					left = left&&state->GetReturnObject()->GetBoolValue();
+					left = left&&state->GetReturnedReference()->GetBoolValue();
 			}
 			//if it's ||, it has lower priority than &&, so push it to the stack for later
 			else if (*op == OP_OR)
 			{
-				lowexps.push(state->GetReturnObject()->GetBoolValue());
+				lowexps.push(state->GetReturnedReference()->GetBoolValue());
 				lowops.push(*op);
 			}
 			opit++;
@@ -386,7 +406,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			lowops.pop();
 			lowexps.pop();
 		}
-		state->GetReturnObject()->SetBoolValue(left);
+		state->GetReturnedReference()->SetBoolValue(left);
 		/*
 		printf("Logic Node(Expressions:");
 		for (list<ExpressionNode*>::iterator expit = lgnode->Expressions->begin();
@@ -408,19 +428,19 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_FLOAT)
 	{
 		FloatNode* fltnode = (FloatNode*)node;
-		state->GetReturnObject()->SetFloatValue(fltnode->Value);
+		state->ReturnFloat(fltnode->Value);
 	}
 	else if (node->GetType() == NT_INTEGER)
 	{
 		IntegerNode* intnode = (IntegerNode*)node;
-		state->GetReturnObject()->SetIntValue(intnode->Value);
+		state->ReturnInteger(intnode->Value);
 	}
 	else if (node->GetType() == NT_FUNCTIONCALL)
 	{
 		FunctionCallNode* funcnode = (FunctionCallNode*)node;
 		CurrentLineNumber = funcnode->GetLineNumber();
 		//retrive the target function from the function library
-		WQFunction func = environment->Functions->Get(funcnode->FunctionName);
+		WQFunction func = Functions.Get(funcnode->FunctionName);
 		if (func == NULL)
 		{
 			throw string(RUNTIME_FUNCTION_NOT_DEFINED) + ": "+*funcnode->FunctionName;
@@ -431,18 +451,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		for (list<ExpressionNode*>::iterator it = funcnode->Parameters->begin(); it != funcnode->Parameters->end(); it++)
 		{
 			Evaluate(*it, state);
-			//string str = state->GetReturnObject()->ToString();
-			
-			//if returning a reference, so don't copy it
-			if (state->ReferencedObject!=NULL)
-				state->AddParam(state->GetReturnObject());
-			//it's returning a copy, so I can copy it it
-			else
-			{
-				WQObject* param = new WQObject;
-				param->GetAssigned(state->GetReturnObject());
-				state->AddParam(param);
-			}
+			state->AddParam(state->GetReturnedReference());
 		}
 		state->ReturnNull();
 		//call the function 
@@ -455,42 +464,39 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_CREATELIST)
 	{
 		CreateListNode* lsnode = (CreateListNode*)node;
-		WQObject result;
-		result.InitList();
+		WQObject* result=new WQObject;
+		result->InitList();
 		for (list<ExpressionNode*>::iterator it = lsnode->Parameters->begin();
 			it != lsnode->Parameters->end(); it++)
 		{
 			Evaluate(*it, state);
-			result.AppendListValue(*state->GetReturnObject());
+			result->AppendList(state->GetReturnedReference());
 		}
-		state->GetReturnObject()->GetAssigned(&result);
-
+		state->ReturnNewReference(result);
 	}
 	else if (node->GetType() == NT_CREATEDICT)
 	{
 		CreateDictionaryNode* dictnode = (CreateDictionaryNode*)node;
-		WQObject result;
-		result.InitDictionary();
-		state->GetReturnObject()->GetAssigned(&result);
+		WQObject* result=new WQObject;
+		result->InitDictionary();
+		state->ReturnNewReference(result);
 	}
 	else if (node->GetType() == NT_FOR)
 	{
 		ForNode* fornode = (ForNode*)node;
 		Evaluate(fornode->IterableVariable, state);
-		WQObject iterable;
-		iterable.GetAssigned(state->GetReturnObject());
+		WQObject* iterable=state->GetReturnedReference();
 
-		if (iterable.Type != DT_LIST)
+		if (iterable->Type != DT_LIST)
 			throw RUNTIME_ITERATE_NON_LIST_VARIABLE;
-		vector<WQObject*>* iterablelist = iterable.GetListValue();
+		vector<WQObject*>* iterablelist = iterable->GetList();
 		for (int i = 0; i < iterablelist->size(); i++)
 		{
-			EnterNewEnvironment();
-			WQObject tempvar;
-			tempvar.GetAssigned(iterablelist->at(i));
-			environment->CreateVariable(*fornode->TempVariable->Value)->GetAssigned( &tempvar);
+			
+			state->EnterNewEnvironment();
+			state->CurrentEnvironment->SetVariable(*fornode->TempVariable->Value, iterablelist->at(i));
 			Evaluate(fornode->CodeBlock, state);
-			BackToParentEnvironment();
+			state->BackToParentEnvironment();
 			if (state->BreakOccurred)
 			{
 				break;
@@ -504,32 +510,35 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		if (slicenode->HasStartIndex)
 		{
 			Evaluate(slicenode->StartIndex, state);
-			if (state->GetReturnObject()->Type != DT_INTEGER)
+			if (state->GetReturnedReference()->Type != DT_INTEGER)
 			{
 				throw RUNTIME_NON_INTERGER_INDEX;
 			}
-			long startIndex = (long)state->GetReturnObject()->GetIntValue();
+			long startIndex = (long)state->GetReturnedReference()->GetIntValue();
 			if (slicenode->HasEndIndex)
 			{
 				
 				Evaluate(slicenode->EndIndex, state);
-				if (state->GetReturnObject()->Type != DT_INTEGER)
+				if (state->GetReturnedReference()->Type != DT_INTEGER)
 				{
 					throw RUNTIME_NON_INTERGER_INDEX;
 				}
-				long endIndex = (long)state->GetReturnObject()->GetIntValue();
+				long endIndex = (long)state->GetReturnedReference()->GetIntValue();
 				//<variable>[<exp>:<exp>]
 				Evaluate(slicenode->Variable, state);
-				WQObject *lsvar = state->GetReturnObject();
-
-				lsvar->GetSlicing(startIndex,endIndex,state->GetReturnObject());
+				WQObject *lsvar = state->GetReturnedReference();
+				WQObject* result = new WQObject;
+				lsvar->GetSlicing(startIndex,endIndex,result);
+				state->ReturnNewReference(result);
 			}
 			else
 			{
 				//<variable>[<exp>:]
 				Evaluate(slicenode->Variable, state);
-				WQObject *lsvar = state->GetReturnObject();
-				lsvar->GetSlicingWithLeftIndexValue(startIndex,state->GetReturnObject());
+				WQObject *lsvar = state->GetReturnedReference();
+				WQObject* result = new WQObject;
+				lsvar->GetSlicingWithLeftIndex(startIndex,result);
+				state->ReturnNewReference(result);
 			}
 		}
 		//no start index
@@ -538,24 +547,24 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			if (slicenode->HasEndIndex)
 			{
 				Evaluate(slicenode->EndIndex, state);
-				if (state->GetReturnObject()->Type != DT_INTEGER)
+				if (state->GetReturnedReference()->Type != DT_INTEGER)
 				{
 					throw RUNTIME_NON_INTERGER_INDEX;
 				}
-				long endIndex = (long)state->GetReturnObject()->GetIntValue();
+				long endIndex = (long)state->GetReturnedReference()->GetIntValue();
 				//<variable>[:<exp>]
 				Evaluate(slicenode->Variable, state);
-				WQObject *lsvar = state->GetReturnObject();
-				lsvar->GetSlicingWithRightIndexValue(endIndex,state->GetReturnObject());
+				WQObject *lsvar = state->GetReturnedReference();
+				WQObject* result = new WQObject;
+				lsvar->GetSlicingWithRightIndex(endIndex,result);
+				state->ReturnNewReference(result);
 			}
 			else
 			{
 				//<variable>[:]
 				//just copy the list
 				Evaluate(slicenode->Variable, state);
-				WQObject cpyobj;
-				cpyobj.GetAssigned(state->GetReturnObject());
-				state->GetReturnObject()->GetAssigned(&cpyobj);
+
 			}
 		}
 
@@ -581,16 +590,5 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	}
 }
 
-void Runtime::EnterNewEnvironment()
-{
-	Environment* newevnt = new Environment;
-	newevnt->Parent = environment;
-	environment = newevnt;
-}
-void Runtime::BackToParentEnvironment()
-{
-	Environment* parentevnt = environment->Parent;
-	delete environment;
-	environment = parentevnt;
-}
+
 

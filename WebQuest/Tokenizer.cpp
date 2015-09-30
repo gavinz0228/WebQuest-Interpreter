@@ -215,6 +215,10 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, len, TK_IN, lineno);
 			}
+			else if (len == strlen(KW_BEGIN) && strncmp(start, KW_BEGIN, len) == 0)
+			{
+				tk = new Token(start, len, TK_BEGIN, lineno);
+			}
 			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
 			{
 				tk = new Token(start, len, TK_BREAK, lineno);
@@ -571,4 +575,9 @@ bool Tokenizer::IsNextBreakKeyword()
 {
 	Token* next = LookAhead();
 	return next != NULL&&next->Type == TK_BREAK;
+}
+bool Tokenizer::IsNextBeginKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_BEGIN;
 }

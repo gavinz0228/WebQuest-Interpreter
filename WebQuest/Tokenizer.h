@@ -22,7 +22,8 @@ enum TokenType :char{
 	TK_END = 'Z',
 	TK_FOR = 'R',
 	TK_IN = 'N',
-	TK_BREAK = 'K'
+	TK_BREAK = 'K',
+	TK_BEGIN = 'G'
 	//,
 	//TK_CREATELIST,
 	//TK_CREATEDICT
@@ -87,6 +88,7 @@ public:
 	bool IsNextEndKeyword();
 	bool IsNextEndBlock();
 	bool IsNextWhileKeyword();
+	bool IsNextBeginKeyword();
 	//+=,-=,*= etc..
 	bool IsNextAssignment();
 	bool IsNextForKeyword();
@@ -144,7 +146,7 @@ private:
 #define				KW_FOR						"for"
 #define				KW_IN						"in"
 #define				KW_BREAK					"break"
-
+#define				KW_BEGIN					"begin"
 
 
 #endif

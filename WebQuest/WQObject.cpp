@@ -11,14 +11,22 @@ WQObject::~WQObject()
 }
 long long WQObject::GetIntValue() const
 {
+	if (IsReference)
+		return Reference->GetIntValue();
 	return *(long long *)Data;
+
 }
 long double WQObject::GetFloatValue() const
 {
+	if (IsReference)
+		return Reference->GetFloatValue();
 	return *(long double *)Data;
+
 }
 bool WQObject::GetBoolValue() const
 {
+	if (IsReference)
+		return Reference->GetBoolValue();
 	if (Type == DT_BOOLEAN)
 		return *(bool*)Data;
 	else if (Type == DT_NULL)
@@ -39,7 +47,7 @@ bool WQObject::GetBoolValue() const
 	}
 	else if (Type == DT_LIST)
 	{
-		if (GetListValue()->size()==0)
+		if (GetList()->size()==0)
 			return false;
 		else
 			return true;
@@ -50,22 +58,32 @@ bool WQObject::GetBoolValue() const
 	}
 
 }
-vector<WQObject*>* WQObject::GetListValue() const
+vector<WQObject*>* WQObject::GetList() const
 {
+	if (IsReference)
+		return Reference->GetList();
 	return (vector<WQObject*>*)Data;
 }
-map<string,WQObject*>* WQObject::GetDictionaryValue() const
+map<string,WQObject*>* WQObject::GetDictionary() const
 {
+	if (IsReference)
+		return Reference->GetDictionary();
 	return (map<string, WQObject*>*)Data;
 }
 void WQObject::ClearValue()
 {
+	if (IsReference)
+	{
+		Reference = NULL;
+		IsReference = false;
+		return;
+	}
 	if (Data != NULL&&Type!=DT_NULL)
 	{
 		if (Type == DT_LIST)
 		{
 			//delete every element of the list
-			vector<WQObject*>* ls = GetListValue();
+			vector<WQObject*>* ls = GetList();
 			for (int i = 0; i < ls->size(); i++)
 				delete ls->at(i);
 		}
@@ -81,6 +99,8 @@ bool WQObject::Assigned()
 }
 void WQObject::SetFloatValue(long double value)
 {
+	if (IsReference)
+		return Reference->SetFloatValue(value);
 	ClearValue();
 	Type = DT_FLOAT;
 	Data = new long double;
@@ -89,6 +109,8 @@ void WQObject::SetFloatValue(long double value)
 }
 void WQObject::SetIntValue(long long value)
 {
+	if (IsReference)
+		return Reference->SetIntValue(value);
 	ClearValue();
 	Type = DT_INTEGER;
 	Data = new long long;
@@ -97,6 +119,8 @@ void WQObject::SetIntValue(long long value)
 }
 void WQObject::SetStringValue(string& value)
 {
+	if (IsReference)
+		return Reference->SetStringValue(value);
 	ClearValue();
 	Type = DT_STRING;
 	Data = new string(value);
@@ -105,6 +129,8 @@ void WQObject::SetStringValue(string& value)
 }
 void WQObject::InitList()
 {
+	if (IsReference)
+		return Reference->InitList();
 	ClearValue();
 	Type = DT_LIST;
 	Data = new vector < WQObject* > ;
@@ -112,27 +138,44 @@ void WQObject::InitList()
 }
 void WQObject::InitDictionary()
 {
+	if (IsReference)
+		return Reference->InitDictionary();
 	ClearValue();
 	Type = DT_DICTIONARY;
 	Data = new map <string,WQObject* >;
 	assigned = true;
 }
-void WQObject:: SetKeyValue(string key, WQObject& value)
+WQObject* WQObject:: SetKeyValue(string key, WQObject* value)
 {
+	if (IsReference)
+		return Reference->SetKeyValue(key,value);
+	WQObject* oldobj = NULL;
 	if (Type == DT_DICTIONARY)
 	{
-		map<string, WQObject*>* dict = GetDictionaryValue();
-		WQObject* newvalue = new WQObject;
-		newvalue->GetAssigned(&value);
-		dict->insert(pair<string, WQObject*>(key, newvalue));
+		map<string, WQObject*>* dict = GetDictionary();
+		WQObject* ref = new WQObject;
+		ref->SetReference(value);
+		if ((*dict)[key] == NULL)
+		{
+			(*dict)[key] = ref;
+		}
+		else
+		{
+			//change the value
+			(*dict)[key] = ref;
+			oldobj = (*dict)[key];
+		}
 	}
 	else
 		throw RUNTIME_NON_DICT_APPENDING;
+	return oldobj;
 }
 void WQObject::SetKeyValue(string key, long long value){
+	if (IsReference)
+		return Reference->SetKeyValue(key,value);
 	if (Type == DT_DICTIONARY)
 	{
-		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>* dict = GetDictionary();
 		WQObject* newvalue = new WQObject;
 		newvalue->SetIntValue(value);
 		dict->insert(pair<string, WQObject*>(key, newvalue));
@@ -142,9 +185,11 @@ void WQObject::SetKeyValue(string key, long long value){
 }
 void WQObject::SetKeyValue(string key, string value)
 {
+	if (IsReference)
+		return Reference->SetKeyValue(key, value);
 	if (Type == DT_DICTIONARY)
 	{
-		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>* dict = GetDictionary();
 		WQObject* newvalue = new WQObject;
 		newvalue->SetStringValue(value);
 		//dict->insert(pair<string, WQObject*>(key, newvalue));
@@ -165,14 +210,16 @@ void WQObject::SetKeyValue(string key, string value)
 //}
 
 
-void WQObject::AppendListValue(WQObject& obj)
+void WQObject::AppendList(WQObject* obj)
 {
+	if (IsReference)
+		return Reference->AppendList(obj);
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
-		WQObject* newobj = new WQObject;
-		newobj->GetAssigned(&obj);
-		ls->push_back(newobj);
+		WQObject* ref = new WQObject;
+		ref->SetReference(obj);
+		ls->push_back(ref);
 	}
 	else
 	{
@@ -181,6 +228,8 @@ void WQObject::AppendListValue(WQObject& obj)
 }
 WQObject* WQObject::GetListElement(long index)
 {
+	if (IsReference)
+		return Reference->GetListElement(index);
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
@@ -199,9 +248,11 @@ WQObject* WQObject::GetListElement(long index)
 }
 WQObject* WQObject::GetDictionaryElement(string& key)
 {
+	if (IsReference)
+		return Reference->GetDictionaryElement(key);
 	if (Type == DT_DICTIONARY)
 	{
-		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>* dict = GetDictionary();
 		map<string, WQObject*>::iterator it = dict->find(key);
 		{
 			if (it != dict->end())
@@ -211,7 +262,6 @@ WQObject* WQObject::GetDictionaryElement(string& key)
 			else
 			{
 				WQObject* obj = new WQObject;
-				obj->InitDictionary();
 				(*dict)[key] = obj;
 				return obj;
 			}
@@ -220,17 +270,19 @@ WQObject* WQObject::GetDictionaryElement(string& key)
 	else
 		throw RUNTIME_NON_DICT_VALUE_ASSIGNMENT;
 }
-void WQObject::SetListElement(long index, WQObject& ele)
+WQObject* WQObject::SetListElement(long index, WQObject* ele)
 {
+	if (IsReference)
+		return Reference->SetListElement(index,ele);
+	WQObject* oldobj=NULL;
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
 		if (index < ls->size() && index >= 0)
 		{
-			delete ls->at(index);
-			WQObject* newObj = new WQObject;
-			newObj->GetAssigned(&ele);
-			(*ls)[index] = newObj;
+			oldobj= ls->at(index);
+
+			(*ls)[index] = ele;
 		}
 		else
 			throw RUNTIME_INDEX_OUT_OF_BOUND;
@@ -239,9 +291,12 @@ void WQObject::SetListElement(long index, WQObject& ele)
 	{
 		throw RUNTIME_NON_LIST_INDEXING;
 	}
+	return oldobj;
 }
 void WQObject::SetBoolValue(bool val)
 {
+	if (IsReference)
+		return Reference->SetBoolValue(val);
 	ClearValue();
 	Type = DT_BOOLEAN;
 	Data = new bool;
@@ -251,12 +306,20 @@ void WQObject::SetBoolValue(bool val)
 }
 void WQObject:: SetNull()
 {
+	if (IsReference){
+		Reference->SetNull();
+		return;
+	}
 	ClearValue();
 	Type = DT_NULL;
 }
-void WQObject::GetAssigned(WQObject* obj)
+void WQObject::DeepCopy(WQObject* obj)
 {
-
+	if (IsReference)
+	{
+		Reference->DeepCopy(obj);
+		return;
+	}
 	if (obj->Type == DT_INTEGER)
 	{
 		SetIntValue(obj->GetIntValue());
@@ -277,12 +340,12 @@ void WQObject::GetAssigned(WQObject* obj)
 	{
 		ClearValue();
 		InitList();
-		vector < WQObject* >* newlist = GetListValue();
-		vector < WQObject* >* income = obj->GetListValue();
+		vector < WQObject* >* newlist = GetList();
+		vector < WQObject* >* income = obj->GetList();
 		for (int i = 0; i < income->size(); i++)
 		{
 			WQObject* newobj = new WQObject;
-			newobj->GetAssigned(income->at(i));
+			newobj->DeepCopy(income->at(i));
 			newlist->push_back(newobj);
 		}
 	}
@@ -290,13 +353,13 @@ void WQObject::GetAssigned(WQObject* obj)
 	{
 		ClearValue();
 		InitDictionary();
-		map<string, WQObject*>* newdict = GetDictionaryValue();
-		map<string, WQObject*>* olddict = obj->GetDictionaryValue();
+		map<string, WQObject*>* newdict = GetDictionary();
+		map<string, WQObject*>* olddict = obj->GetDictionary();
 		map<string, WQObject*>::iterator it = olddict->begin();
 		for (; it != olddict->end(); it++)
 		{
 			WQObject* obj=new WQObject;
-			obj->GetAssigned(it->second);
+			obj->DeepCopy(it->second);
 			newdict->insert(pair<string, WQObject*>(it->first, obj));
 		}
 	}
@@ -307,6 +370,8 @@ void WQObject::GetAssigned(WQObject* obj)
 }
 bool WQObject::IsNumeric() const
 {
+	if (IsReference)
+		return Reference->IsNumeric();
 	if (Type == DT_FLOAT || Type == DT_INTEGER)
 		return true;
 	else
@@ -314,6 +379,8 @@ bool WQObject::IsNumeric() const
 }
 long long WQObject::ToInteger() const
 {
+	if (IsReference)
+		return Reference->ToInteger();
 	if (IsNumeric())
 	{
 		if (Type == DT_INTEGER)
@@ -332,6 +399,8 @@ long long WQObject::ToInteger() const
 
 long double WQObject::ToFloat() const
 {
+	if (IsReference)
+		return Reference->ToFloat();
 	if (IsNumeric())
 	{
 		if (Type == DT_FLOAT)
@@ -349,6 +418,8 @@ long double WQObject::ToFloat() const
 
 string WQObject::ToElementString() const
 {
+	if (IsReference)
+		return Reference->ToElementString();
 	if (Type == DT_STRING)
 	{
 		return "\"" + *((string*)Data) + "\"";
@@ -361,6 +432,8 @@ string WQObject::ToElementString() const
 
 string WQObject::ToString() const
 {
+	if (IsReference)
+		return Reference->ToString();
 	if (Type == DT_STRING)
 	{
 		return *((string*)Data);
@@ -387,7 +460,7 @@ string WQObject::ToString() const
 	{
 		string output;
 		output = "[";
-		vector<WQObject*>* ls = GetListValue();
+		vector<WQObject*>* ls = GetList();
 		for (int i = 0; i < ls->size(); i++)
 		{
 			output += ls->at(i)->ToElementString();
@@ -400,7 +473,7 @@ string WQObject::ToString() const
 	else if (Type == DT_DICTIONARY)
 	{
 		string output="{";
-		map<string, WQObject*>* dict = GetDictionaryValue();
+		map<string, WQObject*>* dict = GetDictionary();
 		map<string, WQObject*>::iterator it = dict->begin();
 		for (; it != dict->end(); it++)
 		{
@@ -419,6 +492,8 @@ string WQObject::ToString() const
 
 bool WQObject::operator < (const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator<(right);
 	//check if they are both numeric
 	if (IsNumeric() && right.IsNumeric())
 	{
@@ -434,6 +509,8 @@ bool WQObject::operator < (const WQObject& right)
 }
 bool WQObject::operator > (const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator>(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -448,6 +525,8 @@ bool WQObject::operator > (const WQObject& right)
 }
 bool WQObject::operator <= (const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator<=(right);
 
 	if (IsNumeric() && right.IsNumeric())
 	{
@@ -464,6 +543,8 @@ bool WQObject::operator <= (const WQObject& right)
 bool WQObject::operator >= (const WQObject& right)
 {
 
+	if (IsReference)
+		return Reference->operator>=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -478,7 +559,8 @@ bool WQObject::operator >= (const WQObject& right)
 }
 bool WQObject::operator == (const WQObject& right)
 {
-
+	if (IsReference)
+		return Reference->operator==(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -503,6 +585,8 @@ bool WQObject::operator == (const WQObject& right)
 }
 WQObject& WQObject::operator+=(const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator+=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -534,6 +618,8 @@ WQObject& WQObject::operator+=(const WQObject& right)
 }
 WQObject& WQObject::operator-=( const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator-=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -552,6 +638,8 @@ WQObject& WQObject::operator-=( const WQObject& right)
 }
 WQObject& WQObject::operator*=(const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator*=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -570,6 +658,8 @@ WQObject& WQObject::operator*=(const WQObject& right)
 }
 WQObject& WQObject::operator/=(const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator/=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -588,6 +678,8 @@ WQObject& WQObject::operator/=(const WQObject& right)
 }
 WQObject& WQObject::operator%=(const WQObject& right)
 {
+	if (IsReference)
+		return Reference->operator%=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -607,6 +699,7 @@ WQObject& WQObject::operator%=(const WQObject& right)
 
 WQObject& operator+(WQObject& left, const WQObject& right)
 {
+
 	left += right;
 	return left;
 }
@@ -630,13 +723,18 @@ WQObject& operator%(WQObject& left, const WQObject& right)
 	left %= right;
 	return left;
 }
-void WQObject::GetSlicingWithLeftIndexValue(long start, WQObject* targetlist)
+void WQObject::GetSlicingWithLeftIndex(long start, WQObject* targetlist)
 {
+	if (IsReference)
+	{
+		Reference->GetSlicingWithLeftIndex(start, targetlist);
+		return;
+	}
 	if (Type == DT_LIST)
 	{
 
 		targetlist->InitList();
-		vector<WQObject*>* original = GetListValue();
+		vector<WQObject*>* original = GetList();
 		long startindex;
 		//if it's 0, start from the begingning
 		if (start>= 0)
@@ -648,7 +746,7 @@ void WQObject::GetSlicingWithLeftIndexValue(long start, WQObject* targetlist)
 		//copy values to new list
 		for (int i = startindex; i <original->size(); i++)
 		{
-			targetlist->AppendListValue(*original->at(i));
+			targetlist->AppendList(original->at(i));
 		}
 	}
 	else if (Type == DT_STRING)
@@ -672,13 +770,18 @@ void WQObject::GetSlicingWithLeftIndexValue(long start, WQObject* targetlist)
 	}
 	
 }
-void WQObject::GetSlicingWithRightIndexValue(long end, WQObject* targetlist)
+void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 {
+	if (IsReference)
+	{
+		Reference->GetSlicingWithRightIndex(end, targetlist);
+		return;
+	}
 	if (Type == DT_LIST)
 	{
 
 		targetlist->InitList();
-		vector<WQObject*>* original = GetListValue();
+		vector<WQObject*>* original = GetList();
 		long endindex;
 		// if it's greater than 0 ,normal index
 		//if it's 0, don't need slicing
@@ -689,7 +792,7 @@ void WQObject::GetSlicingWithRightIndexValue(long end, WQObject* targetlist)
 		//copy values to new list
 		for (int i = 0; i < endindex&&i<original->size(); i++)
 		{
-			targetlist->AppendListValue(*original->at(i));
+			targetlist->AppendList(original->at(i));
 		}
 		// otherwise ,return the empty list
 	}
@@ -713,13 +816,23 @@ void WQObject::GetSlicingWithRightIndexValue(long end, WQObject* targetlist)
 		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
 	}
 }
+void WQObject::SetReference(WQObject* obj)
+{
+	Reference = obj;
+	IsReference = true;
+}
 void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 {
+	if (IsReference)
+	{
+		Reference->GetSlicing(start,end, targetlist);
+		return;
+	}
 	if (Type == DT_LIST)
 	{
 
 		targetlist->InitList();
-		vector<WQObject*>* original = GetListValue();
+		vector<WQObject*>* original = GetList();
 		long endindex;
 		long startindex;
 		//make sure the end index is good
@@ -742,7 +855,7 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 		//copy values to new list
 		for (int i = startindex; i < endindex; i++)
 		{
-			targetlist->AppendListValue(*original->at(i));
+			targetlist->AppendList(original->at(i));
 		}
 
 	}
