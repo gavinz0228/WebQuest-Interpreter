@@ -104,7 +104,7 @@ static void WQRange(WQState* state)
 		long long endindex=state->GetIntegerParam();
 		for (long long i = 0; i < endindex;i++)
 		{
-			WQObject* obj = new WQObject;
+			WQObject* obj = state->CreateObject();
 			obj->SetIntValue(i);
 			ls->AppendList(obj);
 		}
@@ -115,7 +115,7 @@ static void WQRange(WQState* state)
 		long long endindex = state->GetIntegerParam();
 		for (long long i = startindex; i < endindex; i++)
 		{
-			WQObject* obj = new WQObject;
+			WQObject* obj = WQObject::Create();
 			obj->SetIntValue(i);
 			ls->AppendList(obj);
 		}

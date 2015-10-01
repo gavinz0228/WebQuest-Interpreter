@@ -83,7 +83,7 @@ void Environment::SetVariable(string& name, WQObject* newobj)
 }
 WQObject* Environment::CreateVariable(string& name)
 {
-	WQObject* newvar = new WQObject;
+	WQObject* newvar = WQObject::Create();
 	TemporaryVariables.push_back(newvar);
 	AddVariable(name,newvar);
 	return newvar;

@@ -98,13 +98,13 @@ void WQState::ClearParams()
 }
 WQObject* WQState::CreateObject()
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = WQObject::Create();
 	CurrentEnvironment->TemporaryVariables.push_back(obj);
 	return obj;
 }
 WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = WQObject::Create();
 	obj->SetReference(targetobj);
 	CurrentEnvironment->TemporaryVariables.push_back(obj);
 	return obj;

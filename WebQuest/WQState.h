@@ -9,7 +9,6 @@ class Environment;
 class WQState
 {
 public:
-
 	WQState(){
 		ReferencedObject = NULL; 
 		BreakOccurred = false;
@@ -53,7 +52,6 @@ public:
 	//WQObject* GetReturnObject();
 private:
 	
-	WQObject ReturnObject;
 	//void CleanReturnObject();
 	WQObject* ReferencedObject;
 	list<WQObject*> CallingParams;

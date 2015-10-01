@@ -441,17 +441,17 @@ string WQObject::ToString() const
 	}
 	else if (Type == DT_LIST)
 	{
-		string output;
-		output = "[";
+		stringstream ss;
+		ss<< "[";
 		vector<WQObject*>* ls = GetList();
 		for (int i = 0; i < ls->size(); i++)
 		{
-			output += ls->at(i)->ToElementString();
+			ss<< ls->at(i)->ToElementString();
 			if (i != ls->size() - 1)
-				output += ",";
+				ss << ",";
 		}
-		output += "]";
-		return output;
+		ss << "]";
+		return ss.str();
 	}
 	else if (Type == DT_DICTIONARY)
 	{

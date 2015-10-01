@@ -7,13 +7,13 @@
 using namespace std;
 #ifndef WQOBJECT_H
 #define WQOBJECT_H
+
 enum DataType{ DT_FUNCTION, DT_INTEGER, DT_FLOAT, DT_STRING, DT_LIST, DT_DICTIONARY ,DT_BOOLEAN,DT_NULL};
 class WQObject
 {
-
 public:
 
-	WQObject();
+	static WQObject* Create(){ return new WQObject; }
 	~WQObject();
 	WQObject(DataType type);
 	string ToString() const;
@@ -71,6 +71,7 @@ public:
 	bool IsReference = false;
 	int ReferenceCounter = 0;
 private:
+	WQObject();
 	WQObject* Reference;
 	void * Data;
 	bool assigned;

@@ -87,8 +87,8 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_ASSIGNMENT)
 	{
 		AssignmentNode* assignment = (AssignmentNode*)node; 
-		//Evaluate the right side
-		Evaluate((NodeBase*)assignment->RightSide, state);
+		
+
 		CurrentLineNumber = assignment->GetLineNumber();
 		
 		if (assignment->TargetType == AT_VARIABLE)
@@ -96,6 +96,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			VariableNode* var = assignment->LeftSideVariable;
 			Evaluate(var, state);
 			WQObject* left =state->GetReturnedReference();
+			//Evaluate the right side
 			Evaluate(assignment->RightSide, state);
 			PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(),state);
 			state->CurrentEnvironment->SetVariable(*var->Value, state->GetReturnedReference());
