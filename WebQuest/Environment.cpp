@@ -66,13 +66,19 @@ void Environment::SetVariable(string& name, WQObject* newobj)
 		//the variable doesn't exist yet,
 		//create that variable
 		AddVariable(name, newobj);
+		//the new object is being refrenced, so increment the counter
+		newobj->ReferenceCounter++;
 	}
 	else
 	{
 		//GarbageVariables.insert(pair<string,WQObject*>(name, newobj));
 		//TemporaryVariables.push_back(targetobj);
 		tempevnt->Variables.erase(name);
+		//object is not refrenced by the variable, so decrement the counter
+		targetobj->ReferenceCounter--;
 		tempevnt-> Variables.insert(pair<string, WQObject*>(name, newobj));
+		//increment the counter of the new obj
+		newobj->ReferenceCounter++;
 	}
 }
 WQObject* Environment::CreateVariable(string& name)

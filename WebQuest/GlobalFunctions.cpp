@@ -97,7 +97,7 @@ void WQLen(WQState* state)
 }
 static void WQRange(WQState* state)
 {
-	WQObject* ls=new WQObject;
+	WQObject* ls = state->CreateObject();
 	ls->InitList();
 	if (state->ParamSize == 1)
 	{
@@ -120,7 +120,7 @@ static void WQRange(WQState* state)
 			ls->AppendList(obj);
 		}
 	}
-	state->ReturnNewReference(ls);
+	state->ReturnReference(ls);
 }
 static void WQDumpJson(WQState* state)
 {
@@ -132,6 +132,13 @@ static void WQDumpJson(WQState* state)
  	printf(obj->ToString().c_str());
 	state->ReturnString(obj->ToString());
 }
+static void WQDeepCopy(WQState* state)
+{
+	auto obj = state->GetParam();
+	WQObject* newobj = state->CreateObject();
+	newobj->DeepCopy(obj);
+	state->ReturnReference(newobj);
+}
 void GlobalFunctions::LoadFunctions()
 {
 	Add("print", WQPrint);
@@ -139,6 +146,7 @@ void GlobalFunctions::LoadFunctions()
 	Add("len", WQLen);
 	Add("range", WQRange);
 	Add("dump_json", WQDumpJson);
+	Add("deep_copy", WQDeepCopy);
 	Add("milli", WQMilli);
 	Add("get_raw", WQGetRaw);
 	Add("parse_headers",WQParseHeader);

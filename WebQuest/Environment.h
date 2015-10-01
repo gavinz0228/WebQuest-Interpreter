@@ -22,16 +22,29 @@ public:
 	{
 
 		map<string, WQObject*>::iterator it = Variables.begin();
-		//for (; it != Variables.end(); it++)
-		//{
-		//	TemporaryVariables.push_back(it->second);
-		//}
+		for (; it != Variables.end(); it++)
+		{
+			//decrement reference counter
+			it->second->ReferenceCounter--;
+		}
 		TemporaryVariables.sort();
 		TemporaryVariables.unique();
 		list<WQObject*>::iterator tempit = TemporaryVariables.begin();
 		for (; tempit != TemporaryVariables.end(); tempit++)
 		{
+			if ((*tempit)->ReferenceCounter==0)
 				delete *tempit;
+			else
+			{
+				//something else is referencing this object ,don't delete it but bring it to the parent level
+				if (this->Parent != NULL)
+				{
+					this->Parent->TemporaryVariables.push_back(*tempit);
+				}
+				else
+					//it's already the top level of envrionment,means the end of the program, just delete it anyways
+					delete *tempit;
+			}
 		}
 	}
 

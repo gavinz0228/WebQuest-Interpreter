@@ -17,7 +17,7 @@ void Runtime::Run(string& script)
 }
 void Runtime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
-	WQObject* result = new WQObject;
+	WQObject* result = state->CreateObject();
 	if (*op == OP_PLUS)
 	{
 		result->DeepCopy(&(*left + *right));
@@ -38,39 +38,39 @@ void Runtime::Calculate(WQObject* left, string* op, WQObject* right,WQState* sta
 	{
 		result->DeepCopy(&(*left % *right));
 	}
-	state->ReturnNewReference(result);
+	state->ReturnReference(result);
 }
 void PerformAssignment(WQObject* left, string *optr,WQObject* right,WQState* state)
 {
-	WQObject* result=new WQObject;
+	WQObject* result = state->CreateObject();
 	if (*optr == OP_ASSIGN)
 	{
-		state->ReturnNewReference(right);
+		state->ReturnReference(right);
 	}
 	else if (*optr == OP_PLUSASSIGN)
 	{
 		result->DeepCopy(&((*left) + (*right)));
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (*optr == OP_MINUSASSIGN)
 	{
 		result->DeepCopy(&((*left) - (*right)));
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (*optr == OP_MULTIPLYASSIGN)
 	{
 		result->DeepCopy(&((*left) * (*right)));
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (*optr == OP_DEVIDEASSIGN)
 	{
 		result->DeepCopy(&((*left) / (*right)));
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (*optr == OP_MODULOASSIGN)
 	{
 		result->DeepCopy(&((*left) % (*right)));
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else
 	{
@@ -116,8 +116,9 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				Evaluate(assignment->RightSide, state);
 				PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(), state);
 
-				WQObject* oldobj=lsobj->SetListElement(index,state->GetReturnedReference());
-				state->CurrentEnvironment->TemporaryVariables.push_back(oldobj);
+				lsobj->SetListElement(index, state->GetReturnedReference());
+				//WQObject* oldobj=lsobj->SetListElement(index,state->GetReturnedReference());
+				//state->CurrentEnvironment->TemporaryVariables.push_back(oldobj);
 			}
 			else if (lsobj->Type == DT_DICTIONARY)
 			{
@@ -180,7 +181,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		list<string*>::iterator opit = opnode->Operators->begin();
 		stack<string*> lowops;
 		stack<WQObject*> lowexps;
-		WQObject* left =new WQObject;
+		WQObject* left = state->CreateObject();
 		if (opnode->Terms->size() - opnode->Operators->size() != 1)
 		{
 			throw SYNTAX_INVALID_EXPRESSION;
@@ -235,7 +236,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			lowexps.pop();
 			lowops.pop();
 		}
-		state->ReturnNewReference(left);
+		state->ReturnReference(left);
 
 	}
 	else if (node->GetType() == NT_IF)
@@ -464,7 +465,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_CREATELIST)
 	{
 		CreateListNode* lsnode = (CreateListNode*)node;
-		WQObject* result=new WQObject;
+		WQObject* result = state->CreateObject();
 		result->InitList();
 		for (list<ExpressionNode*>::iterator it = lsnode->Parameters->begin();
 			it != lsnode->Parameters->end(); it++)
@@ -472,14 +473,14 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			Evaluate(*it, state);
 			result->AppendList(state->GetReturnedReference());
 		}
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (node->GetType() == NT_CREATEDICT)
 	{
 		CreateDictionaryNode* dictnode = (CreateDictionaryNode*)node;
-		WQObject* result=new WQObject;
+		WQObject* result = state->CreateObject();
 		result->InitDictionary();
-		state->ReturnNewReference(result);
+		state->ReturnReference(result);
 	}
 	else if (node->GetType() == NT_FOR)
 	{
@@ -527,18 +528,18 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//<variable>[<exp>:<exp>]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = new WQObject;
+				WQObject* result = state->CreateObject();
 				lsvar->GetSlicing(startIndex,endIndex,result);
-				state->ReturnNewReference(result);
+				state->ReturnReference(result);
 			}
 			else
 			{
 				//<variable>[<exp>:]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = new WQObject;
+				WQObject* result = state->CreateObject();
 				lsvar->GetSlicingWithLeftIndex(startIndex,result);
-				state->ReturnNewReference(result);
+				state->ReturnReference(result);
 			}
 		}
 		//no start index
@@ -555,9 +556,9 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//<variable>[:<exp>]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = new WQObject;
+				WQObject* result = state->CreateObject();
 				lsvar->GetSlicingWithRightIndex(endIndex,result);
-				state->ReturnNewReference(result);
+				state->ReturnReference(result);
 			}
 			else
 			{

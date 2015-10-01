@@ -4,10 +4,18 @@ WQObject::WQObject()
 {
 	Type = DT_NULL;
 	Data = NULL;
+	Reference = NULL;
 }
 WQObject::~WQObject()
 {
 	ClearValue();
+	if (IsReference)
+		SetReference(NULL);
+}
+void WQObject::AssertCanAssign()
+{
+	if (assigned == true)
+		throw RUNTIME_REASSIGN_OBJECT_NOT_ALLOW;
 }
 long long WQObject::GetIntValue() const
 {
@@ -101,7 +109,7 @@ void WQObject::SetFloatValue(long double value)
 {
 	if (IsReference)
 		return Reference->SetFloatValue(value);
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_FLOAT;
 	Data = new long double;
 	*((long double*)Data) = value;
@@ -111,7 +119,7 @@ void WQObject::SetIntValue(long long value)
 {
 	if (IsReference)
 		return Reference->SetIntValue(value);
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_INTEGER;
 	Data = new long long;
 	*((long long*)Data) = value;
@@ -121,7 +129,7 @@ void WQObject::SetStringValue(string& value)
 {
 	if (IsReference)
 		return Reference->SetStringValue(value);
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_STRING;
 	Data = new string(value);
 	//*((string*)Data) = value;
@@ -131,7 +139,7 @@ void WQObject::InitList()
 {
 	if (IsReference)
 		return Reference->InitList();
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_LIST;
 	Data = new vector < WQObject* > ;
 	assigned = true;
@@ -140,7 +148,7 @@ void WQObject::InitDictionary()
 {
 	if (IsReference)
 		return Reference->InitDictionary();
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_DICTIONARY;
 	Data = new map <string,WQObject* >;
 	assigned = true;
@@ -155,12 +163,14 @@ WQObject* WQObject:: SetKeyValue(string key, WQObject* value)
 		map<string, WQObject*>* dict = GetDictionary();
 		WQObject* ref = new WQObject;
 		ref->SetReference(value);
-		if ((*dict)[key] == NULL)
+		WQObject* oldobj = (*dict)[key];
+		if (oldobj == NULL)
 		{
 			(*dict)[key] = ref;
 		}
 		else
 		{
+			oldobj->ReferenceCounter--;
 			//change the value
 			(*dict)[key] = ref;
 			oldobj = (*dict)[key];
@@ -170,39 +180,11 @@ WQObject* WQObject:: SetKeyValue(string key, WQObject* value)
 		throw RUNTIME_NON_DICT_APPENDING;
 	return oldobj;
 }
-void WQObject::SetKeyValue(string key, long long value){
-	if (IsReference)
-		return Reference->SetKeyValue(key,value);
-	if (Type == DT_DICTIONARY)
-	{
-		map<string, WQObject*>* dict = GetDictionary();
-		WQObject* newvalue = new WQObject;
-		newvalue->SetIntValue(value);
-		dict->insert(pair<string, WQObject*>(key, newvalue));
-	}
-	else
-		throw RUNTIME_NON_DICT_APPENDING;
-}
-void WQObject::SetKeyValue(string key, string value)
-{
-	if (IsReference)
-		return Reference->SetKeyValue(key, value);
-	if (Type == DT_DICTIONARY)
-	{
-		map<string, WQObject*>* dict = GetDictionary();
-		WQObject* newvalue = new WQObject;
-		newvalue->SetStringValue(value);
-		//dict->insert(pair<string, WQObject*>(key, newvalue));
-		(*dict)[key] = newvalue;
-	}
-	else
-		throw RUNTIME_NON_DICT_APPENDING;
-}
 
 
 //void WQObject::SetListValue(list<WQObject> &value)
 //{
-//	ClearValue();
+//	AssertCanAssign();
 //	Type = DT_LIST;
 //	Data = new list < WQObject > ;
 //	*((list<WQObject>*)Data) = value; 
@@ -281,8 +263,9 @@ WQObject* WQObject::SetListElement(long index, WQObject* ele)
 		if (index < ls->size() && index >= 0)
 		{
 			oldobj= ls->at(index);
-
+			oldobj->ReferenceCounter--;
 			(*ls)[index] = ele;
+			ele->ReferenceCounter++;
 		}
 		else
 			throw RUNTIME_INDEX_OUT_OF_BOUND;
@@ -297,7 +280,7 @@ void WQObject::SetBoolValue(bool val)
 {
 	if (IsReference)
 		return Reference->SetBoolValue(val);
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_BOOLEAN;
 	Data = new bool;
 	*((bool*)Data) = val;
@@ -310,7 +293,7 @@ void WQObject:: SetNull()
 		Reference->SetNull();
 		return;
 	}
-	ClearValue();
+	AssertCanAssign();
 	Type = DT_NULL;
 }
 void WQObject::DeepCopy(WQObject* obj)
@@ -338,7 +321,7 @@ void WQObject::DeepCopy(WQObject* obj)
 	}
 	else if (obj->Type == DT_LIST)
 	{
-		ClearValue();
+		AssertCanAssign();
 		InitList();
 		vector < WQObject* >* newlist = GetList();
 		vector < WQObject* >* income = obj->GetList();
@@ -351,7 +334,7 @@ void WQObject::DeepCopy(WQObject* obj)
 	}
 	else if (obj->Type == DT_DICTIONARY)
 	{
-		ClearValue();
+		AssertCanAssign();
 		InitDictionary();
 		map<string, WQObject*>* newdict = GetDictionary();
 		map<string, WQObject*>* olddict = obj->GetDictionary();
@@ -818,7 +801,12 @@ void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 }
 void WQObject::SetReference(WQObject* obj)
 {
+	//decrement the reference counter of the old object
+	if (Reference != NULL)
+		Reference->ReferenceCounter--;
 	Reference = obj;
+	//increase the counter of the obj being refrenced
+	obj->ReferenceCounter++;
 	IsReference = true;
 }
 void WQObject::GetSlicing(long start, long end,WQObject* targetlist)

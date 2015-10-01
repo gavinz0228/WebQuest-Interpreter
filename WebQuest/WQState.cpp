@@ -36,11 +36,11 @@ void WQState::ReturnReference(WQObject* ref)
 {
 	ReferencedObject = ref;
 }
-void WQState::ReturnNewReference(WQObject* ref)
-{
-	ReferencedObject = ref;
-	CurrentEnvironment->TemporaryVariables.push_back(ref);
-}
+//void WQState::ReturnNewReference(WQObject* ref)
+//{
+//	ReferencedObject = ref;
+//	CurrentEnvironment->TemporaryVariables.push_back(ref);
+//}
 WQObject* WQState::GetReturnedReference()
 {
 	return ReferencedObject;
@@ -51,27 +51,27 @@ void WQState::ReturnNull()
 }
 void WQState::ReturnBoolean(bool val)
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = CreateObject();
 	obj->SetBoolValue(val);
 	this->ReturnReference(obj);
 }
 void WQState::ReturnFloat(long double num)
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = CreateObject();
 	obj->SetFloatValue(num);
-	this->ReturnNewReference(obj);
+	this->ReturnReference(obj);
 }
 void WQState::ReturnInteger(long long num)
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = CreateObject();
 	obj->SetIntValue(num);
-	this->ReturnNewReference(obj);
+	this->ReturnReference(obj);
 }
 void WQState::ReturnString(string &str)
 {
-	WQObject* obj = new WQObject;
+	WQObject* obj = CreateObject();
 	obj->SetStringValue(str);
-	this->ReturnNewReference(obj);
+	this->ReturnReference(obj);
 }
 WQObject* WQState::GetParam()
 {
@@ -95,4 +95,17 @@ void WQState::ClearParams()
 		//delete CallingParams.front();
 		CallingParams.pop_front();
 	}
+}
+WQObject* WQState::CreateObject()
+{
+	WQObject* obj = new WQObject;
+	CurrentEnvironment->TemporaryVariables.push_back(obj);
+	return obj;
+}
+WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
+{
+	WQObject* obj = new WQObject;
+	obj->SetReference(targetobj);
+	CurrentEnvironment->TemporaryVariables.push_back(obj);
+	return obj;
 }

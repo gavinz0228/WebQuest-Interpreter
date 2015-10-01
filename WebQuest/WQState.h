@@ -25,6 +25,8 @@ public:
 			current = temp;
 		}
 	}
+	WQObject* CreateObject();
+	WQObject* CreateReferenceObject(WQObject* targetobj);
 	WQObject* GetParam();
 	string GetStringParam();
 	long long GetIntegerParam();
@@ -37,7 +39,7 @@ public:
 	void ReturnNull();
 	void ReturnBoolean(bool val);
 	void ReturnReference(WQObject*);
-	void ReturnNewReference(WQObject* ref);
+	//void ReturnNewReference(WQObject* ref);
 	WQObject* GetReturnedReference();
 	//WQObject* GetReturnObject();
 	bool BreakOccurred;

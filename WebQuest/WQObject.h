@@ -69,11 +69,13 @@ public:
 	WQObject& operator/=(const WQObject& right);
 	WQObject& operator%=(const WQObject& right);
 	bool IsReference = false;
+	int ReferenceCounter = 0;
 private:
 	WQObject* Reference;
 	void * Data;
 	bool assigned;
 	void ClearValue();
+	void AssertCanAssign();
 };
 
 WQObject& operator+(WQObject& left, const WQObject& right);
