@@ -455,19 +455,19 @@ string WQObject::ToString() const
 	}
 	else if (Type == DT_DICTIONARY)
 	{
-		string output="{";
+		stringstream ss;
+		ss<<"{";
 		map<string, WQObject*>* dict = GetDictionary();
 		map<string, WQObject*>::iterator it = dict->begin();
 		for (; it != dict->end(); it++)
 		{
-			output += "\"" + it->first + "\"" + ":";
-			output += it->second->ToElementString();
+			ss<<"\"" <<it->first << "\"" << ":";
+			ss << it->second->ToElementString();
 			if (next(it) != dict->end())
-				output += ",";
-			
+				ss << ",";
 		}
-		output += "}";
-		return output;
+		ss<< "}";
+		return ss.str();
 	}
 	return "None";
 }
