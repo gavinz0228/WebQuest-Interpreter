@@ -5,13 +5,13 @@ using namespace std;
 #include "WQState.h"
 #include "WebRequest.h"
 #include "WebResponse.h"
+#include "WQLibrary.h"
 #include <chrono>
 #include <list>
 #include <map>
 #include <ctime>
-class WQState;
+
 typedef void(*WQFunction)(WQState*);
-class WQState;
 class GlobalFunctions
 {
 public:

@@ -1,7 +1,7 @@
 #include "Tokenizer.h"
 #include "WebRequest.h"
 #include "Parser.h"
-#include "RunTime.h"
+#include "WQRunTime.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 		script.assign((std::istreambuf_iterator<char>(file)),
 			std::istreambuf_iterator<char>());
 		//printf(script.c_str());
-		Runtime rt;
+		WQRuntime rt;
 		try{
 			rt.Run(script);
 		}
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 }
 void Test()
 {
-	Runtime rt;
+	WQRuntime rt;
 	try{
 		//rt.Run("print('asdf')");
 		//rt.Run("a='yea' b=true print(b)");

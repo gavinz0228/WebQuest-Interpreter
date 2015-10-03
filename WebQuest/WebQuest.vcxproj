@@ -65,7 +65,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Converter.h" />
-    <ClInclude Include="RunTime.h" />
+    <ClInclude Include="WQLibrary.h" />
+    <ClInclude Include="WQRunTime.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="GlobalFunctions.h" />
@@ -80,7 +81,8 @@
   <ItemGroup>
     <ClCompile Include="Converter.cpp" />
     <ClCompile Include="Environment.cpp" />
-    <ClCompile Include="Runtime.cpp" />
+    <ClCompile Include="WQLibrary.cpp" />
+    <ClCompile Include="WQRuntime.cpp" />
     <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
