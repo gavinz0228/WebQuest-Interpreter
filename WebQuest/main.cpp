@@ -77,8 +77,11 @@ void Test()
 											print('\n---------------------------------------\n') \
 														");
 		//rt.Run("print(milli())  str=' ' i=0 while i<=10000 str=str+'1' i+=1 end print(str) print('\n')  print(milli()) ");
-		//rt.Run("a=[1,2,3] for i in a print(i) end");
-		rt.Run("a=100 begin a=range(100000) print(a) end print(a)");
+		rt.Run("a=[1,2,3] for i in a print(i+' ') end");
+		//rt.Run("a=100 begin a=range(100000) print(a) end print(a)");
+		//rt.Run("a=[234,234,324] for i in a a[1]='asdfas' end print (a)");
+		//rt.Run("a=2 a+=' ' print(a+'_')");
+		//rt.Run("result=my_func('working') print(result) def my_func(param,second_param) print(param+' yay! function works!') return 'ok' end");
 	}
 	catch (char* msg){
 		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;

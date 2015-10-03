@@ -253,19 +253,51 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			tker->NextToken();
 			program->Statements->push_back(new BreakNode);
 		}
-		else if (tker->IsNextBeginKeyword())
+		else if (tker->IsNextDefKeyword())
 		{
+			//skip def
 			tker->NextToken();
-			//skip begin
-			BeginNode* bgnode = new BeginNode;
-			ParseCodeBlock(tker, bgnode->CodeBlock);
+			//parse the function name
+			if (!tker->IsNextVariable())
+			{
+				throw SYNTAX_INVALID_FUNCTION_NAME;
+			}
+			Token* funcnametk = tker->NextToken();
+			DefNode* defnode = new DefNode;
+			defnode->FunctionName = funcnametk->Symbol;
+			if (!tker->IsNextLeftParen())
+				throw SYNTAX_EXPECTING_LEFT_PAREN;
+			tker->NextToken();
+			list<ExpressionNode*> params;
+			//parse function parameter
+			ParseParameters(tker, &params);
+			list<ExpressionNode*>::iterator it = params.begin();
+			for (; it != params.end(); it++)
+			{
+				if ((*it)->ExpressionType != NT_VARIABLE)
+					throw SYNTAX_INVALID_FUNCTION_PARAMETER;
+				defnode->Parameters->push_back((VariableNode*)(*it)->Expression);
+			}
+			if (!tker->IsNextRightParen())
+				throw SYNTAX_EXPECTING_RIGHT_PAREN;
+			tker->NextToken();
+			//parse the function body
+
+			ParseCodeBlock(tker, defnode->CodeBlock);
 			if (!tker->IsNextEndBlock())
 			{
 				throw SYNTAX_EXPECTING_END;
 			}
 			tker->NextToken();
-			program->Statements->push_back(bgnode);
+			UserFunctions.insert(pair<string, DefNode*>(*defnode->FunctionName, defnode));
 			
+		}
+		else if (tker->IsNextReturnKeyword())
+		{
+			tker->NextToken();
+			ReturnNode* returnnode = new ReturnNode;
+			ParseExpression(tker, returnnode->ReturnExpression);
+			program->Statements->push_back(returnnode);
 		}
 		else
 		{
@@ -310,6 +342,14 @@ void Parser::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parselog
 	{
 		ParseTerm(tker, &frstexp);
 	}
+	//--------------------
+	//--see if it's null term,if yes, just return a null-type expression
+	if (frstexp.ExpressionType == NT_NULL)
+	{
+		exp->ExpressionType = NT_NULL;
+		return;
+	}
+
 	ExpressionNode* currentexp=&frstexp;
 	//there is only one term in this expression
 	//its sign is that the next token is right parenthesis or new line
@@ -403,6 +443,11 @@ void Parser::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parselog
 
 void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 {
+	if (tker->IsNextEndKeyword())
+	{
+		exp->ExpressionType = NT_NULL;
+		return;
+	}
 	Token* frsttk=tker->NextToken();
 	if (frsttk->Type == TK_FLOAT)
 	{

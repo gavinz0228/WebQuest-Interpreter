@@ -4,6 +4,8 @@ void Runtime::Run(char* script)
 	Parser parser;
 	parser.Parse(script);
 	WQState state;
+	//get the user functions from the parsers
+	UserFunctions = &parser.UserFunctions;
 	Evaluate((NodeBase*)parser.program, &state);
 
 }
@@ -12,6 +14,8 @@ void Runtime::Run(string& script)
 	Parser parser;
 	parser.Parse(script.c_str());
 	WQState state;
+	//get the user functions from the parsers
+	UserFunctions = &parser.UserFunctions;
 	Evaluate((NodeBase*)parser.program, &state);
 
 }
@@ -42,39 +46,43 @@ void Runtime::Calculate(WQObject* left, string* op, WQObject* right,WQState* sta
 }
 void PerformAssignment(WQObject* left, string *optr,WQObject* right,WQState* state)
 {
-	WQObject* result = state->CreateObject();
+	
 	if (*optr == OP_ASSIGN)
 	{
 		state->ReturnReference(right);
 	}
-	else if (*optr == OP_PLUSASSIGN)
-	{
-		result->DeepCopy(&((*left) + (*right)));
-		state->ReturnReference(result);
-	}
-	else if (*optr == OP_MINUSASSIGN)
-	{
-		result->DeepCopy(&((*left) - (*right)));
-		state->ReturnReference(result);
-	}
-	else if (*optr == OP_MULTIPLYASSIGN)
-	{
-		result->DeepCopy(&((*left) * (*right)));
-		state->ReturnReference(result);
-	}
-	else if (*optr == OP_DEVIDEASSIGN)
-	{
-		result->DeepCopy(&((*left) / (*right)));
-		state->ReturnReference(result);
-	}
-	else if (*optr == OP_MODULOASSIGN)
-	{
-		result->DeepCopy(&((*left) % (*right)));
-		state->ReturnReference(result);
-	}
 	else
 	{
-		throw SYNTAX_INVALID_OPERATOR;
+		WQObject* result = WQObject::Create();
+		if (*optr == OP_PLUSASSIGN)
+		{
+			result->DeepCopy(&((*left) + (*right)));
+			state->ReturnReference(result);
+		}
+		else if (*optr == OP_MINUSASSIGN)
+		{
+			result->DeepCopy(&((*left) - (*right)));
+			state->ReturnReference(result);
+		}
+		else if (*optr == OP_MULTIPLYASSIGN)
+		{
+			result->DeepCopy(&((*left) * (*right)));
+			state->ReturnReference(result);
+		}
+		else if (*optr == OP_DEVIDEASSIGN)
+		{
+			result->DeepCopy(&((*left) / (*right)));
+			state->ReturnReference(result);
+		}
+		else if (*optr == OP_MODULOASSIGN)
+		{
+			result->DeepCopy(&((*left) % (*right)));
+			state->ReturnReference(result);
+		}
+		else
+		{
+			throw SYNTAX_INVALID_OPERATOR;
+		}
 	}
 }
 void Runtime::Evaluate(NodeBase* node,WQState* state)
@@ -94,8 +102,14 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		if (assignment->TargetType == AT_VARIABLE)
 		{
 			VariableNode* var = assignment->LeftSideVariable;
-			Evaluate(var, state);
-			WQObject* left =state->GetReturnedReference();
+			
+			WQObject* left=NULL;
+			//if it's a assignment operation '=' , no need to evaluate the left side
+			if (*assignment->AssignmentOperator != OP_ASSIGN)
+			{
+				Evaluate(var, state);
+				left = state->GetReturnedReference();
+			}
 			//Evaluate the right side
 			Evaluate(assignment->RightSide, state);
 			PerformAssignment(left, assignment->AssignmentOperator, state->GetReturnedReference(),state);
@@ -255,7 +269,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			}
 			if (state->GetReturnedReference()->GetBoolValue())
 			{
-				state->EnterNewEnvironment();
+				state->EnterNewEnvironment(ET_IF);
 				Evaluate(it->second, state);
 				state->BackToParentEnvironment();
 			}
@@ -274,7 +288,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				}
 				if (state->GetReturnedReference()->GetBoolValue())
 				{
-					state->EnterNewEnvironment();
+					state->EnterNewEnvironment(ET_IF);
 					Evaluate(it->second, state);
 					state->BackToParentEnvironment();
 					break;
@@ -302,20 +316,12 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				break;
 			}
 			state->BreakOccurred = false;
-			state->EnterNewEnvironment();
+			state->EnterNewEnvironment(ET_LOOP);
 			Evaluate(whilenode->CodeBlock, state);
 			state->BackToParentEnvironment();
 			if (state->BreakOccurred)
 				break;
 		}
-	}
-	else if (node->GetType() == NT_BEGIN)
-	{
-		BeginNode* bgnode = (BeginNode*)node;
-		state->EnterNewEnvironment();
-		Evaluate(bgnode->CodeBlock, state);
-		state->BackToParentEnvironment();
-
 	}
 	else if (node->GetType() == NT_COMPARISON)
 	{
@@ -443,25 +449,62 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		CurrentLineNumber = funcnode->GetLineNumber();
 		//retrive the target function from the function library
 		WQFunction func = Functions.Get(funcnode->FunctionName);
-		if (func == NULL)
+		//if it finds the function from the standard function, then invoke it
+		if (func != NULL)
 		{
-			throw string(RUNTIME_FUNCTION_NOT_DEFINED) + ": "+*funcnode->FunctionName;
+			//check the parameter size of the function call
+			state->ParamSize = funcnode->Parameters->size();
+			//evaluate each of them and send them to the current state
+			for (list<ExpressionNode*>::iterator it = funcnode->Parameters->begin(); it != funcnode->Parameters->end(); it++)
+			{
+				Evaluate(*it, state);
+				state->AddParam(state->GetReturnedReference());
+			}
+			state->ReturnNull();
+			//call the function 
+			func(state);
+			//clear the parameters in the list
+			state->ClearParams();
 		}
-		//check the parameter size of the function call
-		state->ParamSize = funcnode->Parameters->size();
-		//evaluate each of them and send them to the current state
-		for (list<ExpressionNode*>::iterator it = funcnode->Parameters->begin(); it != funcnode->Parameters->end(); it++)
+		//otherwise search the user defined functions
+		else
 		{
-			Evaluate(*it, state);
-			state->AddParam(state->GetReturnedReference());
+			map<string, DefNode*>::iterator it = UserFunctions->find(*funcnode->FunctionName);
+			if(it != UserFunctions->end())
+			{
+				DefNode* def = it->second;
+				if (def->Parameters->size() < funcnode->Parameters->size())
+					throw string("Too many parameters are provided, maximum ") + to_string( def->Parameters->size())+" is/are needed";
+				//next step is to evaulate the parameters and inject to the function's environment
+				list<VariableNode*>::iterator paramit = def->Parameters->begin();
+				list<ExpressionNode*>::iterator paramexpit = funcnode->Parameters->begin();
+				state->EnterNewEnvironment(ET_FUNCTION);
+				for (; paramexpit != funcnode->Parameters->end(); paramexpit++, paramit++)
+				{
+					Evaluate(*paramexpit, state);
+					state->CurrentEnvironment->SetVariable(*(*paramit)->Value,state->GetReturnedReference());
+				}
+				//supply the rest arugements, just put null objects
+				while (paramit != def->Parameters->end())
+				{
+					state->CurrentEnvironment->SetVariable(*(*paramit)->Value, state->CreateObject());
+					paramit++;
+				}
+				//all the parameters are all set, invoke the function
+				Evaluate(def->CodeBlock, state);
+				//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+				if (state->CurrentEnvironment->Parent != NULL)
+				{
+					//printf(state->GetReturnedReference()->ToString().c_str());
+					state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+				}
+				state->BackToParentEnvironment();
+			}
+			else
+				throw string(RUNTIME_FUNCTION_NOT_DEFINED) + ": " + *funcnode->FunctionName;
 		}
-		state->ReturnNull();
-		//call the function 
-		func(state);
 
-
-		//clear the parameters in the list
-		state->ClearParams();
+		
 	}
 	else if (node->GetType() == NT_CREATELIST)
 	{
@@ -495,7 +538,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		for (int i = 0; i < iterablelist->size(); i++)
 		{
 			
-			state->EnterNewEnvironment();
+			state->EnterNewEnvironment(ET_LOOP);
 			state->CurrentEnvironment->SetVariable(*fornode->TempVariable->Value, iterablelist->at(i));
 			Evaluate(fornode->CodeBlock, state);
 			state->BackToParentEnvironment();
@@ -575,20 +618,47 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	}
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
-		
 		CodeBlockNode* program = (CodeBlockNode*)node;
-
-		for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
-		{
-			NodeBase* nxt = *it;
-			if (nxt->GetType() == NT_BREAK)
+		//if it's a loop, it allows the code to break
+		if (state->GetCurrentEnvironmentType()==ET_LOOP)
+			for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
 			{
-				state->BreakOccurred = true;
-				break;
+				NodeBase* nxt = *it;
+				if (nxt->GetType() == NT_BREAK)
+				{
+					state->BreakOccurred = true;
+					break;
+				}
+				Evaluate(*it, state);
 			}
-			Evaluate(*it, state);
-		}
-
+		else if (state->GetCurrentEnvironmentType() == ET_FUNCTION)
+			for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
+			{
+				NodeBase* nxt = *it;
+				if (nxt->GetType() == NT_RETURN)
+				{
+					ReturnNode* returnode = (ReturnNode*)nxt;
+					if (returnode->ReturnExpression->ExpressionType==NT_NULL)
+						state->ReturnNull();
+					else
+						//this value will be moved to its parent enviroment to be protected
+						Evaluate(returnode->ReturnExpression, state);
+					break;
+				}
+				Evaluate(*it, state);
+			}
+		//otherwise, neither support break or return
+		else
+			for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
+			{
+				NodeBase* nxt = *it;
+				if (nxt->GetType() == NT_BREAK)
+				{
+					state->BreakOccurred = true;
+					break;
+				}
+				Evaluate(*it, state);
+			}
 	}
 }
 

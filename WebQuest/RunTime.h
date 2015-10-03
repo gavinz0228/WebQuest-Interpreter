@@ -20,8 +20,8 @@ public:
 	long GetCurrentLineNumber(){ return CurrentLineNumber; }
 private:
 	GlobalFunctions Functions;
+	map<string, DefNode*>* UserFunctions;
 	long CurrentLineNumber;
-
 };
 #endif
 /*

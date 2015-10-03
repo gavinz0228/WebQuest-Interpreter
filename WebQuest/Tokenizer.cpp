@@ -215,13 +215,17 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			{
 				tk = new Token(start, len, TK_IN, lineno);
 			}
-			else if (len == strlen(KW_BEGIN) && strncmp(start, KW_BEGIN, len) == 0)
+			else if (len == strlen(KW_DEF) && strncmp(start, KW_DEF, len) == 0)
 			{
-				tk = new Token(start, len, TK_BEGIN, lineno);
+				tk = new Token(start, len, TK_DEF, lineno);
 			}
 			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
 			{
 				tk = new Token(start, len, TK_BREAK, lineno);
+			}
+			else if (len == strlen(KW_RETURN) && strncmp(start, KW_RETURN, len) == 0)
+			{
+				tk = new Token(start, len, TK_RETURN, lineno);
 			}
 			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
 				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
@@ -576,8 +580,13 @@ bool Tokenizer::IsNextBreakKeyword()
 	Token* next = LookAhead();
 	return next != NULL&&next->Type == TK_BREAK;
 }
-bool Tokenizer::IsNextBeginKeyword()
+bool Tokenizer::IsNextDefKeyword()
 {
 	Token* next = LookAhead();
-	return next != NULL&&next->Type == TK_BEGIN;
+	return next != NULL&&next->Type == TK_DEF;
+}
+bool Tokenizer::IsNextReturnKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_RETURN;
 }

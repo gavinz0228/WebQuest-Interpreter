@@ -32,7 +32,7 @@ public:
 		list<WQObject*>::iterator tempit = TemporaryVariables.begin();
 		for (; tempit != TemporaryVariables.end(); tempit++)
 		{
-			if ((*tempit)->ReferenceCounter==0)
+			if ((*tempit)->ReferenceCounter<1)
 				delete *tempit;
 			else
 			{

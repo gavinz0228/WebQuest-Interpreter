@@ -16,6 +16,7 @@ public:
 	static WQObject* Create(){ return new WQObject; }
 	~WQObject();
 	WQObject(DataType type);
+	WQObject* GetActualObject();
 	string ToString() const;
 	string ToElementString() const;
 	
@@ -58,16 +59,16 @@ public:
 	long long ToInteger() const;
 	long double ToFloat() const;
 	DataType Type;
-	bool operator < ( const WQObject& right) ;
+	bool operator < ( const WQObject& right);
 	bool operator > (const WQObject& right);
 	bool operator <= (const WQObject& right);
 	bool operator >= (const WQObject& right);
 	bool operator == (const WQObject& right);
-	WQObject& operator+=(const WQObject& right);
-	WQObject& operator-=(const WQObject& right);
-	WQObject& operator*=(const WQObject& right);
-	WQObject& operator/=(const WQObject& right);
-	WQObject& operator%=(const WQObject& right);
+	WQObject& operator+=( WQObject& right);
+	WQObject& operator-=(WQObject& right);
+	WQObject& operator*=(WQObject& right);
+	WQObject& operator/=(WQObject& right);
+	WQObject& operator%=(WQObject& right);
 	bool IsReference = false;
 	int ReferenceCounter = 0;
 private:
@@ -79,9 +80,9 @@ private:
 	void AssertCanAssign();
 };
 
-WQObject& operator+(WQObject& left, const WQObject& right);
-WQObject& operator-(WQObject& left, const WQObject& right);
-WQObject& operator*(WQObject& left, const WQObject& right);
-WQObject& operator/(WQObject& left, const WQObject& right);
-WQObject& operator%(WQObject& left, const WQObject& right);
+WQObject& operator+(WQObject& left, WQObject& right);
+WQObject& operator-(WQObject& left, WQObject& right);
+WQObject& operator*(WQObject& left, WQObject& right);
+WQObject& operator/(WQObject& left, WQObject& right);
+WQObject& operator%(WQObject& left, WQObject& right);
 #endif

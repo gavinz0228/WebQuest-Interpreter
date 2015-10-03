@@ -1,17 +1,29 @@
 #include "WQState.h"
 
 
-void WQState::EnterNewEnvironment()
+void WQState::EnterNewEnvironment(EnvironmentType et)
 {
 	Environment* newevnt = new Environment;
 	newevnt->Parent = CurrentEnvironment;
 	CurrentEnvironment = newevnt;
+	EnvironmentTypeStack.push(et);
 }
 void WQState::BackToParentEnvironment()
 {
 	Environment* parentevnt = CurrentEnvironment->Parent;
 	delete CurrentEnvironment;
 	CurrentEnvironment = parentevnt;
+	if (EnvironmentTypeStack.size() != 0)
+		EnvironmentTypeStack.pop();
+}
+EnvironmentType WQState::GetCurrentEnvironmentType()
+{
+	if (EnvironmentTypeStack.size() == 0)
+	{
+		return ET_ROOT;
+	}
+	else
+		return EnvironmentTypeStack.top();
 }
 long long WQState::GetIntegerParam()
 {
@@ -47,7 +59,7 @@ WQObject* WQState::GetReturnedReference()
 }
 void WQState::ReturnNull()
 {
-	ReferencedObject = NULL;
+	ReferencedObject = CreateObject();
 }
 void WQState::ReturnBoolean(bool val)
 {
@@ -108,4 +120,18 @@ WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
 	obj->SetReference(targetobj);
 	CurrentEnvironment->TemporaryVariables.push_back(obj);
 	return obj;
+}
+void WQState::MoveVariableToParentEnvironment(WQObject* obj)
+{
+	list<WQObject*>::iterator it = CurrentEnvironment->TemporaryVariables.begin();
+	for (; it != CurrentEnvironment->TemporaryVariables.end(); it++)
+	{
+		if (*it == obj)
+		{
+			CurrentEnvironment->Parent->TemporaryVariables.push_back(*it);
+			CurrentEnvironment->TemporaryVariables.erase(it);
+			break;
+		}
+	}
+	
 }

@@ -29,7 +29,10 @@ enum ParserNodeType{ NT_ASSIGNMENT,
 	NT_FOR,
 	NT_BREAK,
 	NT_SLICING,
-	NT_BEGIN};
+	NT_BEGIN,
+	NT_DEF,
+	NT_RETURN,
+	NT_NULL};
 enum AssignmentTargetType{AT_VARIABLE,AT_ELEMENT};
 class NodeBase
 {
@@ -57,6 +60,7 @@ class BreakNode :public TerminalNodeBase
 {
 	int GetType(){ return NT_BREAK; }
 };
+
 class StringNode :public  TerminalNodeBase
 {
 public:
@@ -317,15 +321,25 @@ public:
 	CodeBlockNode* CodeBlock;
 	int GetType(){ return NT_FOR; }
 };
-class BeginNode :public NodeBase
+class DefNode :public NodeBase
 {
 public:
-	BeginNode(){ CodeBlock = new CodeBlockNode; }
-	~BeginNode(){ delete CodeBlock; }
+	DefNode(){ CodeBlock = new CodeBlockNode; Parameters = new list < VariableNode* > ;}
+	~DefNode(){ delete CodeBlock; }
 	CodeBlockNode* CodeBlock;
-	int GetType(){ return NT_BEGIN; }
+	string* FunctionName;
+	list< VariableNode*>* Parameters;
+	int GetType(){ return NT_DEF; }
 };
-
+class ExpressionNode;
+class ReturnNode :public TerminalNodeBase
+{
+public:
+	ReturnNode(){ ReturnExpression = new ExpressionNode; }
+	~ReturnNode(){ delete ReturnExpression; }
+	int GetType(){ return NT_RETURN; }
+	ExpressionNode* ReturnExpression;
+};
 /*
 	Parser class
 */
@@ -337,6 +351,8 @@ public:
 	void Parse(string script);
 	void PrintTree();
 	volatile CodeBlockNode *program;
+	map<string, DefNode*> UserFunctions;
+
 private:
 	void ParseCodeBlock(Tokenizer* tker, CodeBlockNode* codeblock);
 	void ParseExpression(Tokenizer* tker, ExpressionNode* node,bool parselogicnode=true);

@@ -6,7 +6,8 @@
 #define		SYNTAX_INVALID_FUNCTION_CALL					"Expecting a comma or right parenthesis"
 #define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
 #define		SYNTAX_EXPECTING_END							"Expecting an 'end' for the block"
-#define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting a right parentheise"
+#define		SYNTAX_EXPECTING_RIGHT_PAREN					"Expecting a right parenthesis"
+#define		SYNTAX_EXPECTING_LEFT_PAREN					"Expecting a left parenthesis"
 #define		SYNTAX_EXPECTING_RIGHT_BRACKET					"Expecting a right bracket"
 #define		SYNTAX_STRING_MISSING_QUOTE						"Missing Quote at the end of the string"
 #define		SYNTAX_INVALID_EXPRESSION						"Invalid expression"
@@ -16,6 +17,8 @@
 #define		SYNTAX_NOT_IN_KEYWORD_IN_FOR					"Expecing a 'in' keyword in a for loop"
 #define		SYNTAX_INVALID_SYMBOL							"Invalid symbol"
 #define		SYNTAX_UNEXPECTED_SYMBOL						"Unexpected symbol"
+#define		SYNTAX_INVALID_FUNCTION_NAME					"Invalid function name"
+#define		SYNTAX_INVALID_FUNCTION_PARAMETER				"Invalid function parameter"
 
 #define		RUNTIME_FUNCTION_NOT_DEFINED					"Function is not define"
 #define		RUNTIME_EXPECTING_BOOLEAN						"Expecting a boolean expression"

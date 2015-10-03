@@ -7,23 +7,24 @@ using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 enum TokenType :char{
-	TK_OPERATOR = 'O',
-	TK_STRING = 'S',
-	TK_VARIABLE = 'V',
-	TK_INTEGER = 'I',
-	TK_FLOAT = 'F',
-	TK_BOOLEAN = 'B',
-	TK_NEWLINE = 'L',
-	TK_TAB = 'T',
-	TK_WHILE = 'W',
-	TK_IF = 'U',
-	TK_ELSE = 'X',
-	TK_ELSEIF = 'Y',
-	TK_END = 'Z',
-	TK_FOR = 'R',
-	TK_IN = 'N',
-	TK_BREAK = 'K',
-	TK_BEGIN = 'G'
+	TK_OPERATOR ,
+	TK_STRING ,
+	TK_VARIABLE ,
+	TK_INTEGER ,
+	TK_FLOAT ,
+	TK_BOOLEAN ,
+	TK_NEWLINE ,
+	TK_TAB ,
+	TK_WHILE ,
+	TK_IF ,
+	TK_ELSE ,
+	TK_ELSEIF ,
+	TK_END ,
+	TK_FOR ,
+	TK_IN ,
+	TK_BREAK ,
+	TK_DEF ,
+	TK_RETURN 
 	//,
 	//TK_CREATELIST,
 	//TK_CREATEDICT
@@ -88,7 +89,8 @@ public:
 	bool IsNextEndKeyword();
 	bool IsNextEndBlock();
 	bool IsNextWhileKeyword();
-	bool IsNextBeginKeyword();
+	bool IsNextDefKeyword();
+	bool IsNextReturnKeyword();
 	//+=,-=,*= etc..
 	bool IsNextAssignment();
 	bool IsNextForKeyword();
@@ -146,7 +148,8 @@ private:
 #define				KW_FOR						"for"
 #define				KW_IN						"in"
 #define				KW_BREAK					"break"
-#define				KW_BEGIN					"begin"
+#define				KW_DEF						"def"
+#define				KW_RETURN					"return"
 
 
 #endif

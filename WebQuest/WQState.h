@@ -3,8 +3,10 @@ using namespace std;
 #ifndef WQSTATE_H
 #define WQSTATE_H
 #include <list>
+#include<stack>
 #include "WQObject.h"
 #include "Environment.h"
+enum EnvironmentType{ET_ROOT,ET_FUNCTION,ET_IF,ET_LOOP};
 class Environment;
 class WQState
 {
@@ -43,9 +45,10 @@ public:
 	//WQObject* GetReturnObject();
 	bool BreakOccurred;
 
-	void EnterNewEnvironment();
+	void EnterNewEnvironment(EnvironmentType nodeType);
 	void BackToParentEnvironment();
-
+	EnvironmentType GetCurrentEnvironmentType();
+	void MoveVariableToParentEnvironment(WQObject* obj);
 	int ParamSize;
 	Environment* CurrentEnvironment;
 	//void SetReturnObject(WQObject& obj);
@@ -53,6 +56,8 @@ public:
 private:
 	
 	//void CleanReturnObject();
+	//it's to store the node chain;
+	stack<EnvironmentType> EnvironmentTypeStack;
 	WQObject* ReferencedObject;
 	list<WQObject*> CallingParams;
 };

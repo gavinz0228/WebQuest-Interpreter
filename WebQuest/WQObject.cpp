@@ -14,8 +14,15 @@ WQObject::~WQObject()
 }
 void WQObject::AssertCanAssign()
 {
-	if (assigned == true)
-		throw RUNTIME_REASSIGN_OBJECT_NOT_ALLOW;
+	//if (assigned == true)
+	//	throw RUNTIME_REASSIGN_OBJECT_NOT_ALLOW;
+}
+WQObject* WQObject::GetActualObject()
+{
+	if (IsReference)
+		return Reference->GetActualObject();
+	else
+		return this;
 }
 long long WQObject::GetIntValue() const
 {
@@ -264,7 +271,9 @@ WQObject* WQObject::SetListElement(long index, WQObject* ele)
 		{
 			oldobj= ls->at(index);
 			oldobj->ReferenceCounter--;
-			(*ls)[index] = ele;
+			WQObject* ref = WQObject::Create();
+			ref->SetReference(ele);
+			(*ls)[index] = ref;
 			ele->ReferenceCounter++;
 		}
 		else
@@ -296,13 +305,14 @@ void WQObject:: SetNull()
 	AssertCanAssign();
 	Type = DT_NULL;
 }
-void WQObject::DeepCopy(WQObject* obj)
+void WQObject::DeepCopy(WQObject* incomeobj)
 {
-	if (IsReference)
-	{
-		Reference->DeepCopy(obj);
-		return;
-	}
+	WQObject* obj = incomeobj->GetActualObject();
+	//if (IsReference)
+	//{
+	//	Reference->DeepCopy(obj);
+	//	return;
+	//}
 	if (obj->Type == DT_INTEGER)
 	{
 		SetIntValue(obj->GetIntValue());
@@ -427,7 +437,7 @@ string WQObject::ToString() const
 		return Converter::IntegerToString(*((long long*)Data));
 	}
 	else if (this->Type == DT_NULL)
-		return "Null";
+		return "null";
 	else if (Type == DT_FLOAT)
 		return to_string(GetFloatValue());
 	else if (Type==DT_BOOLEAN)
@@ -469,7 +479,7 @@ string WQObject::ToString() const
 		ss<< "}";
 		return ss.str();
 	}
-	return "None";
+	return "none";
 }
 
 
@@ -566,31 +576,32 @@ bool WQObject::operator == (const WQObject& right)
 	return false;
 
 }
-WQObject& WQObject::operator+=(const WQObject& right)
+WQObject& WQObject::operator+=(WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator+=(right);
-	if (IsNumeric() && right.IsNumeric())
+
+	WQObject* lhs =GetActualObject();
+	WQObject* rhs = right.GetActualObject();
+	if (lhs->IsNumeric() && rhs->IsNumeric())
 	{
-		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
 		{
-			SetIntValue(ToInteger() + right.ToInteger());
+			lhs->SetIntValue(lhs->ToInteger() + rhs->ToInteger());
 			return *this;
 		}
 		else
 		{
-			SetFloatValue(ToFloat() + right.ToFloat());
+			lhs->SetFloatValue(lhs->ToFloat() + rhs->ToFloat());
 			return *this;
 		}
 	}
-	else if (Type == DT_STRING||right.Type==DT_STRING)
+	else if (lhs->Type == DT_STRING||rhs->Type==DT_STRING)
 	{
-		//stringstream ss;
-		////use string stream as a buffer
+		stringstream ss;
+		//use string stream as a buffer
 		//ss >> ToString() >> right.ToString();
 		//ss.flush();
-		//string cc = ss.str();
-		SetStringValue(ToString()+ right.ToString());
+		
+		lhs->SetStringValue(lhs->ToString()+rhs->ToString());
 
 	}
 	else
@@ -599,80 +610,80 @@ WQObject& WQObject::operator+=(const WQObject& right)
 	return *this;
 
 }
-WQObject& WQObject::operator-=( const WQObject& right)
+WQObject& WQObject::operator-=( WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator-=(right);
-	if (IsNumeric() && right.IsNumeric())
+	WQObject* lhs = GetActualObject();
+	WQObject* rhs = right.GetActualObject();
+	if (lhs->IsNumeric() && rhs->IsNumeric())
 	{
-		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
 		{
-			SetIntValue(ToInteger() - right.ToInteger());
+			lhs->SetIntValue(lhs->ToInteger() - rhs->ToInteger());
 			return *this;
 		}
 		else
 		{
-			SetFloatValue(ToFloat() - right.ToFloat());
+			lhs->SetFloatValue(lhs->ToFloat() - rhs->ToFloat());
 			return *this;
 		}
 	}
 	else
 		throw RUNTIME_EXPECTING_NUMERIC;
 }
-WQObject& WQObject::operator*=(const WQObject& right)
+WQObject& WQObject::operator*=(WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator*=(right);
-	if (IsNumeric() && right.IsNumeric())
+	WQObject* lhs = GetActualObject();
+	WQObject* rhs = right.GetActualObject();
+	if (lhs->IsNumeric() && rhs->IsNumeric())
 	{
-		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
 		{
-			SetIntValue(ToInteger() * right.ToInteger());
+			lhs->SetIntValue(lhs->ToInteger() * rhs->ToInteger());
 			return *this;
 		}
 		else
 		{
-			SetFloatValue(ToFloat() * right.ToFloat());
+			lhs->SetFloatValue(lhs->ToFloat() * rhs->ToFloat());
 			return *this;
 		}
 	}
 	else
 		throw RUNTIME_EXPECTING_NUMERIC;
 }
-WQObject& WQObject::operator/=(const WQObject& right)
+WQObject& WQObject::operator/=(WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator/=(right);
-	if (IsNumeric() && right.IsNumeric())
+	WQObject* lhs = GetActualObject();
+	WQObject* rhs = right.GetActualObject();
+	if (lhs->IsNumeric() && rhs->IsNumeric())
 	{
-		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
 		{
-			SetIntValue(ToInteger() / right.ToInteger());
+			lhs->SetIntValue(lhs->ToInteger() / rhs->ToInteger());
 			return *this;
 		}
 		else
 		{
-			SetFloatValue(ToFloat() / right.ToFloat());
+			lhs->SetFloatValue(lhs->ToFloat() / rhs->ToFloat());
 			return *this;
 		}
 	}
 	else
 		throw RUNTIME_EXPECTING_NUMERIC;
 }
-WQObject& WQObject::operator%=(const WQObject& right)
+WQObject& WQObject::operator%=(WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator%=(right);
-	if (IsNumeric() && right.IsNumeric())
+	WQObject* lhs = GetActualObject();
+	WQObject* rhs = right.GetActualObject();
+	if (lhs->IsNumeric() &&rhs->IsNumeric())
 	{
-		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
+		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
 		{
-			SetIntValue(ToInteger() % right.ToInteger());
+			lhs->SetIntValue(lhs->ToInteger() % rhs->ToInteger());
 			return *this;
 		}
 		else
 		{
-			SetFloatValue(fmod(ToFloat() , right.ToFloat()));
+			lhs->SetFloatValue(fmod(lhs->ToFloat() , rhs->ToFloat()));
 			return *this;
 		}
 	}
@@ -680,28 +691,27 @@ WQObject& WQObject::operator%=(const WQObject& right)
 		throw RUNTIME_EXPECTING_NUMERIC;
 }
 
-WQObject& operator+(WQObject& left, const WQObject& right)
+WQObject& operator+(WQObject& left, WQObject& right)
 {
-
 	left += right;
 	return left;
 }
-WQObject& operator-(WQObject& left, const WQObject& right)
+WQObject& operator-(WQObject& left, WQObject& right)
 {
 	left -= right;
 	return left;
 }
-WQObject& operator*(WQObject& left, const WQObject& right)
+WQObject& operator*(WQObject& left, WQObject& right)
 {
 	left *= right;
 	return left;
 }
-WQObject& operator/(WQObject& left, const WQObject& right)
+WQObject& operator/(WQObject& left, WQObject& right)
 {
 	left /= right;
 	return left;
 }
-WQObject& operator%(WQObject& left, const WQObject& right)
+WQObject& operator%(WQObject& left, WQObject& right)
 {
 	left %= right;
 	return left;
