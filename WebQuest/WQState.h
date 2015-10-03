@@ -51,6 +51,7 @@ public:
 	void MoveVariableToParentEnvironment(WQObject* obj);
 	int ParamSize;
 	Environment* CurrentEnvironment;
+	WQObject* CreateObject();
 	//void SetReturnObject(WQObject& obj);
 	//WQObject* GetReturnObject();
 private:

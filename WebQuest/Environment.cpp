@@ -94,15 +94,14 @@ void Environment::IncreaseReference(WQObject* obj)
 }
 void Environment::ReleaseReference(WQObject* obj)
 {
-	
 	obj->ReferenceCounter--;
 	//if this object is not being reference any more
 	//delete the object right now, before that also check if it's a reference
 	//if yes, also release the object it's referencing
 	if (obj->ReferenceCounter < 1)
 	{
-		if (obj->IsReference)
-			ReleaseReference(obj->Reference);
+		//if (obj->IsReference)
+		//	ReleaseReference(obj->Reference);
 		DeleteObject(obj);
 	}
 }

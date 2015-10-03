@@ -72,7 +72,7 @@ void Test()
 		//rt.Run("for i in range(0,500) print(i+' ') end");
 		//rt.Run("for i in range(10) print(i) end");
 		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
-		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
+		rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			   			    header=parse_headers(res) print(header)  \
 											print('\n---------------------------------------\n') \
 														");
@@ -82,7 +82,7 @@ void Test()
 		//rt.Run("a=[234,234,324] for i in a a[1]='asdfas' end print (a)");
 		//rt.Run("a=2 a+=' ' print(a+'_')");
 		//rt.Run("result=my_func('working') print(result) def my_func(param,second_param) print(param+' yay! function works!') return 'ok' end");
-		rt.Run("c=[] append(c,'s')  d=c[0] print(d)");
+		//rt.Run("c=[] append(c,'s')  d=c[0] print(d)");
 	}
 	catch (char* msg){
 		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;

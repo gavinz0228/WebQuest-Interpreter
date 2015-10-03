@@ -30,33 +30,39 @@ public:
 			//decrement reference counter
 			ReleaseReference( it->second);
 		}
-		TemporaryVariables.sort();
-		TemporaryVariables.unique();
+		Variables.clear();
+		//TemporaryVariables.sort();
+		//TemporaryVariables.unique();
 		list<WQObject*>::iterator tempit = TemporaryVariables.begin();
-		for (; tempit != TemporaryVariables.end(); tempit++)
+		while(tempit!=TemporaryVariables.end())
 		{
 			if ((*tempit)->ReferenceCounter < 1)
 			{
-				//if this object is referencing other objects object-obj2, also release obj2
-				if ((*tempit)->IsReference)
-					ReleaseReference((*tempit)->Reference);
-				//delete *tempit;
+				delete *tempit;
+				TemporaryVariables.erase(tempit++);
 			}
+			else
+				tempit++;
 		}
 
 		//bring the rest to the parent environment or delete them
 
 		tempit = TemporaryVariables.begin();
-		for (; tempit != TemporaryVariables.end(); tempit++)
+		while( tempit != TemporaryVariables.end())
 		{
 			//something else is referencing this object ,don't delete it but bring it to the parent level
 			if (this->Parent != NULL)
 			{
 				this->Parent->TemporaryVariables.push_back(*tempit);
+				tempit++;
 			}
 			else
+			{
 				//it's already the top level of envrionment,means the end of the program, just delete it anyways
 				delete *tempit;
+				TemporaryVariables.erase(tempit++);
+			}
+
 		}
 
 

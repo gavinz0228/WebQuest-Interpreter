@@ -4,44 +4,33 @@ WQObject::WQObject()
 {
 	Type = DT_NULL;
 	Data = NULL;
-	Reference = NULL;
+
 }
 WQObject::~WQObject()
 {
 	ClearValue();
-	if (IsReference)
-		SetReference(NULL);
+	//if (IsReference)
+	//	SetReference(NULL);
 }
 void WQObject::AssertCanAssign()
 {
 	//if (assigned == true)
 	//	throw RUNTIME_REASSIGN_OBJECT_NOT_ALLOW;
 }
-WQObject* WQObject::GetActualObject()
-{
-	if (IsReference)
-		return Reference->GetActualObject();
-	else
-		return this;
-}
+
 long long WQObject::GetIntValue() const
 {
-	if (IsReference)
-		return Reference->GetIntValue();
+
 	return *(long long *)Data;
 
 }
 long double WQObject::GetFloatValue() const
 {
-	if (IsReference)
-		return Reference->GetFloatValue();
 	return *(long double *)Data;
 
 }
 bool WQObject::GetBoolValue() const
 {
-	if (IsReference)
-		return Reference->GetBoolValue();
 	if (Type == DT_BOOLEAN)
 		return *(bool*)Data;
 	else if (Type == DT_NULL)
@@ -75,24 +64,15 @@ bool WQObject::GetBoolValue() const
 }
 vector<WQObject*>* WQObject::GetList() const
 {
-	if (IsReference)
-		return Reference->GetList();
 	return (vector<WQObject*>*)Data;
 }
 map<string,WQObject*>* WQObject::GetDictionary() const
 {
-	if (IsReference)
-		return Reference->GetDictionary();
+
 	return (map<string, WQObject*>*)Data;
 }
 void WQObject::ClearValue()
 {
-	if (IsReference)
-	{
-		Reference = NULL;
-		IsReference = false;
-		return;
-	}
 	if (Data != NULL&&Type!=DT_NULL)
 	{
 		if (Type == DT_LIST)
@@ -102,8 +82,6 @@ void WQObject::ClearValue()
 			for (int i = 0; i < ls->size(); i++)
 			{
 				ls->at(i)->ReferenceCounter--;
-				if (ls->at(i)->ReferenceCounter<1)
-					delete ls->at(i);
 			}
 		}
 		delete Data;
@@ -118,8 +96,6 @@ bool WQObject::Assigned()
 }
 void WQObject::SetFloatValue(long double value)
 {
-	if (IsReference)
-		return Reference->SetFloatValue(value);
 	AssertCanAssign();
 	Type = DT_FLOAT;
 	Data = new long double;
@@ -128,8 +104,6 @@ void WQObject::SetFloatValue(long double value)
 }
 void WQObject::SetIntValue(long long value)
 {
-	if (IsReference)
-		return Reference->SetIntValue(value);
 	AssertCanAssign();
 	Type = DT_INTEGER;
 	Data = new long long;
@@ -138,8 +112,7 @@ void WQObject::SetIntValue(long long value)
 }
 void WQObject::SetStringValue(string& value)
 {
-	if (IsReference)
-		return Reference->SetStringValue(value);
+
 	AssertCanAssign();
 	Type = DT_STRING;
 	Data = new string(value);
@@ -148,8 +121,7 @@ void WQObject::SetStringValue(string& value)
 }
 void WQObject::InitList()
 {
-	if (IsReference)
-		return Reference->InitList();
+
 	AssertCanAssign();
 	Type = DT_LIST;
 	Data = new vector < WQObject* > ;
@@ -157,8 +129,6 @@ void WQObject::InitList()
 }
 void WQObject::InitDictionary()
 {
-	if (IsReference)
-		return Reference->InitDictionary();
 	AssertCanAssign();
 	Type = DT_DICTIONARY;
 	Data = new map <string,WQObject* >;
@@ -166,25 +136,25 @@ void WQObject::InitDictionary()
 }
 WQObject* WQObject:: SetKeyValue(string key, WQObject* value)
 {
-	if (IsReference)
-		return Reference->SetKeyValue(key,value);
 	WQObject* oldobj = NULL;
 	if (Type == DT_DICTIONARY)
 	{
 		map<string, WQObject*>* dict = GetDictionary();
-		WQObject* ref = new WQObject;
-		ref->SetReference(value);
+		//WQObject* ref = new WQObject;
+		//ref->SetReference(value);
+		value->ReferenceCounter++;
 		WQObject* oldobj = (*dict)[key];
 		if (oldobj == NULL)
 		{
-			(*dict)[key] = ref;
+			(*dict)[key] = value;
 		}
 		else
 		{
 			oldobj->ReferenceCounter--;
-			//change the value
-			(*dict)[key] = ref;
 			oldobj = (*dict)[key];
+			//change the value
+			(*dict)[key] = value;
+			
 		}
 	}
 	else
@@ -205,15 +175,14 @@ WQObject* WQObject:: SetKeyValue(string key, WQObject* value)
 
 void WQObject::AppendList(WQObject* obj)
 {
-	if (IsReference)
-		return Reference->AppendList(obj);
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
-		WQObject* ref = new WQObject;
-		ref->ReferenceCounter++;
-		ref->SetReference(obj);
-		ls->push_back(ref);
+		//WQObject* ref = new WQObject;
+		//ref->ReferenceCounter++;
+		//ref->SetReference(obj);
+		obj->ReferenceCounter++;
+		ls->push_back(obj);
 	}
 	else
 	{
@@ -222,8 +191,7 @@ void WQObject::AppendList(WQObject* obj)
 }
 WQObject* WQObject::GetListElement(long index)
 {
-	if (IsReference)
-		return Reference->GetListElement(index);
+
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
@@ -242,8 +210,6 @@ WQObject* WQObject::GetListElement(long index)
 }
 WQObject* WQObject::GetDictionaryElement(string& key)
 {
-	if (IsReference)
-		return Reference->GetDictionaryElement(key);
 	if (Type == DT_DICTIONARY)
 	{
 		map<string, WQObject*>* dict = GetDictionary();
@@ -266,8 +232,7 @@ WQObject* WQObject::GetDictionaryElement(string& key)
 }
 WQObject* WQObject::SetListElement(long index, WQObject* ele)
 {
-	if (IsReference)
-		return Reference->SetListElement(index,ele);
+
 	WQObject* oldobj=NULL;
 	if (Type == DT_LIST)
 	{
@@ -276,14 +241,15 @@ WQObject* WQObject::SetListElement(long index, WQObject* ele)
 		{
 			oldobj= ls->at(index);
 			oldobj->ReferenceCounter--;
-			WQObject* ref = WQObject::Create();
-			ref->SetReference(ele);
-			(*ls)[index] = ref;
+			//WQObject* ref = WQObject::Create();
+			//ref->SetReference(ele);
 			ele->ReferenceCounter++;
+			(*ls)[index] = ele;
+			
 		}
 		else
 			throw RUNTIME_INDEX_OUT_OF_BOUND;
-	}
+	} 
 	else
 	{
 		throw RUNTIME_NON_LIST_INDEXING;
@@ -292,8 +258,6 @@ WQObject* WQObject::SetListElement(long index, WQObject* ele)
 }
 void WQObject::SetBoolValue(bool val)
 {
-	if (IsReference)
-		return Reference->SetBoolValue(val);
 	AssertCanAssign();
 	Type = DT_BOOLEAN;
 	Data = new bool;
@@ -303,16 +267,11 @@ void WQObject::SetBoolValue(bool val)
 }
 void WQObject:: SetNull()
 {
-	if (IsReference){
-		Reference->SetNull();
-		return;
-	}
 	AssertCanAssign();
 	Type = DT_NULL;
 }
-void WQObject::DeepCopy(WQObject* incomeobj)
+void WQObject::DeepCopy(WQObject* obj)
 {
-	WQObject* obj = incomeobj->GetActualObject();
 	//if (IsReference)
 	//{
 	//	Reference->DeepCopy(obj);
@@ -368,8 +327,7 @@ void WQObject::DeepCopy(WQObject* incomeobj)
 }
 bool WQObject::IsNumeric() const
 {
-	if (IsReference)
-		return Reference->IsNumeric();
+
 	if (Type == DT_FLOAT || Type == DT_INTEGER)
 		return true;
 	else
@@ -377,8 +335,6 @@ bool WQObject::IsNumeric() const
 }
 long long WQObject::ToInteger() const
 {
-	if (IsReference)
-		return Reference->ToInteger();
 	if (IsNumeric())
 	{
 		if (Type == DT_INTEGER)
@@ -397,8 +353,6 @@ long long WQObject::ToInteger() const
 
 long double WQObject::ToFloat() const
 {
-	if (IsReference)
-		return Reference->ToFloat();
 	if (IsNumeric())
 	{
 		if (Type == DT_FLOAT)
@@ -416,8 +370,6 @@ long double WQObject::ToFloat() const
 
 string WQObject::ToElementString() const
 {
-	if (IsReference)
-		return Reference->ToElementString();
 	if (Type == DT_STRING)
 	{
 		return "\"" + *((string*)Data) + "\"";
@@ -430,8 +382,6 @@ string WQObject::ToElementString() const
 
 string WQObject::ToString() const
 {
-	if (IsReference)
-		return Reference->ToString();
 	if (Type == DT_STRING)
 	{
 		return *((string*)Data);
@@ -490,8 +440,6 @@ string WQObject::ToString() const
 
 bool WQObject::operator < (const WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator<(right);
 	//check if they are both numeric
 	if (IsNumeric() && right.IsNumeric())
 	{
@@ -507,8 +455,6 @@ bool WQObject::operator < (const WQObject& right)
 }
 bool WQObject::operator > (const WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator>(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -523,9 +469,6 @@ bool WQObject::operator > (const WQObject& right)
 }
 bool WQObject::operator <= (const WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator<=(right);
-
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -540,9 +483,6 @@ bool WQObject::operator <= (const WQObject& right)
 }
 bool WQObject::operator >= (const WQObject& right)
 {
-
-	if (IsReference)
-		return Reference->operator>=(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -557,8 +497,6 @@ bool WQObject::operator >= (const WQObject& right)
 }
 bool WQObject::operator == (const WQObject& right)
 {
-	if (IsReference)
-		return Reference->operator==(right);
 	if (IsNumeric() && right.IsNumeric())
 	{
 		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
@@ -584,29 +522,27 @@ bool WQObject::operator == (const WQObject& right)
 WQObject& WQObject::operator+=(WQObject& right)
 {
 
-	WQObject* lhs =GetActualObject();
-	WQObject* rhs = right.GetActualObject();
-	if (lhs->IsNumeric() && rhs->IsNumeric())
+	if (IsNumeric() && right.IsNumeric())
 	{
-		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
 		{
-			lhs->SetIntValue(lhs->ToInteger() + rhs->ToInteger());
+			SetIntValue(ToInteger() + right.ToInteger());
 			return *this;
 		}
 		else
 		{
-			lhs->SetFloatValue(lhs->ToFloat() + rhs->ToFloat());
+			SetFloatValue(ToFloat() + right.ToFloat());
 			return *this;
 		}
 	}
-	else if (lhs->Type == DT_STRING||rhs->Type==DT_STRING)
+	else if (Type == DT_STRING||right.Type==DT_STRING)
 	{
 		stringstream ss;
 		//use string stream as a buffer
 		//ss >> ToString() >> right.ToString();
 		//ss.flush();
 		
-		lhs->SetStringValue(lhs->ToString()+rhs->ToString());
+		SetStringValue(ToString()+right.ToString());
 
 	}
 	else
@@ -617,18 +553,16 @@ WQObject& WQObject::operator+=(WQObject& right)
 }
 WQObject& WQObject::operator-=( WQObject& right)
 {
-	WQObject* lhs = GetActualObject();
-	WQObject* rhs = right.GetActualObject();
-	if (lhs->IsNumeric() && rhs->IsNumeric())
+	if (IsNumeric() && right.IsNumeric())
 	{
-		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
 		{
-			lhs->SetIntValue(lhs->ToInteger() - rhs->ToInteger());
+			SetIntValue(ToInteger() - right.ToInteger());
 			return *this;
 		}
 		else
 		{
-			lhs->SetFloatValue(lhs->ToFloat() - rhs->ToFloat());
+			SetFloatValue(ToFloat() - right.ToFloat());
 			return *this;
 		}
 	}
@@ -637,18 +571,16 @@ WQObject& WQObject::operator-=( WQObject& right)
 }
 WQObject& WQObject::operator*=(WQObject& right)
 {
-	WQObject* lhs = GetActualObject();
-	WQObject* rhs = right.GetActualObject();
-	if (lhs->IsNumeric() && rhs->IsNumeric())
+	if (IsNumeric() && right.IsNumeric())
 	{
-		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
 		{
-			lhs->SetIntValue(lhs->ToInteger() * rhs->ToInteger());
+			SetIntValue(ToInteger() * right.ToInteger());
 			return *this;
 		}
 		else
 		{
-			lhs->SetFloatValue(lhs->ToFloat() * rhs->ToFloat());
+			SetFloatValue(ToFloat() * right.ToFloat());
 			return *this;
 		}
 	}
@@ -657,18 +589,16 @@ WQObject& WQObject::operator*=(WQObject& right)
 }
 WQObject& WQObject::operator/=(WQObject& right)
 {
-	WQObject* lhs = GetActualObject();
-	WQObject* rhs = right.GetActualObject();
-	if (lhs->IsNumeric() && rhs->IsNumeric())
+	if (IsNumeric() && right.IsNumeric())
 	{
-		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
 		{
-			lhs->SetIntValue(lhs->ToInteger() / rhs->ToInteger());
+			SetIntValue(ToInteger() / right.ToInteger());
 			return *this;
 		}
 		else
 		{
-			lhs->SetFloatValue(lhs->ToFloat() / rhs->ToFloat());
+			SetFloatValue(ToFloat() / right.ToFloat());
 			return *this;
 		}
 	}
@@ -677,18 +607,17 @@ WQObject& WQObject::operator/=(WQObject& right)
 }
 WQObject& WQObject::operator%=(WQObject& right)
 {
-	WQObject* lhs = GetActualObject();
-	WQObject* rhs = right.GetActualObject();
-	if (lhs->IsNumeric() &&rhs->IsNumeric())
+
+	if (IsNumeric() &&right.IsNumeric())
 	{
-		if (lhs->Type == DT_INTEGER&&rhs->Type == DT_INTEGER)
+		if (Type == DT_INTEGER&&right.Type == DT_INTEGER)
 		{
-			lhs->SetIntValue(lhs->ToInteger() % rhs->ToInteger());
+			SetIntValue(ToInteger() % right.ToInteger());
 			return *this;
 		}
 		else
 		{
-			lhs->SetFloatValue(fmod(lhs->ToFloat() , rhs->ToFloat()));
+			SetFloatValue(fmod(ToFloat() , right.ToFloat()));
 			return *this;
 		}
 	}
@@ -723,11 +652,7 @@ WQObject& operator%(WQObject& left, WQObject& right)
 }
 void WQObject::GetSlicingWithLeftIndex(long start, WQObject* targetlist)
 {
-	if (IsReference)
-	{
-		Reference->GetSlicingWithLeftIndex(start, targetlist);
-		return;
-	}
+
 	if (Type == DT_LIST)
 	{
 
@@ -770,11 +695,6 @@ void WQObject::GetSlicingWithLeftIndex(long start, WQObject* targetlist)
 }
 void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 {
-	if (IsReference)
-	{
-		Reference->GetSlicingWithRightIndex(end, targetlist);
-		return;
-	}
 	if (Type == DT_LIST)
 	{
 
@@ -814,23 +734,18 @@ void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 		throw RUNTIME_SLICING_NON_LIST_VARIABLE;
 	}
 }
-void WQObject::SetReference(WQObject* obj)
-{
-	//decrement the reference counter of the old object
-	if (Reference != NULL)
-		Reference->ReferenceCounter--;
-	Reference = obj;
-	//increase the counter of the obj being refrenced
-	obj->ReferenceCounter++;
-	IsReference = true;
-}
+//void WQObject::SetReference(WQObject* obj)
+//{
+//	//decrement the reference counter of the old object
+//	if (Reference != NULL)
+//		Reference->ReferenceCounter--;
+//	Reference = obj;
+//	//increase the counter of the obj being refrenced
+//	obj->ReferenceCounter++;
+//	IsReference = true;
+//}
 void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 {
-	if (IsReference)
-	{
-		Reference->GetSlicing(start,end, targetlist);
-		return;
-	}
 	if (Type == DT_LIST)
 	{
 

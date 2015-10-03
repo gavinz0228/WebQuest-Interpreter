@@ -13,14 +13,14 @@ class WQObject
 {
 public:
 
-	static WQObject* Create(){ return new WQObject; }
+
 	~WQObject();
 	WQObject(DataType type);
-	WQObject* GetActualObject();
+	static WQObject* Create(){ return new WQObject; }
 	string ToString() const;
 	string ToElementString() const;
 	
-	void SetReference(WQObject* obj);
+	//void SetReference(WQObject* obj);
 
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
@@ -30,10 +30,6 @@ public:
 	void SetNull();
 	void InitList();
 	void InitDictionary();
-	//void AppendListValue(long long val);
-	//void AppendListValue(long double val);
-	//void AppendListValue(string &val);
-	//void AppendListvalue(bool val);
 	void AppendList(WQObject* obj);
 	WQObject* GetListElement(long index);
 	WQObject* GetDictionaryElement(string& key);
@@ -69,12 +65,12 @@ public:
 	WQObject& operator*=(WQObject& right);
 	WQObject& operator/=(WQObject& right);
 	WQObject& operator%=(WQObject& right);
-	bool IsReference = false;
+	//bool IsReference = false;
 	int ReferenceCounter = 0;
-	WQObject* Reference;
+	//WQObject* Reference;
 private:
 	WQObject();
-	
+
 	void * Data;
 	bool assigned;
 	void ClearValue();

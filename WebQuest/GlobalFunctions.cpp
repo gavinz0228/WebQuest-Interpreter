@@ -97,14 +97,14 @@ void WQLen(WQState* state)
 }
 static void WQRange(WQState* state)
 {
-	WQObject* ls = state->CurrentEnvironment->CreateObject();
+	WQObject* ls = state->CreateObject();
 	ls->InitList();
 	if (state->ParamSize == 1)
 	{
 		long long endindex=state->GetIntegerParam();
 		for (long long i = 0; i < endindex;i++)
 		{
-			WQObject* obj = state->CurrentEnvironment->CreateObject();
+			WQObject* obj = state->CreateObject();
 			obj->SetIntValue(i);
 			ls->AppendList(obj);
 		}
@@ -135,7 +135,7 @@ static void WQDumpJson(WQState* state)
 static void WQDeepCopy(WQState* state)
 {
 	auto obj = state->GetParam();
-	WQObject* newobj = state->CurrentEnvironment->CreateObject();
+	WQObject* newobj = state->CreateObject();
 	newobj->DeepCopy(obj);
 	state->ReturnReference(newobj);
 }

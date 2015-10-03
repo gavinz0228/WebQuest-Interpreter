@@ -53,6 +53,10 @@ void WQState::ReturnReference(WQObject* ref)
 //	ReferencedObject = ref;
 //	CurrentEnvironment->TemporaryVariables.push_back(ref);
 //}
+WQObject* WQState::CreateObject()
+{
+	return CurrentEnvironment->CreateObject();
+}
 WQObject* WQState::GetReturnedReference()
 {
 	return ReferencedObject;
@@ -89,7 +93,7 @@ WQObject* WQState::GetParam()
 {
 	if (CallingParams.size() > 0)
 	{
-		WQObject* param = CallingParams.front()->GetActualObject();
+		WQObject* param = CallingParams.front();
 		CallingParams.pop_front();
 		return param;
 	}
@@ -109,13 +113,13 @@ void WQState::ClearParams()
 	}
 }
 
-WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
-{
-	WQObject* obj = WQObject::Create();
-	obj->SetReference(targetobj);
-	CurrentEnvironment->TemporaryVariables.push_back(obj);
-	return obj;
-}
+//WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
+//{
+//	WQObject* obj = WQObject::Create();
+//	obj->SetReference(targetobj);
+//	CurrentEnvironment->TemporaryVariables.push_back(obj);
+//	return obj;
+//}
 void WQState::MoveVariableToParentEnvironment(WQObject* obj)
 {
 	list<WQObject*>::iterator it = CurrentEnvironment->TemporaryVariables.begin();
