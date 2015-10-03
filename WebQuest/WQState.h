@@ -26,7 +26,7 @@ public:
 			current = temp;
 		}
 	}
-	WQObject* CreateObject();
+
 	WQObject* CreateReferenceObject(WQObject* targetobj);
 	WQObject* GetParam();
 	string GetStringParam();

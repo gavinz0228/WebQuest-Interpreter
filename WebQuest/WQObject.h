@@ -71,13 +71,15 @@ public:
 	WQObject& operator%=(WQObject& right);
 	bool IsReference = false;
 	int ReferenceCounter = 0;
+	WQObject* Reference;
 private:
 	WQObject();
-	WQObject* Reference;
+	
 	void * Data;
 	bool assigned;
 	void ClearValue();
 	void AssertCanAssign();
+	
 };
 
 WQObject& operator+(WQObject& left, WQObject& right);

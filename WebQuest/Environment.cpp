@@ -67,7 +67,7 @@ void Environment::SetVariable(string& name, WQObject* newobj)
 		//create that variable
 		AddVariable(name, newobj);
 		//the new object is being refrenced, so increment the counter
-		newobj->ReferenceCounter++;
+		IncreaseReference(newobj);
 	}
 	else
 	{
@@ -75,10 +75,10 @@ void Environment::SetVariable(string& name, WQObject* newobj)
 		//TemporaryVariables.push_back(targetobj);
 		tempevnt->Variables.erase(name);
 		//object is not refrenced by the variable, so decrement the counter
-		targetobj->ReferenceCounter--;
+		ReleaseReference( targetobj);
 		tempevnt-> Variables.insert(pair<string, WQObject*>(name, newobj));
 		//increment the counter of the new obj
-		newobj->ReferenceCounter++;
+		IncreaseReference( newobj);
 	}
 }
 WQObject* Environment::CreateVariable(string& name)
@@ -87,4 +87,41 @@ WQObject* Environment::CreateVariable(string& name)
 	TemporaryVariables.push_back(newvar);
 	AddVariable(name,newvar);
 	return newvar;
+}
+void Environment::IncreaseReference(WQObject* obj)
+{
+	obj->ReferenceCounter++;
+}
+void Environment::ReleaseReference(WQObject* obj)
+{
+	
+	obj->ReferenceCounter--;
+	//if this object is not being reference any more
+	//delete the object right now, before that also check if it's a reference
+	//if yes, also release the object it's referencing
+	if (obj->ReferenceCounter < 1)
+	{
+		if (obj->IsReference)
+			ReleaseReference(obj->Reference);
+		DeleteObject(obj);
+	}
+}
+void Environment::DeleteObject(WQObject* obj)
+{
+	list<WQObject*>::iterator tempit = TemporaryVariables.begin();
+	for (; tempit != TemporaryVariables.end(); tempit++)
+	{
+		if (*tempit == obj)
+		{
+			delete obj;
+			TemporaryVariables.erase(tempit);
+			return;
+		}
+	}
+}
+WQObject* Environment::CreateObject()
+{
+	WQObject* obj = WQObject::Create();
+	TemporaryVariables .push_back(obj);
+	return obj;
 }

@@ -100,7 +100,11 @@ void WQObject::ClearValue()
 			//delete every element of the list
 			vector<WQObject*>* ls = GetList();
 			for (int i = 0; i < ls->size(); i++)
-				delete ls->at(i);
+			{
+				ls->at(i)->ReferenceCounter--;
+				if (ls->at(i)->ReferenceCounter<1)
+					delete ls->at(i);
+			}
 		}
 		delete Data;
 		Data = NULL;
@@ -207,6 +211,7 @@ void WQObject::AppendList(WQObject* obj)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
 		WQObject* ref = new WQObject;
+		ref->ReferenceCounter++;
 		ref->SetReference(obj);
 		ls->push_back(ref);
 	}

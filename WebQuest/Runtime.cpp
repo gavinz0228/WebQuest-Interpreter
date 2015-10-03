@@ -21,7 +21,7 @@ void Runtime::Run(string& script)
 }
 void Runtime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
-	WQObject* result = state->CreateObject();
+	WQObject* result = state->CurrentEnvironment->CreateObject();
 	if (*op == OP_PLUS)
 	{
 		result->DeepCopy(&(*left + *right));
@@ -167,14 +167,14 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 			state->ReturnReference(obj);
 		}
 	}
-	//else if (node->GetType() == NT_ELEMENT)
-	//{
-	//	ElementNode* elenode = (ElementNode*)node;
-	//	Evaluate(elenode->key, state);
-	//	int index = state->GetReturnObject()->GetIntValue();
-	//	WQObject* obj = environment->GetVariable(*elenode->Variable->Value)->GetListElement(index);
-	//	state->ReturnReference(obj);
-	//}
+	else if (node->GetType() == NT_ELEMENT)
+	{
+		ElementNode* elenode = (ElementNode*)node;
+		Evaluate(elenode->key, state);
+		int index = state->GetReturnedReference()->GetIntValue();
+		WQObject* obj = state->CurrentEnvironment->GetVariable(*elenode->Variable->Value)->GetListElement(index);
+		state->ReturnReference(obj);
+	}
 	else if (node->GetType() == NT_STRING)
 	{
 		StringNode* strnode = (StringNode*)node;
@@ -196,7 +196,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 		list<string*>::iterator opit = opnode->Operators->begin();
 		stack<string*> lowops;
 		stack<WQObject*> lowexps;
-		WQObject* left = state->CreateObject();
+		WQObject* left = state->CurrentEnvironment->CreateObject();
 		if (opnode->Terms->size() - opnode->Operators->size() != 1)
 		{
 			throw SYNTAX_INVALID_EXPRESSION;
@@ -487,7 +487,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//supply the rest arugements, just put null objects
 				while (paramit != def->Parameters->end())
 				{
-					state->CurrentEnvironment->SetVariable(*(*paramit)->Value, state->CreateObject());
+					state->CurrentEnvironment->SetVariable(*(*paramit)->Value, state->CurrentEnvironment->CreateObject());
 					paramit++;
 				}
 				//all the parameters are all set, invoke the function
@@ -509,7 +509,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_CREATELIST)
 	{
 		CreateListNode* lsnode = (CreateListNode*)node;
-		WQObject* result = state->CreateObject();
+		WQObject* result = state->CurrentEnvironment->CreateObject();
 		result->InitList();
 		for (list<ExpressionNode*>::iterator it = lsnode->Parameters->begin();
 			it != lsnode->Parameters->end(); it++)
@@ -522,7 +522,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_CREATEDICT)
 	{
 		CreateDictionaryNode* dictnode = (CreateDictionaryNode*)node;
-		WQObject* result = state->CreateObject();
+		WQObject* result = state->CurrentEnvironment->CreateObject();
 		result->InitDictionary();
 		state->ReturnReference(result);
 	}
@@ -572,7 +572,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//<variable>[<exp>:<exp>]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = state->CreateObject();
+				WQObject* result = state->CurrentEnvironment->CreateObject();
 				lsvar->GetSlicing(startIndex,endIndex,result);
 				state->ReturnReference(result);
 			}
@@ -581,7 +581,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//<variable>[<exp>:]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = state->CreateObject();
+				WQObject* result = state->CurrentEnvironment->CreateObject();
 				lsvar->GetSlicingWithLeftIndex(startIndex,result);
 				state->ReturnReference(result);
 			}
@@ -600,7 +600,7 @@ void Runtime::Evaluate(NodeBase* node,WQState* state)
 				//<variable>[:<exp>]
 				Evaluate(slicenode->Variable, state);
 				WQObject *lsvar = state->GetReturnedReference();
-				WQObject* result = state->CreateObject();
+				WQObject* result = state->CurrentEnvironment->CreateObject();
 				lsvar->GetSlicingWithRightIndex(endIndex,result);
 				state->ReturnReference(result);
 			}

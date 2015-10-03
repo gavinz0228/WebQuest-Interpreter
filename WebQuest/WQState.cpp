@@ -59,29 +59,29 @@ WQObject* WQState::GetReturnedReference()
 }
 void WQState::ReturnNull()
 {
-	ReferencedObject = CreateObject();
+	ReferencedObject = CurrentEnvironment->CreateObject();
 }
 void WQState::ReturnBoolean(bool val)
 {
-	WQObject* obj = CreateObject();
+	WQObject* obj = CurrentEnvironment->CreateObject();
 	obj->SetBoolValue(val);
 	this->ReturnReference(obj);
 }
 void WQState::ReturnFloat(long double num)
 {
-	WQObject* obj = CreateObject();
+	WQObject* obj = CurrentEnvironment->CreateObject();
 	obj->SetFloatValue(num);
 	this->ReturnReference(obj);
 }
 void WQState::ReturnInteger(long long num)
 {
-	WQObject* obj = CreateObject();
+	WQObject* obj = CurrentEnvironment->CreateObject();
 	obj->SetIntValue(num);
 	this->ReturnReference(obj);
 }
 void WQState::ReturnString(string &str)
 {
-	WQObject* obj = CreateObject();
+	WQObject* obj = CurrentEnvironment->CreateObject();
 	obj->SetStringValue(str);
 	this->ReturnReference(obj);
 }
@@ -89,7 +89,7 @@ WQObject* WQState::GetParam()
 {
 	if (CallingParams.size() > 0)
 	{
-		WQObject* param = CallingParams.front();
+		WQObject* param = CallingParams.front()->GetActualObject();
 		CallingParams.pop_front();
 		return param;
 	}
@@ -108,12 +108,7 @@ void WQState::ClearParams()
 		CallingParams.pop_front();
 	}
 }
-WQObject* WQState::CreateObject()
-{
-	WQObject* obj = WQObject::Create();
-	CurrentEnvironment->TemporaryVariables.push_back(obj);
-	return obj;
-}
+
 WQObject* WQState::CreateReferenceObject(WQObject* targetobj)
 {
 	WQObject* obj = WQObject::Create();
