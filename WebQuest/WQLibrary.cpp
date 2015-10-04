@@ -15,10 +15,31 @@
 {
 	WebRequest request;
 	WebResponse response;
+	if (state->ParamSize < 1 || state->ParamSize>3)
+	{
+		throw "The function only accept maximum 3 parameters";
+	}
 	string url = state->GetStringParam();
-	string result = request.Get(url);
-	response.ParseResponse(result);
-	state->ReturnString(response.ResponseBody);
+	if (state->ParamSize == 1)
+	{
+		string result = request.Get(url);
+		response.ParseResponse(result);
+		state->ReturnString(response.ResponseBody);
+	}
+	else if (state->ParamSize = 2)
+	{
+		auto dict = state->GetDictionaryParam();
+		map<string, WQObject*>::iterator it = dict->begin();
+		for (; it != dict->end(); it++)
+		{
+			request.AddHeader(it->first, it->second->ToString());
+		}
+		string result = request.Get(url);
+		response.ParseResponse(result);
+		state->ReturnString(response.ResponseBody);
+		
+	}
+
 }
  void WQParseHeader(WQState* state)
 {

@@ -97,6 +97,19 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				it++;
 			}
 		}
+
+
+		//return true if it's operator, operatorlen outputs the length of the operator
+		else if (IsOperator(&(*it), charlen,operatorStart,operatorlen))
+		{
+			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, lineno);
+			Tokens->push_back(tk);
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+		}
 		else if (IsFloat(it, script.end(), charlen))
 		{
 			Converter::StringToFloat(&(*it), charlen, floatno);
@@ -113,7 +126,7 @@ list<Token*>* Tokenizer::Tokenize(string script)
 		{
 			Converter::StringToInteger(&(*it), charlen, integer);
 
-			Token* tk = new Token(integer,lineno);
+			Token* tk = new Token(integer, lineno);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -121,19 +134,6 @@ list<Token*>* Tokenizer::Tokenize(string script)
 				charlen--;
 			}
 		}
-
-		//return true if it's operator, operatorlen outputs the length of the operator
-		else if (IsOperator(&(*it), charlen,operatorStart,operatorlen))
-		{
-			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, lineno);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
-		}
-
 		//must be variable name,string, or numbers
 		else
 		{
@@ -357,7 +357,7 @@ int Tokenizer::GetNewLine(string::iterator startit, string::iterator endit, int 
 {
 	charlen = 0;
 	int linenum=0;
-	while ((*startit=='\r' || *startit == '\n')&&startit!=endit)
+	while (startit != endit&&(*startit == '\r' || *startit == '\n'))
 	{
 		charlen++;
 		if (*startit == '\n')

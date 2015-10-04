@@ -79,7 +79,7 @@ void WQObject::ClearValue()
 		{
 			//delete every element of the list
 			vector<WQObject*>* ls = GetList();
-			for (int i = 0; i < ls->size(); i++)
+			for (size_t i = 0; i < ls->size(); i++)
 			{
 				ls->at(i)->ReferenceCounter--;
 			}
@@ -409,7 +409,7 @@ string WQObject::ToString() const
 		stringstream ss;
 		ss<< "[";
 		vector<WQObject*>* ls = GetList();
-		for (int i = 0; i < ls->size(); i++)
+		for (size_t i = 0; i < ls->size(); i++)
 		{
 			ss<< ls->at(i)->ToElementString();
 			if (i != ls->size() - 1)
@@ -667,7 +667,7 @@ void WQObject::GetSlicingWithLeftIndex(long start, WQObject* targetlist)
 		//make sure the start index is greater than 0
 		if (startindex< 0)  startindex = 0;
 		//copy values to new list
-		for (int i = startindex; i <original->size(); i++)
+		for (size_t i = startindex; i <original->size(); i++)
 		{
 			targetlist->AppendList(original->at(i));
 		}
@@ -708,7 +708,7 @@ void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 		else if (end < 0)
 			endindex = original->size() + end;
 		//copy values to new list
-		for (int i = 0; i < endindex&&i<original->size(); i++)
+		for (size_t i = 0; i < endindex&&i<original->size(); i++)
 		{
 			targetlist->AppendList(original->at(i));
 		}

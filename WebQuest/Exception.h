@@ -32,6 +32,7 @@
 #define		RUNTIME_SLICING_NON_LIST_VARIABLE				"Slicing a non-list variable is not allowed"
 #define		RUNTIME_REASSIGN_OBJECT_NOT_ALLOW				"Not allow reassign an WQObject"
 
+
 #define		RUNTIME_INVALID_TYPE_FOR_EQUAL					"Invalid type for == operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_EQUAL			"Invalid type for >= operator"
 
@@ -42,7 +43,8 @@
 #define		RUNTIME_NON_DICT_VALUE_ASSIGNMENT				"Connot set value by key on a non-dictionary object"
 #define		RUNTIME_TOO_FEW_ARGUMENTS						"Too few arguments to call the function"
 #define		RUNTIME_EXPECTING_A_INTEGER_PARAMETER			"Expecting a integer parameter"
-#define		RUNTIME_EXPECTING_A_STRING_PARAM				"Expecting a string parameter"
+#define		RUNTIME_EXPECTING_A_STRING_PARAMETER			"Expecting a string parameter"
+#define		RUNTIME_EXPECTING_A_DICTIONARY_PARAMETER
 class Exception :std::exception
 {
 public:

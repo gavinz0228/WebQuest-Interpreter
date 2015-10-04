@@ -32,6 +32,7 @@ public:
 	string GetStringParam();
 	long long GetIntegerParam();
 	long double GetFloatParam();
+	map<string, WQObject*>* GetDictionaryParam();
 	void AddParam(WQObject* obj);
 	void ClearParams();
 	void ReturnInteger(long long integer);

@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	{
 		string script;
 		ifstream file(argv[1]);
-
+		//ifstream file("C:\\Users\\Gavin\\OneDrive\\WebQuest\\Debug\\script.wq");
 		file.seekg(0, std::ios::end);
 		script.reserve(file.tellg());
 		file.seekg(0, std::ios::beg);
@@ -72,17 +72,20 @@ void Test()
 		//rt.Run("for i in range(0,500) print(i+' ') end");
 		//rt.Run("for i in range(10) print(i) end");
 		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
-		rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
+		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			   			    header=parse_headers(res) print(header)  \
 											print('\n---------------------------------------\n') \
 														");
 		//rt.Run("print(milli())  str=' ' i=0 while i<=10000 str=str+'1' i+=1 end print(str) print('\n')  print(milli()) ");
-		//rt.Run("a=[1,2,3] for i in a print(i+' ') end");
+		rt.Run("a=[1,2,3] for i in a print(i+100) end");
+		//rt.Run("print(1+1)");
 		//rt.Run("a=100 begin a=range(100000) print(a) end print(a)");
 		//rt.Run("a=[234,234,324] for i in a a[1]='asdfas' end print (a)");
 		//rt.Run("a=2 a+=' ' print(a+'_')");
 		//rt.Run("result=my_func('working') print(result) def my_func(param,second_param) print(param+' yay! function works!') return 'ok' end");
 		//rt.Run("c=[] append(c,'s')  d=c[0] print(d)");
+		//rt.Run("a={} a['sdfg']='dfff' res=get('http://requestb.in/14rhet81',a) \n \n print(res)");
+		//rt.Run("aa=get('http://google.com') print(aa)");
 	}
 	catch (char* msg){
 		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;

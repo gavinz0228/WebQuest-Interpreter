@@ -10,7 +10,7 @@ string WebRequest::GetHeaders(string method, Uri uri)
 	string data;
 	data += method+" "+ uri.Path + " HTTP/" + HTTP_VERSION + "\r\n";
 	data += "Host: " + uri.Host + "\r\n";
-	
+
 	int hsize = headers.size();
 	if (hsize > 0)
 	{
@@ -22,14 +22,18 @@ string WebRequest::GetHeaders(string method, Uri uri)
 	data += "\r\n";
 	return data;
 }
-//WebRequest::WebRequest()
-//{headers.insert("");}
+WebRequest::WebRequest()
+{
+	AddHeader("Connection", "close");
+	AddHeader("Accept", "*/*");
+}
 //sends a get request
 string WebRequest::Get(string url)
 {
 	Uri uri;
 	//parse the uri, splits the components of the uri
 	uri=Uri::Parse(url);
+	AddHeader("Content-Length", "0");
 	return SendRequest(uri.Host.c_str(),uri.Port.c_str(),GetHeaders(METHOD_GET,uri).c_str());
 }
 

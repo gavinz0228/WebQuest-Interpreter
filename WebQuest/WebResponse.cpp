@@ -78,8 +78,8 @@ string WebResponse::ProcessChunkedBody(string& str)
 string Trim(string& str)
 {
 	bool sawchar = false;
-	int start = 0;
-	int end = str.size() -1;
+	size_t start = 0;
+	size_t end = str.size() -1;
 	for (; start < str.length(); start++)
 	{
 		if (str.at(start) != ' ')
@@ -95,7 +95,7 @@ string Trim(string& str)
 string ToLowerCase(string& str)
 {
 	string output;
-	for (int i = 0; i < str.length(); i++)
+	for (size_t i = 0; i < str.length(); i++)
 	{
 		char c = str.at(i);
 		if (c >= 65 && c <= 90)

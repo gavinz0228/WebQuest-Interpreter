@@ -30,7 +30,7 @@ using namespace std;
 class WebRequest
 {
 public:
-	//WebRequest();
+	WebRequest();
 	void AddHeader(string key,string value);
 	string Get(string url);
 	string PostBinary(string url, const char* data);

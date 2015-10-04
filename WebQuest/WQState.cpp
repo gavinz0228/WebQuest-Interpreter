@@ -42,8 +42,19 @@ string WQState::GetStringParam()
 	if (obj->Type == DT_STRING)
 		return obj->ToString();
 	else
-		throw RUNTIME_EXPECTING_A_STRING_PARAM;
+		throw RUNTIME_EXPECTING_A_STRING_PARAMETER;
 }
+
+map<string, WQObject*>* WQState::GetDictionaryParam()
+{
+	WQObject* obj = GetParam();
+	if (obj->Type == DT_DICTIONARY)
+		return obj->GetDictionary();
+	else
+		throw RUNTIME_EXPECTING_A_DICTIONARY_PARAMETER;
+	
+}
+
 void WQState::ReturnReference(WQObject* ref)
 {
 	ReferencedObject = ref;
