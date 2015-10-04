@@ -3,14 +3,14 @@
 
 void WQState::EnterNewEnvironment(EnvironmentType et)
 {
-	Environment* newevnt = new Environment;
+	WQEnvironment* newevnt = new WQEnvironment;
 	newevnt->Parent = CurrentEnvironment;
 	CurrentEnvironment = newevnt;
 	EnvironmentTypeStack.push(et);
 }
 void WQState::BackToParentEnvironment()
 {
-	Environment* parentevnt = CurrentEnvironment->Parent;
+	WQEnvironment* parentevnt = CurrentEnvironment->Parent;
 	delete CurrentEnvironment;
 	CurrentEnvironment = parentevnt;
 	if (EnvironmentTypeStack.size() != 0)

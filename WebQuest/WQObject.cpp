@@ -58,8 +58,12 @@ bool WQObject::GetBoolValue() const
 	}
 	else if (Type == DT_DICTIONARY)
 	{
-		return true;
+		if (GetDictionary()->size() > 0)
+			return true;
+		else
+			return false;
 	}
+	return false;
 
 }
 vector<WQObject*>* WQObject::GetList() const
@@ -189,9 +193,9 @@ void WQObject::AppendList(WQObject* obj)
 		throw RUNTIME_NON_LIST_APPENDING;
 	}
 }
-WQObject* WQObject::GetListElement(long index)
+WQObject* WQObject::GetListElement(long _index)
 {
-
+	unsigned long index = (unsigned long)_index;
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
@@ -230,9 +234,9 @@ WQObject* WQObject::GetDictionaryElement(string& key)
 	else
 		throw RUNTIME_NON_DICT_VALUE_ASSIGNMENT;
 }
-WQObject* WQObject::SetListElement(long index, WQObject* ele)
+WQObject* WQObject::SetListElement(long _index, WQObject* ele)
 {
-
+	unsigned long index = _index;
 	WQObject* oldobj=NULL;
 	if (Type == DT_LIST)
 	{
@@ -299,7 +303,7 @@ void WQObject::DeepCopy(WQObject* obj)
 		InitList();
 		vector < WQObject* >* newlist = GetList();
 		vector < WQObject* >* income = obj->GetList();
-		for (int i = 0; i < income->size(); i++)
+		for (size_t i = 0; i < income->size(); i++)
 		{
 			WQObject* newobj = new WQObject;
 			newobj->DeepCopy(income->at(i));
@@ -359,7 +363,7 @@ long double WQObject::ToFloat() const
 			return GetFloatValue();
 		else
 		{
-			return GetIntValue();;
+			return GetFloatValue();;
 		}
 	}
 	else
@@ -700,7 +704,7 @@ void WQObject::GetSlicingWithRightIndex(long end, WQObject* targetlist)
 
 		targetlist->InitList();
 		vector<WQObject*>* original = GetList();
-		long endindex;
+		unsigned long endindex;
 		// if it's greater than 0 ,normal index
 		//if it's 0, don't need slicing
 		if (end >= 0)
@@ -751,11 +755,11 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 
 		targetlist->InitList();
 		vector<WQObject*>* original = GetList();
-		long endindex;
-		long startindex;
+		unsigned long endindex;
+		unsigned long startindex;
 		//make sure the end index is good
 		if (end >= 0)
-			endindex = end<original->size()?end:original->size();
+			endindex = (unsigned long)end<original->size() ? end : original->size();
 		else 
 			//if (end < 0)
 		{
@@ -764,14 +768,14 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 		}
 		//make sure the start index is good
 		if (start >= 0)
-			startindex = start < original->size() ? start : original->size();
+			startindex = (unsigned long)start < original->size() ? start : original->size();
 		else {
 			//if (start<0)
 			startindex = start + original->size();
 			if (startindex < 0) startindex = 0;
 		}
 		//copy values to new list
-		for (int i = startindex; i < endindex; i++)
+		for (size_t i = startindex; i < endindex; i++)
 		{
 			targetlist->AppendList(original->at(i));
 		}
@@ -780,11 +784,11 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 	else if (Type == DT_STRING)
 	{
 		string original = ToString();
-		long endindex;
-		long startindex;
+		unsigned long endindex;
+		unsigned long startindex;
 		//make sure the end index is good
 		if (end >= 0)
-			endindex = end<original.size() ? end : original.size();
+			endindex = (unsigned long)end<original.size() ? end : original.size();
 		else
 			//if (end < 0)
 		{
@@ -793,7 +797,7 @@ void WQObject::GetSlicing(long start, long end,WQObject* targetlist)
 		}
 		//make sure the start index is good
 		if (start >= 0)
-			startindex = start < original.size() ? start : original.size();
+			startindex = (unsigned long)start < original.size() ? (unsigned long)start : original.size();
 		else {
 			//if (start<0)
 			startindex = start + original.size();

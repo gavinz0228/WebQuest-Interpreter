@@ -2,7 +2,7 @@
 #include <regex>
 #include<iostream>
 #include "Converter.h"
-#include "Exception.h"
+#include "WQException.h"
 using namespace std;
 #ifndef TOKENIZER_H
 #define TOKENIZER_H

@@ -2,7 +2,7 @@
 
  void WQMilli(WQState* state)
 {
-	long milli = time(0) * 1000;
+	time_t milli = time(0) * 1000;
 	return state->ReturnInteger(milli);
 }
  void WQGetRaw(WQState* state)

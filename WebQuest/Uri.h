@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include "Exception.h"
+#include "WQException.h"
 using namespace std;
 #ifndef URI_H
 #define URI_H

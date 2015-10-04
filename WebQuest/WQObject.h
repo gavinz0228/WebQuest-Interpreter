@@ -1,7 +1,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "Exception.h"
+#include "WQException.h"
 #include "Converter.h"
 #include <sstream>
 using namespace std;

@@ -1,5 +1,5 @@
-#include "Environment.h"
-#include "GlobalFunctions.h"
+#include "WQEnvironment.h"
+#include "WQGlobalFunctions.h"
 #include "Parser.h"
 #include <stack>
 using namespace std;
@@ -19,7 +19,7 @@ public:
 	//Environment* environment;
 	long GetCurrentLineNumber(){ return CurrentLineNumber; }
 private:
-	GlobalFunctions Functions;
+	WQGlobalFunctions Functions;
 	map<string, DefNode*>* UserFunctions;
 	long CurrentLineNumber;
 };

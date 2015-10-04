@@ -55,7 +55,7 @@ string WebRequest::PostForm(string url, map<string, string> data)
 }
 string WebRequest::PostBinary(string url, const char* data)
 {
-	char buf[30];
+	//char buf[30];
 	Uri uri = Uri::Parse(url);
 	//AddHeader("Accept", "*/*");
 	AddHeader("Content-Type", "application/x-www-form-urlencoded;");

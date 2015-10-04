@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <map>
 #include "Uri.h"
-#include "Exception.h"
+#include "WQException.h"
 using namespace std;
 #ifndef WEBREQUEST_H
 #define WEBREQUEST_H

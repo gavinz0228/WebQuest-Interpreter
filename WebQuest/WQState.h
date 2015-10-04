@@ -5,23 +5,23 @@ using namespace std;
 #include <list>
 #include<stack>
 #include "WQObject.h"
-#include "Environment.h"
+#include "WQEnvironment.h"
 enum EnvironmentType{ET_ROOT,ET_FUNCTION,ET_IF,ET_LOOP};
-class Environment;
+class WQEnvironment;
 class WQState
 {
 public:
 	WQState(){
 		ReferencedObject = NULL; 
 		BreakOccurred = false;
-		CurrentEnvironment = new Environment;
+		CurrentEnvironment = new WQEnvironment;
 	}
 	~WQState(){
-		Environment* current = CurrentEnvironment;
+		WQEnvironment* current = CurrentEnvironment;
 		while (current != NULL)
 		{
 			//delete its parent environment until the parent is null
-			Environment* temp = current->Parent;
+			WQEnvironment* temp = current->Parent;
 			delete current;
 			current = temp;
 		}
@@ -51,7 +51,7 @@ public:
 	EnvironmentType GetCurrentEnvironmentType();
 	void MoveVariableToParentEnvironment(WQObject* obj);
 	int ParamSize;
-	Environment* CurrentEnvironment;
+	WQEnvironment* CurrentEnvironment;
 	WQObject* CreateObject();
 	//void SetReturnObject(WQObject& obj);
 	//WQObject* GetReturnObject();

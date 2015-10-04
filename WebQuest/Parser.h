@@ -4,7 +4,7 @@
 #include <map>
 #include "Tokenizer.h"
 #include "WQObject.h"
-#include "Exception.h"
+#include "WQException.h"
 using namespace std;
 #ifndef PARSERTREE_H
 #define PARSERTREE_H

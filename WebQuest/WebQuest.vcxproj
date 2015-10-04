@@ -67,9 +67,9 @@
     <ClInclude Include="Converter.h" />
     <ClInclude Include="WQLibrary.h" />
     <ClInclude Include="WQRunTime.h" />
-    <ClInclude Include="Environment.h" />
-    <ClInclude Include="Exception.h" />
-    <ClInclude Include="GlobalFunctions.h" />
+    <ClInclude Include="WQEnvironment.h" />
+    <ClInclude Include="WQException.h" />
+    <ClInclude Include="WQGlobalFunctions.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="WebRequest.h" />
@@ -80,10 +80,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Converter.cpp" />
-    <ClCompile Include="Environment.cpp" />
+    <ClCompile Include="WQEnvironment.cpp" />
     <ClCompile Include="WQLibrary.cpp" />
     <ClCompile Include="WQRuntime.cpp" />
-    <ClCompile Include="GlobalFunctions.cpp" />
+    <ClCompile Include="WQGlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
