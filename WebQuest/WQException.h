@@ -44,7 +44,8 @@
 #define		RUNTIME_TOO_FEW_ARGUMENTS						"Too few arguments to call the function"
 #define		RUNTIME_EXPECTING_A_INTEGER_PARAMETER			"Expecting a integer parameter"
 #define		RUNTIME_EXPECTING_A_STRING_PARAMETER			"Expecting a string parameter"
-#define		RUNTIME_EXPECTING_A_DICTIONARY_PARAMETER
+#define		RUNTIME_EXPECTING_A_DICTIONARY_PARAMETER		"Expecting a dictionary parameter"
+#define		RUNTIME_EXPECTING_A_LIST_OR_DICTIONARY			"Expecting a list or dictionary"
 class Exception :std::exception
 {
 public:

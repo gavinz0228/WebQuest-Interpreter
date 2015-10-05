@@ -170,10 +170,25 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_ELEMENT)
 	{
 		ElementNode* elenode = (ElementNode*)node;
-		Evaluate(elenode->key, state);
-		long index =(long) state->GetReturnedReference()->GetIntValue();
-		WQObject* obj = state->CurrentEnvironment->GetVariable(*elenode->Variable->Value)->GetListElement(index);
-		state->ReturnReference(obj);
+		Evaluate(elenode->Variable, state);
+		WQObject* var = state->GetReturnedReference();
+		if (var->Type == DT_LIST)
+		{
+			Evaluate(elenode->key, state);
+			long index = (long)state->GetReturnedReference()->GetIntValue();
+			state->ReturnReference(var->GetList()->at(index));
+		}
+		else if (var->Type == DT_DICTIONARY)
+		{
+			Evaluate(elenode->key, state);
+			WQObject* value = (*var->GetDictionary())[state->GetReturnedReference()->ToString()];
+			if (value != NULL)
+				state->ReturnReference(value);
+			else
+				state->ReturnNull();
+		}
+		else
+			throw RUNTIME_EXPECTING_A_LIST_OR_DICTIONARY;
 	}
 	else if (node->GetType() == NT_STRING)
 	{

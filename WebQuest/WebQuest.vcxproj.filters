@@ -54,6 +54,12 @@
     <ClInclude Include="WQException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JsonParser\JSON.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonParser\JSONValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Uri.cpp">
@@ -93,6 +99,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WQGlobalFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonParser\JSON.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonParser\JSONValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

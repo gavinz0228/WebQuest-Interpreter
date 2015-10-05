@@ -28,6 +28,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("len", WQLen);
 	Add("range", WQRange);
 	Add("dump_json", WQDumpJson);
+	Add("parse_json", WQParseJson);
 	Add("deep_copy", WQDeepCopy);
 	Add("milli", WQMilli);
 	Add("get_raw", WQGetRaw);

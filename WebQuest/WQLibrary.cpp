@@ -134,6 +134,70 @@
 	printf(obj->ToString().c_str());
 	state->ReturnString(obj->ToString());
 }
+ void WQCreateNode(WQObject* parent, JSONValue* js,WQState* state)
+ {
+	 if (js == NULL)
+		 return;
+	 if (js->IsObject())
+	 {
+		 parent->InitDictionary();
+		 auto obj = js->AsObject();
+		 auto it = obj.begin();
+		 for (; it != obj.end(); it++)
+		 {
+			 auto kv=state->CreateObject();
+			 WQCreateNode(kv, it->second, state);
+			 auto strval = it->first;
+			 parent->SetKeyValue(string(strval.begin(),strval.end()),kv);
+		 }
+	 }
+	 else if (js->IsString())
+	 {
+		 auto strval = js->AsString();
+		 parent->SetStringValue(string(strval.begin(),strval.end()));
+	 }
+	 else if (js->IsBool())
+	 {
+		 parent->SetBoolValue(js->AsBool());
+	 }
+	 else if (js->IsNumber())
+	 {
+		 parent->SetFloatValue(js->AsNumber());
+	 }
+	 else if (js->IsArray())
+	 {
+		 parent->InitList();
+		 auto arr = js->AsArray();
+		 for (size_t i = 0; i < arr.size(); i++)
+		 {
+			 auto obj=state->CreateObject();
+			 WQCreateNode(obj, arr[i], state);
+			 parent->AppendList(obj);
+		 }
+	 }
+	 else if (js->IsNull())
+	 {
+
+	 }
+	 else
+		 throw "Invalid json string";
+	 //for (size_t i = 0; i < js->ObjectKeys().size(); i++)
+	 //{
+		// if (js->IsString())
+		// {
+		//	 (*parent->GetDictionary())[js->k]
+		// }
+	 //}
+ }
+
+ void WQParseJson(WQState* state)
+ {
+	 string raw = state->GetParam()->ToString();
+	 auto dict=state->CreateObject();
+	 JSONValue* js = JSON::Parse(raw.c_str());
+	 WQCreateNode(dict, js,state);
+	 state->ReturnReference(dict);
+ }
  void WQDeepCopy(WQState* state)
 {
 	auto obj = state->GetParam();

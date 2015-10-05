@@ -71,13 +71,13 @@ void Test()
 		//rt.Run("aa={} aa['key']='value' dump_json(aa)");
 		//rt.Run("for i in range(0,500) print(i+' ') end");
 		//rt.Run("for i in range(10) print(i) end");
-		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') print(res)");
+		rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn')\n js=parse_json(res)\n print(js['results'])");
 		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
 			   			    header=parse_headers(res) print(header)  \
 											print('\n---------------------------------------\n') \
 														");
 		//rt.Run("print(milli())  str=' ' i=0 while i<=10000 str=str+'1' i+=1 end print(str) print('\n')  print(milli()) ");
-		rt.Run("a=[1,2,3] for i in a print(i+100) end");
+		//rt.Run("a=[1,2,3] for i in a print(i+100) end");
 		//rt.Run("print(1+1)");
 		//rt.Run("a=100 begin a=range(100000) print(a) end print(a)");
 		//rt.Run("a=[234,234,324] for i in a a[1]='asdfas' end print (a)");
@@ -86,6 +86,7 @@ void Test()
 		//rt.Run("c=[] append(c,'s')  d=c[0] print(d)");
 		//rt.Run("a={} a['sdfg']='dfff' res=get('http://requestb.in/14rhet81',a) \n \n print(res)");
 		//rt.Run("aa=get('http://google.com') print(aa)");
+		//rt.Run("js=parse_json('{\"aa\":\"asdfsf\",\"bb\":[123,456]}') print(js)");
 	}
 	catch (char* msg){
 		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;
