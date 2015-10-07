@@ -24,7 +24,8 @@ enum TokenType :char{
 	TK_IN ,
 	TK_BREAK ,
 	TK_DEF ,
-	TK_RETURN 
+	TK_RETURN ,
+	TK_NULL
 	//,
 	//TK_CREATELIST,
 	//TK_CREATEDICT
@@ -50,7 +51,7 @@ public:
 	string Data;
 	Tokenizer();
 	~Tokenizer();
-	list<Token*>* Tokenize(string script);
+	list<Token*>* Tokenize(string& script);
 	bool IsOperator(char* script, int &charlen, char*& operatorstr,int& operatorlen);
 	bool IsInteger(string::iterator startit, string::iterator endit, int &charlen);
 	bool IsFloat(string::iterator startit, string::iterator endit, int &charlen);
@@ -150,6 +151,7 @@ private:
 #define				KW_BREAK					"break"
 #define				KW_DEF						"def"
 #define				KW_RETURN					"return"
+#define				KW_NULL						"null"
 
 
 #endif

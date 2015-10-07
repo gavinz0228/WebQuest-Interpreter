@@ -7,9 +7,9 @@ Parser::~Parser()
 	if (program != NULL)
 		delete program;
 }
-void Parser::Parse(string script)
+void Parser::Parse(string& script)
 {
-	if (tker == NULL)
+	if (tker != NULL)
 		delete tker;
 	tker = new Tokenizer;
 	tker->Tokenize(script);
@@ -481,11 +481,18 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 		exp->Expression = (NodeBase*)boolnode;
 		exp->ExpressionType = NT_BOOLEAN;
 	}
+	else if (frsttk->Type == TK_NULL)
+	{
+		NullNode * nullnode = new NullNode;
+		exp->Expression = (NodeBase*)nullnode;
+		exp->ExpressionType = NT_NULL;
+	}
 	else if (frsttk->Type == TK_VARIABLE)
 	{ //get the next token- variable or function name
 		if (tker->IsNextLeftParen())
 		{
 			FunctionCallNode* function = new FunctionCallNode;
+			function->SetLineNumber(frsttk->lineno);
 			//skip the left parenthesis
 			tker->NextToken();
 			ParseParameters(tker, function->Parameters);

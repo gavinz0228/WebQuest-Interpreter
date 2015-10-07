@@ -1,23 +1,28 @@
 #include "WQRuntime.h"
-void WQRuntime::Run(char* script)
-{
-	Parser parser;
-	parser.Parse(script);
+
+void WQRuntime::Run(char* _script)
+{	
+	string script = _script;
 	WQState state;
-	//get the user functions from the parsers
-	UserFunctions = &parser.UserFunctions;
-	Evaluate((NodeBase*)parser.program, &state);
+	Run(script, &state);
 
 }
 void WQRuntime::Run(string& script)
 {
-	Parser parser;
-	parser.Parse(script.c_str());
 	WQState state;
+	Run(script, &state);
+
+}
+void WQRuntime::Run(string& script, WQState* state)
+{
+	Parser parser;
+	this->Script = &script;
+	parser.Parse(script);
+
+	RuntimeState = state;
 	//get the user functions from the parsers
 	UserFunctions = &parser.UserFunctions;
-	Evaluate((NodeBase*)parser.program, &state);
-
+	Evaluate((NodeBase*)parser.program, RuntimeState);
 }
 void WQRuntime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
@@ -97,7 +102,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		AssignmentNode* assignment = (AssignmentNode*)node; 
 		
 
-		CurrentLineNumber = assignment->GetLineNumber();
+		state->CurrentLineNumber= assignment->GetLineNumber();
 		
 		if (assignment->TargetType == AT_VARIABLE)
 		{
@@ -200,6 +205,11 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 	{
 		BooleanNode * boolnode = (BooleanNode*)node;
 		state->ReturnBoolean(boolnode->Value);
+
+	}
+	else if (node->GetType() == NT_NULL)
+	{
+		state->ReturnNull();
 
 	}
 	else if (node->GetType() == NT_OPERATION)
@@ -461,7 +471,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_FUNCTIONCALL)
 	{
 		FunctionCallNode* funcnode = (FunctionCallNode*)node;
-		CurrentLineNumber = funcnode->GetLineNumber();
+		state->CurrentLineNumber = funcnode->GetLineNumber();
 		//retrive the target function from the function library
 		WQFunction func = Functions.Get(funcnode->FunctionName);
 		//if it finds the function from the standard function, then invoke it
@@ -677,5 +687,45 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 	}
 }
 
+long WQRuntime::GetCurrentLineNumber()
+{
+	return RuntimeState->CurrentLineNumber;
+}
+
+void WQRuntime::PrintCurrentLine()
+{
+	long lineno = GetCurrentLineNumber();
+	string* script = this->Script;
+	string::iterator it = script->begin();
+	long currentno = 1;
+	while (it != script->end()&&currentno<lineno)
+	{
+		if (*it == '\n')
+		{
+			it++;
+			currentno++;
+		}
+		else if (*it == '\r')
+		{
+			it++;
+			if (*it == '\n')
+				it++;
+			currentno++;
+		}
+		else
+		{
+			it++;
+		}
+	}
+	string::iterator startit = it;
+	while (it != script->end())
+	{
+		if (*it == '\n' || *it == '\r')
+			break;
+		it++;
+	}
+	printf("\t");
+	printf(string(startit,it).c_str());
+}
 
 

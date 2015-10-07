@@ -9,19 +9,24 @@ class WQRuntime{
 public:
 	WQRuntime(){
 		//environment = new Environment;
+		CurrentLineNumber = 0;
 	}
 	~WQRuntime(){
 	}
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	void Run(string& script);
+	void Run(string& script, WQState* state);
 	void Calculate(WQObject* left, string* op, WQObject* right, WQState* state);
 	//Environment* environment;
-	long GetCurrentLineNumber(){ return CurrentLineNumber; }
+	void PrintCurrentLine();
+	long GetCurrentLineNumber();
 private:
 	WQGlobalFunctions Functions;
 	map<string, DefNode*>* UserFunctions;
-	long CurrentLineNumber;
+	volatile long CurrentLineNumber;
+	string* Script;
+	WQState* RuntimeState;
 };
 #endif
 /*

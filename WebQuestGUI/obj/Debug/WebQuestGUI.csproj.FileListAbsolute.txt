@@ -1,0 +1,12 @@
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\WebQuestGUI.exe.config
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.csprojResolveAssemblyReference.cache
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.Properties.Resources.resources
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.csproj.GenerateResource.Cache
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\WebQuestGUI.exe
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\WebQuestGUI.pdb
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.exe
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.pdb
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\obj\Debug\WebQuestGUI.WebQuestGUI.resources
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\ActiproSoftware.Shared.Net20.dll
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\ActiproSoftware.SyntaxEditor.Net20.dll
+C:\Users\Gavin\OneDrive\WebQuest\WebQuestGUI\bin\Debug\ActiproSoftware.WinUICore.Net20.dll

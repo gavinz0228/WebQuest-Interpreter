@@ -47,7 +47,7 @@ Tokenizer::~Tokenizer()
 {
 	this->Clear();
 }
-list<Token*>* Tokenizer::Tokenize(string script)
+list<Token*>* Tokenizer::Tokenize(string& script)
 {
 	this->Clear();
 	long long integer;
@@ -222,6 +222,10 @@ list<Token*>* Tokenizer::Tokenize(string script)
 			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
 			{
 				tk = new Token(start, len, TK_BREAK, lineno);
+			}
+			else if (len == strlen(KW_NULL) && strncmp(start, KW_NULL, len) == 0)
+			{
+				tk = new Token(start, len, TK_NULL, lineno);
 			}
 			else if (len == strlen(KW_RETURN) && strncmp(start, KW_RETURN, len) == 0)
 			{

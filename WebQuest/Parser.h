@@ -60,6 +60,11 @@ class BreakNode :public TerminalNodeBase
 {
 	int GetType(){ return NT_BREAK; }
 };
+class NullNode :public TerminalNodeBase
+{
+	int GetType(){ return NT_NULL; }
+};
+
 
 class StringNode :public  TerminalNodeBase
 {
@@ -348,7 +353,7 @@ class Parser
 {
 public:
 	~Parser();
-	void Parse(string script);
+	void Parse(string& script);
 	void PrintTree();
 	volatile CodeBlockNode *program;
 	map<string, DefNode*> UserFunctions;

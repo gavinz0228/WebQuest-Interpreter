@@ -1,0 +1,3 @@
+res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') 
+#header=parse_headers(res) 
+print(res)

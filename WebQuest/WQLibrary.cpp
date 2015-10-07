@@ -11,6 +11,36 @@
 	string url = state->GetStringParam();
 	state->ReturnString(request.Get(url));
 }
+ void WQStr(WQState* state)
+ {
+	 auto obj=state->CreateObject();
+	 obj->SetStringValue(state->GetParam()->ToString());
+ }
+ void WQInt(WQState* state)
+ {
+	 auto val = state->GetStringParam();
+	 long long intval ;
+	 Converter::StringToInteger(val, intval);
+	 state->ReturnInteger(intval);
+ }
+ void WQFloat(WQState* state)
+ {
+	 auto val = state->GetStringParam();
+	 long double floatval;
+	 Converter::StringToFloat(val, floatval);
+	 state->ReturnInteger(floatval);
+ }
+ void WQTime(WQState* state)
+ {
+ }
+ void WQYear(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 ;
+	 state->ReturnInteger(2015);
+ }
  void WQGet(WQState* state)
 {
 	WebRequest request;

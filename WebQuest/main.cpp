@@ -8,48 +8,11 @@ using namespace std;
 void Request();
 void Tokenize();
 void Parse();
-void Test();
+void Execute(string& script);
 int main(int argc, char **argv)
 {
 	//no parameter is passed in, then run test method
-	if (argc==1)
-		Test();
-	else
-		//read script from the file
-	{
-		string script;
-		ifstream file(argv[1]);
-		//ifstream file("C:\\Users\\Gavin\\OneDrive\\WebQuest\\Debug\\script.wq");
-		file.seekg(0, std::ios::end);
-		script.reserve(file.tellg());
-		file.seekg(0, std::ios::beg);
-
-		script.assign((std::istreambuf_iterator<char>(file)),
-			std::istreambuf_iterator<char>());
-		//printf(script.c_str());
-		WQRuntime rt;
-		try{
-			rt.Run(script);
-		}
-		catch (char* msg){
-			cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;
-		}
-		catch (string &str){
-			cout << "Line: " << rt.GetCurrentLineNumber() << ":" << str << endl;
-		}
-
-	}
-	//Request();
-	//Tokenize();
-	//Parse();
-	//char wait;
-	//scanf_s(&wait);
-	return 0;
-}
-void Test()
-{
-	WQRuntime rt;
-	try{
+	if (argc == 1){
 		//rt.Run("print('asdf')");
 		//rt.Run("a='yea' b=true print(b)");
 		//rt.Run("if true a='yes' else a='no' end print(a)");
@@ -71,11 +34,11 @@ void Test()
 		//rt.Run("aa={} aa['key']='value' dump_json(aa)");
 		//rt.Run("for i in range(0,500) print(i+' ') end");
 		//rt.Run("for i in range(10) print(i) end");
-		rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn')\n js=parse_json(res)\n print(js['results'])");
+		//rt.Run("res=get('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn')\n js=parse_json(res)\n print(js['results'])");
 		//rt.Run("res=get_raw('https://maps.googleapis.com/maps/api/geocode/json?address=2900+bedford+avenue+brooklyn') \
-			   			    header=parse_headers(res) print(header)  \
-											print('\n---------------------------------------\n') \
-														");
+		//			   			    header=parse_headers(res) print(header)  \
+		//											print('\n---------------------------------------\n') \
+		//														");
 		//rt.Run("print(milli())  str=' ' i=0 while i<=10000 str=str+'1' i+=1 end print(str) print('\n')  print(milli()) ");
 		//rt.Run("a=[1,2,3] for i in a print(i+100) end");
 		//rt.Run("print(1+1)");
@@ -85,19 +48,56 @@ void Test()
 		//rt.Run("result=my_func('working') print(result) def my_func(param,second_param) print(param+' yay! function works!') return 'ok' end");
 		//rt.Run("c=[] append(c,'s')  d=c[0] print(d)");
 		//rt.Run("a={} a['sdfg']='dfff' res=get('http://requestb.in/14rhet81',a) \n \n print(res)");
-		//rt.Run("aa=get('http://google.com') print(aa)");
+
 		//rt.Run("js=parse_json('{\"aa\":\"asdfsf\",\"bb\":[123,456]}') print(js)");
+		//string script = "aa='sdf' \r\n \r\n \r\n aa=get('https:/www.google.com') print(aa)";
+		string script = "aa=str(23) print(aa)";
+		Execute(script);
 	}
-	catch (char* msg){
-		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << msg << endl;
-	}
-	catch (string &str){
-		cout << "Line: " << rt.GetCurrentLineNumber() << ":" << str << endl;
+	else
+		//read script from the file
+	{
+		string script;
+		ifstream file(argv[1]);
+		//ifstream file("C:\\Users\\Gavin\\OneDrive\\WebQuest\\Debug\\script.wq");
+		file.seekg(0, std::ios::end);
+		script.reserve(file.tellg());
+		file.seekg(0, std::ios::beg);
+
+		script.assign((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
+		//printf(script.c_str());
+		Execute(script);
 	}
 	char wait;
 	scanf_s(&wait);
+	//Request();
+	//Tokenize();
+	//Parse();
+	//char wait;
+	//scanf_s(&wait);
+	return 0;
+}
+void Execute(string& script)
+{
+	WQRuntime rt;
+	try{
 
-
+		rt.Run(script);
+	}
+	catch (const std::exception& ex)
+	{
+		cout << "[Error: Line " << rt.GetCurrentLineNumber() << ":" << ex.what() <<"]"<< endl;
+		rt.PrintCurrentLine();
+	}
+	catch (char* msg){
+		cout << "[Error: Line " << rt.GetCurrentLineNumber() << ":" << msg << "]" << endl;
+		rt.PrintCurrentLine();
+	}
+	catch (string &str){
+		cout << "[Error: Line " << rt.GetCurrentLineNumber() << ":" << str << "]" << endl;
+		rt.PrintCurrentLine();
+	}
 }
 //void Parse()
 //{

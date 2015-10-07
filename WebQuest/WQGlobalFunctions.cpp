@@ -31,6 +31,9 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("parse_json", WQParseJson);
 	Add("deep_copy", WQDeepCopy);
 	Add("milli", WQMilli);
+	Add("str", WQStr);
+	Add("int", WQInt);
+	Add("float", WQFloat);
 	Add("get_raw", WQGetRaw);
 	Add("parse_headers",WQParseHeader);
 	Add("parse_body", WQParseBody);

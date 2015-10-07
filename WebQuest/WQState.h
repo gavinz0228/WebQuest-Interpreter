@@ -53,6 +53,7 @@ public:
 	int ParamSize;
 	WQEnvironment* CurrentEnvironment;
 	WQObject* CreateObject();
+	volatile long CurrentLineNumber;
 	//void SetReturnObject(WQObject& obj);
 	//WQObject* GetReturnObject();
 private:
