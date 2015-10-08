@@ -2,15 +2,77 @@
 
  void WQMilli(WQState* state)
 {
-	time_t milli = time(0) * 1000;
-	return state->ReturnInteger(milli);
+	using namespace std::chrono;
+	milliseconds ms = duration_cast< milliseconds >(
+		system_clock::now().time_since_epoch()
+		);
+	state->ReturnInteger(ms.count());
 }
- void WQGetRaw(WQState* state)
-{
-	WebRequest request;
-	string url = state->GetStringParam();
-	state->ReturnString(request.Get(url));
-}
+ void WQType(WQState* state)
+ {
+
+	 auto obj = state->GetParam();
+	 string output = "";
+	 if (obj->Type == DT_BOOLEAN)
+		 output = "bool";
+	 else if (obj->Type == DT_STRING)
+		 output = "string";
+	 else if (obj->Type == DT_FLOAT)
+		 output = "float";
+	 else if (obj->Type == DT_INTEGER)
+		 output = "int";
+	 else if (obj->Type == DT_LIST)
+		 output = "list";
+	 else if (obj->Type == DT_DICTIONARY)
+		 output = "dict";
+	 else if (obj->Type == DT_NULL)
+		 output = "null";
+	 state->ReturnString(output);
+ }
+
+ void WQMonth(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_mon+1);
+ }
+ void WQDay(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_mday);
+
+ }
+ void WQYear(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_year+1900);
+ }
+ void WQHour(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_hour);
+ }
+ void WQMinute(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_min);
+ }
+ void WQSecond(WQState* state)
+ {
+	 time_t  timev;
+	 time(&timev);
+	 struct tm * now = localtime(&timev);
+	 state->ReturnInteger(now->tm_sec);
+ }
  void WQStr(WQState* state)
  {
 	 auto obj=state->CreateObject();
@@ -30,16 +92,12 @@
 	 Converter::StringToFloat(val, floatval);
 	 state->ReturnInteger(floatval);
  }
- void WQTime(WQState* state)
+
+ void WQGetRaw(WQState* state)
  {
- }
- void WQYear(WQState* state)
- {
-	 time_t  timev;
-	 time(&timev);
-	 struct tm * now = localtime(&timev);
-	 ;
-	 state->ReturnInteger(2015);
+	 WebRequest request;
+	 string url = state->GetStringParam();
+	 state->ReturnString(request.Get(url));
  }
  void WQGet(WQState* state)
 {

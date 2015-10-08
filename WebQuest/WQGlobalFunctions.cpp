@@ -23,17 +23,28 @@ void func(WQState* state)
 }
 void WQGlobalFunctions::LoadFunctions()
 {
+	//basic
 	Add("print", WQPrint);
 	Add("append", WQAppend);
 	Add("len", WQLen);
 	Add("range", WQRange);
-	Add("dump_json", WQDumpJson);
-	Add("parse_json", WQParseJson);
+	Add("type", WQType);
 	Add("deep_copy", WQDeepCopy);
-	Add("milli", WQMilli);
 	Add("str", WQStr);
 	Add("int", WQInt);
 	Add("float", WQFloat);
+	//time
+	Add("year", WQYear);
+	Add("month", WQMonth);
+	Add("day", WQDay);
+	Add("hour", WQHour);
+	Add("minute", WQMinute);
+	Add("second", WQSecond);
+	//utility
+	Add("dump_json", WQDumpJson);
+	Add("parse_json", WQParseJson);
+	Add("milli", WQMilli);
+	//web
 	Add("get_raw", WQGetRaw);
 	Add("parse_headers",WQParseHeader);
 	Add("parse_body", WQParseBody);
