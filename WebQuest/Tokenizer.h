@@ -51,6 +51,7 @@ public:
 	string Data;
 	Tokenizer();
 	~Tokenizer();
+	long CurrentLineNumber;
 	list<Token*>* Tokenize(string& script);
 	bool IsOperator(char* script, int &charlen, char*& operatorstr,int& operatorlen);
 	bool IsInteger(string::iterator startit, string::iterator endit, int &charlen);

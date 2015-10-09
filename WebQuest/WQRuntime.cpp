@@ -15,14 +15,20 @@ void WQRuntime::Run(string& script)
 }
 void WQRuntime::Run(string& script, WQState* state)
 {
-	Parser parser;
+	if (ProgramParser != NULL)
+	{
+		delete ProgramParser;
+		ProgramParser = NULL;
+	}
+	ProgramParser = new Parser;
 	this->Script = &script;
-	parser.Parse(script);
-
+	CurrentStage = RS_PARSING;
+	ProgramParser->Parse(script);
+	CurrentStage = RS_EVALUATING;
 	RuntimeState = state;
 	//get the user functions from the parsers
-	UserFunctions = &parser.UserFunctions;
-	Evaluate((NodeBase*)parser.program, RuntimeState);
+	UserFunctions = &ProgramParser->UserFunctions;
+	Evaluate((NodeBase*)ProgramParser->program, RuntimeState);
 }
 void WQRuntime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
@@ -689,7 +695,17 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 
 long WQRuntime::GetCurrentLineNumber()
 {
-	return RuntimeState->CurrentLineNumber;
+	if (CurrentStage==RS_EVALUATING)
+		return RuntimeState->CurrentLineNumber;
+	else
+	{
+		if (ProgramParser->CurrentStage == Parser::PS_TOKENIZING)
+		{
+			return ProgramParser->tker->CurrentLineNumber;
+		}
+		else
+			return ProgramParser->CurrentLineNumber;
+	}
 }
 
 void WQRuntime::PrintCurrentLine()

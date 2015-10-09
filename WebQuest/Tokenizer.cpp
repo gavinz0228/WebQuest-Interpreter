@@ -42,6 +42,7 @@ Tokenizer::Tokenizer()
 {
 	Tokens = new list <Token*> ;
 	StartGettingToken = false;
+	CurrentLineNumber = 0;
 }
 Tokenizer::~Tokenizer()
 {
@@ -49,15 +50,15 @@ Tokenizer::~Tokenizer()
 }
 list<Token*>* Tokenizer::Tokenize(string& script)
 {
+	
 	this->Clear();
 	long long integer;
 	long double floatno;
 	char* operatorStart=NULL;
 	int operatorlen;
-	long lineno=1;
+	CurrentLineNumber = 1;
 	string::iterator it = script.begin();
 	int charlen;
-	bool gettingcomment = false;
 	while (it!=script.end())
 	{
 		if (*it==' ')
@@ -82,7 +83,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 			int num = GetNewLine(it, script.end(),charlen);
 			//Token* tk = new Token(&(*it), charlen, TK_NEWLINE, lineno);
 			//Tokens->push_back(tk);
-			lineno += num;
+			CurrentLineNumber += num;
 			while (charlen>0)
 			{
 				it++;
@@ -97,24 +98,52 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 				it++;
 			}
 		}
-
-
 		//return true if it's operator, operatorlen outputs the length of the operator
 		else if (IsOperator(&(*it), charlen,operatorStart,operatorlen))
 		{
-			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, lineno);
+			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, CurrentLineNumber);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
 				it++;
 				charlen--;
 			}
+			//in order to deal with situation that is like a=-2 or a=-2.0
+
+			if (tk->Type == TK_OPERATOR&&*tk->Symbol == string(OP_ASSIGN))
+			{
+				if (IsFloat(it, script.end(), charlen))
+				{
+					Converter::StringToFloat(&(*it), charlen, floatno);
+
+					Token* tk = new Token(floatno, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen>0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+				else if (IsInteger(it, script.end(), charlen))
+				{
+					Converter::StringToInteger(&(*it), charlen, integer);
+
+					Token* tk = new Token(integer, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen>0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+			}
+
 		}
 		else if (IsFloat(it, script.end(), charlen))
 		{
 			Converter::StringToFloat(&(*it), charlen, floatno);
 
-			Token* tk = new Token(floatno, lineno);
+			Token* tk = new Token(floatno, CurrentLineNumber);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -126,7 +155,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 		{
 			Converter::StringToInteger(&(*it), charlen, integer);
 
-			Token* tk = new Token(integer, lineno);
+			Token* tk = new Token(integer, CurrentLineNumber);
 			Tokens->push_back(tk);
 			while (charlen>0)
 			{
@@ -181,7 +210,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 				if (finishedString==true)
 				{
 					//skip the quote at the begining and the end;
-					tk = new Token(start + 1, len - 2, TK_STRING, lineno);
+					tk = new Token(start + 1, len - 2, TK_STRING, CurrentLineNumber);
 				}
 				else
 					throw SYNTAX_STRING_MISSING_QUOTE;
@@ -189,53 +218,53 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 
 			else if (len == strlen(KW_ELSEIF)&&strncmp(start, KW_ELSEIF, len) == 0)
 			{
-				tk = new Token(start, len, TK_ELSEIF, lineno);
+				tk = new Token(start, len, TK_ELSEIF, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_IF) && strncmp(start, KW_IF, len) == 0)
 			{
-				tk = new Token(start, len, TK_IF, lineno);
+				tk = new Token(start, len, TK_IF, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_ELSE) && strncmp(start, KW_ELSE, len) == 0)
 			{
-				tk = new Token(start, len, TK_ELSE, lineno);
+				tk = new Token(start, len, TK_ELSE, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_END) && strncmp(start, KW_END, len) == 0)
 			{
-				tk = new Token(start, len, TK_END, lineno);
+				tk = new Token(start, len, TK_END, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_WHILE) && strncmp(start, KW_WHILE, len) == 0)
 			{
-				tk = new Token(start, len, TK_WHILE, lineno);
+				tk = new Token(start, len, TK_WHILE, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_FOR) && strncmp(start, KW_FOR, len) == 0)
 			{
-				tk = new Token(start, len, TK_FOR, lineno);
+				tk = new Token(start, len, TK_FOR, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_IN) && strncmp(start, KW_IN, len) == 0)
 			{
-				tk = new Token(start, len, TK_IN, lineno);
+				tk = new Token(start, len, TK_IN, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_DEF) && strncmp(start, KW_DEF, len) == 0)
 			{
-				tk = new Token(start, len, TK_DEF, lineno);
+				tk = new Token(start, len, TK_DEF, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_BREAK) && strncmp(start, KW_BREAK, len) == 0)
 			{
-				tk = new Token(start, len, TK_BREAK, lineno);
+				tk = new Token(start, len, TK_BREAK, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_NULL) && strncmp(start, KW_NULL, len) == 0)
 			{
-				tk = new Token(start, len, TK_NULL, lineno);
+				tk = new Token(start, len, TK_NULL, CurrentLineNumber);
 			}
 			else if (len == strlen(KW_RETURN) && strncmp(start, KW_RETURN, len) == 0)
 			{
-				tk = new Token(start, len, TK_RETURN, lineno);
+				tk = new Token(start, len, TK_RETURN, CurrentLineNumber);
 			}
 			else if ((len == strlen(KW_TRUE) && strncmp(start, KW_TRUE, len) == 0) ||
 				len == strlen(KW_FALSE) && strncmp(start, KW_FALSE, len) == 0
 				)
 			{
-				tk = new Token(start, len, TK_BOOLEAN, lineno);
+				tk = new Token(start, len, TK_BOOLEAN, CurrentLineNumber);
 			}
 			//else if (Converter::StringToInteger(start, len, integer))
 			//{
@@ -255,7 +284,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 			//}
 			else
 			{
-				tk = new Token(start, len, TK_VARIABLE, lineno);
+				tk = new Token(start, len, TK_VARIABLE, CurrentLineNumber);
 			}
 			//while (len > 0)
 			//{
@@ -292,7 +321,7 @@ bool Tokenizer::IsInteger(string::iterator startit, string::iterator endit, int 
 }
 bool Tokenizer::IsFloat(string::iterator startit, string::iterator endit, int &charlen)
 {
-	regex floatexp("^[\\d]*[.]{1}\\d+");
+	regex floatexp("^(\\+|-)?[\\d]*[.]{1}\\d+");
 	regex_iterator<std::string::iterator> wordstart(startit, endit, floatexp, regex_constants::match_continuous);
 	std::regex_iterator<std::string::iterator> wordend;
 	if (wordstart != wordend)
@@ -486,7 +515,7 @@ bool Tokenizer::IsNextColon()
 bool Tokenizer::IsNextArithmeticOperator()
 {
 	Token* next = LookAhead();
-	return next != NULL && (*next->Symbol==OP_PLUS||
+	return next != NULL &&next->Type==TK_OPERATOR && (*next->Symbol == OP_PLUS ||
 		*next->Symbol == OP_MINUS||
 		*next->Symbol == OP_MULTIPLY||
 		*next->Symbol == OP_DEVIDE||
@@ -495,7 +524,7 @@ bool Tokenizer::IsNextArithmeticOperator()
 bool Tokenizer::IsNextComparisonOperator()
 {
 	Token* next = LookAhead();
-	return next != NULL&&(*next->Symbol == OP_GREATER ||
+	return next != NULL&&next->Type == TK_OPERATOR&&(*next->Symbol == OP_GREATER ||
 		*next->Symbol == OP_GREATEQUAL ||
 		*next->Symbol == OP_EQUAL ||
 		*next->Symbol == OP_LESS ||
@@ -532,12 +561,12 @@ bool Tokenizer::IsNextEndBlock()
 bool Tokenizer::IsNextAndOperator()
 {
 	Token* next = LookAhead();
-	return next != NULL && *next->Symbol == OP_AND;
+	return next != NULL && next->Type == TK_OPERATOR&&*next->Symbol == OP_AND;
 }
 bool Tokenizer::IsNextOrOperator()
 {
 	Token* next = LookAhead();
-	return next != NULL && *next->Symbol == OP_OR;
+	return next != NULL && next->Type == TK_OPERATOR&&*next->Symbol == OP_OR;
 }
 bool Tokenizer::IsNextNotOperator()
 {

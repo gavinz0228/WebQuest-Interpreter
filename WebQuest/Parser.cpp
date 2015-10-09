@@ -11,18 +11,21 @@ void Parser::Parse(string& script)
 {
 	if (tker != NULL)
 		delete tker;
+	CurrentStage = PS_TOKENIZING;
 	tker = new Tokenizer;
 	tker->Tokenize(script);
+	CurrentStage = PS_PARSING;
 	CodeBlockNode* program = new CodeBlockNode;
 	ParseCodeBlock(tker, program);
 	this->program = program;
+	CurrentLineNumber = 0;
 }
 void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 {
 
 	while (true)
 	{
-		long linenumber=tker->GetNextLineNumber();
+		long CurrentLineNumber = tker->GetNextLineNumber();
 		if (tker->IsNextEndBlock())
 			return;
 		//------------------------------------------
@@ -114,7 +117,7 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 
 				//it's a assignment
 				AssignmentNode* assignment = new AssignmentNode;
-				assignment->SetLineNumber( linenumber);
+				assignment->SetLineNumber(CurrentLineNumber);
 
 				//get the assignment operator
 				assignment->AssignmentOperator = tker->NextToken()->Symbol;
@@ -201,7 +204,7 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			//function call
 			else if (exp.ExpressionType==NT_FUNCTIONCALL)
 			{
-				((FunctionCallNode*)exp.Expression)->SetLineNumber(linenumber);
+				((FunctionCallNode*)exp.Expression)->SetLineNumber(CurrentLineNumber);
 				program->Statements->push_back(exp.Expression);
 			}
 			else if (false)

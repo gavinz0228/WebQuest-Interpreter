@@ -12,6 +12,8 @@ public:
 		CurrentLineNumber = 0;
 	}
 	~WQRuntime(){
+		if (ProgramParser != NULL)
+			delete ProgramParser;
 	}
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
@@ -21,12 +23,15 @@ public:
 	//Environment* environment;
 	void PrintCurrentLine();
 	long GetCurrentLineNumber();
+	enum RuntimeStage{RS_EVALUATING,RS_PARSING};
 private:
 	WQGlobalFunctions Functions;
 	map<string, DefNode*>* UserFunctions;
 	volatile long CurrentLineNumber;
 	string* Script;
 	WQState* RuntimeState;
+	RuntimeStage CurrentStage;
+	Parser* ProgramParser;
 };
 #endif
 /*

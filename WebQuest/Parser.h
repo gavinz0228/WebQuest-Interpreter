@@ -357,7 +357,14 @@ public:
 	void PrintTree();
 	volatile CodeBlockNode *program;
 	map<string, DefNode*> UserFunctions;
-
+	Tokenizer* tker;
+	enum ParserStage
+	{
+		PS_TOKENIZING,
+		PS_PARSING
+	};
+	ParserStage CurrentStage;
+	long CurrentLineNumber;
 private:
 	void ParseCodeBlock(Tokenizer* tker, CodeBlockNode* codeblock);
 	void ParseExpression(Tokenizer* tker, ExpressionNode* node,bool parselogicnode=true);
@@ -365,9 +372,9 @@ private:
 	void ConsumeNewLine(Tokenizer* tker);
 	void ParseTerm(Tokenizer* tker, ExpressionNode* exp);
 	void ParseIf(Tokenizer* tker, IfNode* ifnode);
-
+	
 	void PrintTreeNode(NodeBase* node, int level);
-	Tokenizer* tker;
+	
 
 };
 #endif

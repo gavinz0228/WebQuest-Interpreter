@@ -363,7 +363,7 @@ long double WQObject::ToFloat() const
 			return GetFloatValue();
 		else
 		{
-			return GetFloatValue();;
+			return GetIntValue()*1.0;
 		}
 	}
 	else

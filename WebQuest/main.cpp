@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 
 		//rt.Run("js=parse_json('{\"aa\":\"asdfsf\",\"bb\":[123,456]}') print(js)");
 		//string script = "aa='sdf' \r\n \r\n \r\n aa=get('https:/www.google.com') print(aa)";
-		string script = "print(milli()) range(10000) print(milli()) ";
+		//string script = "print(milli()) range(10000) print(milli()) ";
+		string script = "a=-2 b=-2.1+2.1 print(a+b)";
 		Execute(script);
 	}
 	else
@@ -81,9 +82,10 @@ int main(int argc, char **argv)
 void Execute(string& script)
 {
 	WQRuntime rt;
+	WQState state;
 	try{
 
-		rt.Run(script);
+		rt.Run(script,&state);
 	}
 	catch (const std::exception& ex)
 	{
