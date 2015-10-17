@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{4aa5dc7f-6443-4213-80a1-18d9b9e7abb5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Uri.h">
@@ -57,8 +60,14 @@
     <ClInclude Include="JsonParser\JSONValue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StringUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="WQState.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WQRequest.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,5 +116,28 @@
     <ClCompile Include="JsonParser\JSONValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StringUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WQRequest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="DLLs\libcurl.lib">
+      <Filter>Library</Filter>
+    </Library>
+    <Library Include="DLLs\libeay32.lib">
+      <Filter>Library</Filter>
+    </Library>
+    <Library Include="DLLs\libssh2.lib">
+      <Filter>Library</Filter>
+    </Library>
+    <Library Include="DLLs\ssleay32.lib">
+      <Filter>Library</Filter>
+    </Library>
   </ItemGroup>
 </Project>

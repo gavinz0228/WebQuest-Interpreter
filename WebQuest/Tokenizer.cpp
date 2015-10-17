@@ -200,8 +200,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 				it++;
 
 			}
-			long long integer;
-			long double floating;
+
 			len = ch - start;
 			Token* tk;
 			//if the first character is a slash, then it's a string

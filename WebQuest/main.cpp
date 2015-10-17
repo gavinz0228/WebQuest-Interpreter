@@ -52,7 +52,9 @@ int main(int argc, char **argv)
 		//rt.Run("js=parse_json('{\"aa\":\"asdfsf\",\"bb\":[123,456]}') print(js)");
 		//string script = "aa='sdf' \r\n \r\n \r\n aa=get('https:/www.google.com') print(aa)";
 		//string script = "print(milli()) range(10000) print(milli()) ";
-		string script = "a=-2 b=-2.1+2.1 print(a+b)";
+		//string script = "a=-2 b=-2.1+2.1 print(a+b)";
+		string script = "get('http://www.baidu.com')";
+		//string script = "for i in range(1210) print(i + 100) end ";
 		Execute(script);
 	}
 	else

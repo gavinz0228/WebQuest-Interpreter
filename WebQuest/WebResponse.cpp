@@ -1,8 +1,7 @@
 #include "WebResponse.h"
-string ToLowerCase(string& str);
-string Trim(string& str);
-int HexStrToInt(string& str);
-void WebResponse::ParseResponse(string response)
+
+const string WebResponse::COOKIE_FILE_FORMAT = ".cookie";
+void WebResponse::ParseResponse(string& response)
 {
 	if (response.size() != 0)
 	{
@@ -24,19 +23,19 @@ void WebResponse::ParseResponse(string response)
 			//gets a line of header
 			string hd = RawResponseHeader.substr(start, end - start);
 			size_t colonindex= hd.find(":");
-			ResponseHeaders[ToLowerCase(Trim(hd.substr(0, colonindex)))] = hd.substr(colonindex + 1, hd.size() - colonindex - 1);
+			ResponseHeaders[StringUtility::Trim(hd.substr(0, colonindex))] = hd.substr(colonindex + 1, hd.size() - colonindex - 1);
 			start = end + delim.length();
 			end = RawResponseHeader.find(delim, start);
 		}
 		//add the last line of header to it
 		string hd = RawResponseHeader.substr(start, RawResponseHeader.size() - start);
 		size_t colonindex = hd.find(":");
-		ResponseHeaders[ToLowerCase(Trim(hd.substr(0, colonindex)))] = hd.substr(colonindex + 1, hd.size() - colonindex - 1);
+		ResponseHeaders[StringUtility::Trim(hd.substr(0, colonindex))] = hd.substr(colonindex + 1, hd.size() - colonindex - 1);
 
 		//check headers
 		//---------------------
-		map<string, string>::iterator findit = ResponseHeaders.find("transfer-encoding");
-		if (findit != ResponseHeaders.end() && ToLowerCase(Trim(findit->second)) == "chunked")
+		map<string, string>::iterator findit = ResponseHeaders.find("Transfer-Encoding");
+		if (findit != ResponseHeaders.end() && StringUtility::Trim(findit->second)=="Chunked")
 		{
 			ResponseBody = ProcessChunkedBody(ResponseBody);
 		}
@@ -58,9 +57,9 @@ string WebResponse::ProcessChunkedBody(string& str)
 	{
 		findres = str.find(newline, start);
 		//get the line and remove extra spaces
-		string line = Trim(str.substr(start, findres -start));
+		string line = StringUtility::Trim(str.substr(start, findres -start));
 		//convert the hex string to integer
-		int length = HexStrToInt(line);
+		int length = StringUtility::HexStrToInt(line);
 		if (length == 0)
 			break;
 		//got a chunk of data, write it to the buffer
@@ -71,58 +70,63 @@ string WebResponse::ProcessChunkedBody(string& str)
 	}
 	return ss.str();
 	
-
-
-
 }
-string Trim(string& str)
+string WebResponse::GetCookies()
 {
-	bool sawchar = false;
-	size_t start = 0;
-	size_t end = str.size() -1;
-	for (; start < str.length(); start++)
-	{
-		if (str.at(start) != ' ')
-			break;
-	}
-	for (; end >= start; end--)
-	{
-		if (str.at(end) != ' ')
-			break;
-	}
-	return str.substr(start, end - start+1);
-}
-string ToLowerCase(string& str)
-{
-	string output;
-	for (size_t i = 0; i < str.length(); i++)
-	{
-		char c = str.at(i);
-		if (c >= 65 && c <= 90)
-		{
-			output += c + 32;
-		}
-		else
-		{
-			output += c;
-		}
+	string cookie = ResponseHeaders["Set-Cookie"];
 
-	}
-	return output;
+	return cookie;
+		
 }
-int HexStrToInt(string& str)
+void WebResponse::ProcessCookies()
 {
-	int x;
-	std::stringstream ss;
-	ss << std::hex << str;
-	ss >> x;
-	return x;
-}
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-	std::stringstream ss(s);
-	std::string item;
-	while (std::getline(ss, item, delim)) {
-		elems.push_back(item);
+	map<string, string>  newvalue;
+	map<string, string> oldvalue;
+	LoadCookies(oldvalue);
+	StringToPairs(GetCookies(), newvalue);
+	map<string, string>::iterator newit = newvalue.begin();
+	for (; newit != newvalue.end(); newit++)
+	{
+		oldvalue[newit->first] = newit->second;
 	}
-	return elems;
+	SaveCookies(oldvalue);
+}
+void WebResponse::StringToPairs(string& str, map<string, string>& pairs)
+{
+	vector<string> items;
+	StringUtility::split(str, ';', items);
+	StringUtility::ListToPairs('=', items, pairs);
+}
+void WebResponse::PairsToString(map<string, string>& pairs, string& str)
+{
+	stringstream sbuffer;
+	map<string, string>::iterator pairit = pairs.begin();
+	for (; pairit != pairs.end(); pairit++)
+	{
+		sbuffer << pairit->first << "=" << pairit->second << ";";
+	}
+	str = sbuffer.str();
+	
+}
+
+void WebResponse::SaveCookies(map<string, string>& pairs)
+{
+	ofstream output(Request->Host + WebResponse::COOKIE_FILE_FORMAT, ofstream::out);
+	if (output.is_open())
+	{
+		string cookiestr;
+		PairsToString(pairs, cookiestr);
+		output << cookiestr;
+		output.close();
+	}
+	
+}
+void WebResponse::LoadCookies(map<string,string>& pairs)
+{
+	ifstream input(Request->Host + WebResponse::COOKIE_FILE_FORMAT, ifstream::in);
+	if (input.is_open())
+	{
+		std::string str((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+		StringToPairs(str, pairs);
+	}
 }

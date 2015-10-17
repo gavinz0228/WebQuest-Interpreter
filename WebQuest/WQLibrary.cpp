@@ -90,7 +90,7 @@
 	 auto val = state->GetStringParam();
 	 long double floatval;
 	 Converter::StringToFloat(val, floatval);
-	 state->ReturnInteger(floatval);
+	 state->ReturnFloat(floatval);
  }
 
  void WQGetRaw(WQState* state)
@@ -99,10 +99,15 @@
 	 string url = state->GetStringParam();
 	 state->ReturnString(request.Get(url));
  }
+
+
+
+
+
  void WQGet(WQState* state)
 {
 	WebRequest request;
-	WebResponse response;
+	
 	if (state->ParamSize < 1 || state->ParamSize>3)
 	{
 		throw "The function only accept maximum 3 parameters";
@@ -110,12 +115,37 @@
 	string url = state->GetStringParam();
 	if (state->ParamSize == 1)
 	{
-		string result = request.Get(url);
-		response.ParseResponse(result);
-		state->ReturnString(response.ResponseBody);
+		WQRequest req;
+		stringstream ss;
+		//req.GetResponse("http://www.google.com", ss);
+		req.HTTPSRequest("https://www.yahoo.com", ss);
+		printf(ss.str().c_str());  
+		//WebResponse response(&request);
+		//string result = request.Get(url);
+		//response.ParseResponse(result);
+		//response.ProcessCookies();
+		//state->ReturnString(response.ResponseBody);
+		//CURL *curl;
+		//CURLcode res;
+		//curl = curl_easy_init();
+		//if (curl)
+		//{
+		//	curl_easy_setopt(curl, CURLOPT_URL, url);
+		//	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
+		//	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
+
+		//	res = curl_easy_perform(curl);
+		//	
+		//	if (res == CURLE_OK)
+		//	{
+		//		
+		//	}
+		//	curl_easy_cleanup(curl);
+		//}
 	}
 	else if (state->ParamSize = 2)
 	{
+		WebResponse response(&request);
 		auto dict = state->GetDictionaryParam();
 		map<string, WQObject*>::iterator it = dict->begin();
 		for (; it != dict->end(); it++)
@@ -127,7 +157,6 @@
 		state->ReturnString(response.ResponseBody);
 		
 	}
-
 }
  void WQParseHeader(WQState* state)
 {

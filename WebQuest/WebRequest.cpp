@@ -26,6 +26,7 @@ WebRequest::WebRequest()
 {
 	AddHeader("Connection", "close");
 	AddHeader("Accept", "*/*");
+	//AddHeader("Accept-Encoding","gzip, deflate");
 }
 //sends a get request
 string WebRequest::Get(string url)
@@ -33,6 +34,7 @@ string WebRequest::Get(string url)
 	Uri uri;
 	//parse the uri, splits the components of the uri
 	uri=Uri::Parse(url);
+	Host = uri.Host;
 	AddHeader("Content-Length", "0");
 	return SendRequest(uri.Host.c_str(),uri.Port.c_str(),GetHeaders(METHOD_GET,uri).c_str());
 }

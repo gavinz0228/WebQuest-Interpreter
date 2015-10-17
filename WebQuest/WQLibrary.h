@@ -1,9 +1,12 @@
 #include "WQState.h"
+#include "WQRequest.h"
 #include "WebRequest.h"
 #include "WebResponse.h"
 #include "JsonParser\JSON.h"
 #include "JsonParser\JSONValue.h"
+
 #include "Converter.h"
+
 #include <wchar.h>
 #include <ctype.h>
 #include <wctype.h>
