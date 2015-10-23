@@ -28,7 +28,32 @@ void WQRuntime::Run(string& script, WQState* state)
 	RuntimeState = state;
 	//get the user functions from the parsers
 	UserFunctions = &ProgramParser->UserFunctions;
+	LoadFunctionsToEnvironment();
 	Evaluate((NodeBase*)ProgramParser->program, RuntimeState);
+	UnloadFunctionsFromEnvironment();
+}
+void WQRuntime::LoadFunctionsToEnvironment()
+{
+	map<string, DefNode*>::iterator ufit=UserFunctions->begin();
+	while (ufit != UserFunctions->end())
+	{
+		auto obj = WQEnvironment::CreateGlobalVariable(ufit->first);
+		obj->SetUserFunctionValue(ufit->second);
+		ufit++;
+	}
+	map<string, WQFunction>::iterator sdit = StandardFunctions.Functions->begin();
+	while (sdit != StandardFunctions.Functions->end())
+	{
+		auto obj = WQEnvironment::CreateGlobalVariable(sdit->first);
+		obj->SetStandardFunctionValue(sdit->second);
+		sdit++;
+	}
+}
+void WQRuntime::UnloadFunctionsFromEnvironment()
+{
+
+	WQEnvironment:: ClearGlobalVariables();
+
 }
 void WQRuntime::Calculate(WQObject* left, string* op, WQObject* right,WQState* state)
 {
@@ -479,9 +504,11 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		FunctionCallNode* funcnode = (FunctionCallNode*)node;
 		state->CurrentLineNumber = funcnode->GetLineNumber();
 		//retrive the target function from the function library
-		WQFunction func = Functions.Get(funcnode->FunctionName);
-		//if it finds the function from the standard function, then invoke it
-		if (func != NULL)
+		WQObject* func=state->CurrentEnvironment->GetVariable(*funcnode->FunctionName);
+		if (func==NULL)
+			throw string(RUNTIME_FUNCTION_NOT_DEFINED) + ": " + *funcnode->FunctionName;
+		//if it's a standard function
+		if (func->Type==DT_STANDARD_FUNCTION)
 		{
 			//check the parameter size of the function call
 			state->ParamSize = funcnode->Parameters->size();
@@ -493,48 +520,48 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			}
 			state->ReturnNull();
 			//call the function 
-			func(state);
+			((WQFunction)func->GetStandardFunctionValue())(state);
 			//clear the parameters in the list
 			state->ClearParams();
 		}
 		//otherwise search the user defined functions
-		else
+		else if (func->Type==DT_USER_FUNCTION)
 		{
-			map<string, DefNode*>::iterator it = UserFunctions->find(*funcnode->FunctionName);
-			if(it != UserFunctions->end())
+			//map<string, DefNode*>::iterator it = UserFunctions->find(*funcnode->FunctionName);
+			//if(it != UserFunctions->end())
+			//{
+			DefNode* def = (DefNode*)func->GetUserFunctionValue();
+			if (def->Parameters->size() < funcnode->Parameters->size())
+				throw string("Too many parameters are provided, maximum ") + to_string( def->Parameters->size())+" is/are needed";
+			//next step is to evaulate the parameters and inject to the function's environment
+			list<VariableNode*>::iterator paramit = def->Parameters->begin();
+			list<ExpressionNode*>::iterator paramexpit = funcnode->Parameters->begin();
+			state->EnterNewEnvironment(ET_FUNCTION);
+			for (; paramexpit != funcnode->Parameters->end(); paramexpit++, paramit++)
 			{
-				DefNode* def = it->second;
-				if (def->Parameters->size() < funcnode->Parameters->size())
-					throw string("Too many parameters are provided, maximum ") + to_string( def->Parameters->size())+" is/are needed";
-				//next step is to evaulate the parameters and inject to the function's environment
-				list<VariableNode*>::iterator paramit = def->Parameters->begin();
-				list<ExpressionNode*>::iterator paramexpit = funcnode->Parameters->begin();
-				state->EnterNewEnvironment(ET_FUNCTION);
-				for (; paramexpit != funcnode->Parameters->end(); paramexpit++, paramit++)
-				{
-					Evaluate(*paramexpit, state);
-					state->CurrentEnvironment->SetVariable(*(*paramit)->Value,state->GetReturnedReference());
-				}
-				//supply the rest arugements, just put null objects
-				while (paramit != def->Parameters->end())
-				{
-					state->CurrentEnvironment->SetVariable(*(*paramit)->Value, state->CurrentEnvironment->CreateObject());
-					paramit++;
-				}
-				//all the parameters are all set, invoke the function
-				Evaluate(def->CodeBlock, state);
-				//this is the return value of the function, needs to be brought to the parent environment in order to keep it
-				if (state->CurrentEnvironment->Parent != NULL)
-				{
-					//printf(state->GetReturnedReference()->ToString().c_str());
-					state->MoveVariableToParentEnvironment(state->GetReturnedReference());
-				}
-				state->BackToParentEnvironment();
+				Evaluate(*paramexpit, state);
+				state->CurrentEnvironment->SetVariable(*(*paramit)->Value,state->GetReturnedReference());
 			}
-			else
-				throw string(RUNTIME_FUNCTION_NOT_DEFINED) + ": " + *funcnode->FunctionName;
+			//supply the rest arugements, just put null objects
+			while (paramit != def->Parameters->end())
+			{
+				state->CurrentEnvironment->SetVariable(*(*paramit)->Value, state->CurrentEnvironment->CreateObject());
+				paramit++;
+			}
+			//all the parameters are all set, invoke the function
+			Evaluate(def->CodeBlock, state);
+			//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+			if (state->CurrentEnvironment->Parent != NULL)
+			{
+				//printf(state->GetReturnedReference()->ToString().c_str());
+				state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+			}
+			state->BackToParentEnvironment();
+			//}
+			
 		}
-
+		else
+			throw string(RUNTIME_INVOKING_NON_FUNCTION) + ": " + *funcnode->FunctionName;
 		
 	}
 	else if (node->GetType() == NT_CREATELIST)
@@ -555,6 +582,14 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		CreateDictionaryNode* dictnode = (CreateDictionaryNode*)node;
 		WQObject* result = state->CurrentEnvironment->CreateObject();
 		result->InitDictionary();
+		map<string, ExpressionNode*>::iterator it=dictnode->Pairs->begin();
+		map<string, WQObject*>* newdict = result->GetDictionary();
+		while (it != dictnode->Pairs->end())
+		{
+			Evaluate(it->second, state);
+			(*newdict)[it->first] = state->GetReturnedReference();
+			it++;
+		}
 		state->ReturnReference(result);
 	}
 	else if (node->GetType() == NT_FOR)

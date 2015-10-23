@@ -3,16 +3,16 @@
 #include <vector>
 #include "WQException.h"
 #include "Converter.h"
+
 #include <sstream>
 using namespace std;
 #ifndef WQOBJECT_H
 #define WQOBJECT_H
 
-enum DataType{ DT_FUNCTION, DT_INTEGER, DT_FLOAT, DT_STRING, DT_LIST, DT_DICTIONARY ,DT_BOOLEAN,DT_NULL};
+enum DataType{ DT_INTEGER, DT_FLOAT, DT_STRING, DT_LIST, DT_DICTIONARY ,DT_BOOLEAN,DT_STANDARD_FUNCTION,DT_USER_FUNCTION,DT_NULL};
 class WQObject
 {
 public:
-
 
 	~WQObject();
 	WQObject(DataType type);
@@ -25,8 +25,11 @@ public:
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
 	void SetStringValue(string& val);
-	
 	void SetBoolValue(bool val);
+
+	void SetUserFunctionValue(void* func);
+	void SetStandardFunctionValue(void* func);
+
 	void SetNull();
 	void InitList();
 	void InitDictionary();
@@ -41,6 +44,10 @@ public:
 	void SetKeyValue(string key, long long value);
 
 	void DeepCopy(WQObject* obj);
+
+	void* GetUserFunctionValue();
+	void* GetStandardFunctionValue();
+
 	long long GetIntValue() const;
 	long double GetFloatValue() const;
 	bool GetBoolValue() const;

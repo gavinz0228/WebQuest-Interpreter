@@ -50,6 +50,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("parse_body", WQParseBody);
 	Add("parse_status", WQParseStatus);
 	Add("get", WQGet);
+	Add("post", WQPost);
 
 
 }

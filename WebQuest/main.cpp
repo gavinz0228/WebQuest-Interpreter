@@ -53,9 +53,17 @@ int main(int argc, char **argv)
 		//string script = "aa='sdf' \r\n \r\n \r\n aa=get('https:/www.google.com') print(aa)";
 		//string script = "print(milli()) range(10000) print(milli()) ";
 		//string script = "a=-2 b=-2.1+2.1 print(a+b)";
-		string script = "get('http://www.baidu.com')";
+		//string script = "get('http://www.baidu.com')";
 		//string script = "for i in range(1210) print(i + 100) end ";
+		//string script = "print(['asfasdf',234,'sdfsf',['sdf',3]]) print({sfd:{'ss':2}}) print({'sdfd':[2,3,5]})";
+		//string script = "res = get('http://maps.googleapis.com/maps/api/geocode/json', { 'address':'2900 bedford avenue brooklyn' }) print(res)";
+		//string script = "def test_func() lst=[print] func=lst[0] func('asdfasdf') end test_func() print('dd')";
+		//string script = "dict={} dict['key1']={} print(dict['key1']['ss'])";
+		//string script="res=get('http://requestb.in/znfitizn',null,{'header1':'value1'}) print(res)";
+		string script = "res=post('http://requestb.in/1isq5r61',{'asdfsf':22,'a':'sdf'},{'header1':'headervalue'}) print(res)";
 		Execute(script);
+		char wait;
+		scanf_s(&wait);
 	}
 	else
 		//read script from the file
@@ -72,8 +80,7 @@ int main(int argc, char **argv)
 		//printf(script.c_str());
 		Execute(script);
 	}
-	char wait;
-	scanf_s(&wait);
+
 	//Request();
 	//Tokenize();
 	//Parse();

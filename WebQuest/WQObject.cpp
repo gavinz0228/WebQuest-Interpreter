@@ -66,6 +66,14 @@ bool WQObject::GetBoolValue() const
 	return false;
 
 }
+void* WQObject::GetUserFunctionValue()
+{
+	return Data;
+}
+void* WQObject::GetStandardFunctionValue()
+{
+	return Data;
+}
 vector<WQObject*>* WQObject::GetList() const
 {
 	return (vector<WQObject*>*)Data;
@@ -88,8 +96,17 @@ void WQObject::ClearValue()
 				ls->at(i)->ReferenceCounter--;
 			}
 		}
-		delete Data;
-		Data = NULL;
+		if (Type != DT_STANDARD_FUNCTION && Type != DT_USER_FUNCTION)
+		{
+			delete Data;
+			Data = NULL;
+		}
+		else
+		{
+
+		}
+		
+
 
 	}
 }
@@ -98,6 +115,21 @@ bool WQObject::Assigned()
 {
 	return assigned;
 }
+void WQObject::SetUserFunctionValue(void* func)
+{
+	AssertCanAssign();
+	Type = DT_USER_FUNCTION;
+	Data = func;
+	assigned = true;
+}
+void WQObject::SetStandardFunctionValue(void* func)
+{
+	AssertCanAssign();
+	Type = DT_STANDARD_FUNCTION;
+	Data = func;
+	assigned = true;
+}
+
 void WQObject::SetFloatValue(long double value)
 {
 	AssertCanAssign();
@@ -323,6 +355,14 @@ void WQObject::DeepCopy(WQObject* obj)
 			obj->DeepCopy(it->second);
 			newdict->insert(pair<string, WQObject*>(it->first, obj));
 		}
+	}
+	else if (obj->Type == DT_USER_FUNCTION)
+	{
+		SetUserFunctionValue(obj->GetUserFunctionValue());
+	}
+	else if (obj->Type == DT_STANDARD_FUNCTION)
+	{
+		SetStandardFunctionValue(obj->GetStandardFunctionValue());
 	}
 	else if (obj->Type == DT_NULL)
 	{

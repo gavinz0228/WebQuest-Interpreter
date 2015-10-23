@@ -22,6 +22,7 @@
  void WQParseBody(WQState* state);
  void WQParseHeader(WQState* state);
  void WQGet(WQState* state);
+ void WQPost(WQState* state);
  void WQGetRaw(WQState* state);
  void WQMilli(WQState* state);
  

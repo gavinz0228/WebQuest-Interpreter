@@ -92,6 +92,97 @@ CURLcode WQRequest::GetResponse(const std::string& url, std::ostream& os, long t
 	return code;
 }
 
+
+string WQRequest::PairsToURLParameters(map<string, string>& params)
+{
+	string urlparam = "";
+	map<string, string>::iterator it = params.begin();
+	for (; it != params.end(); it++)
+	{
+		urlparam += Uri::URLEncode(it->first) + "=" + Uri::URLEncode(it->second);
+	}
+	return urlparam;
+}
+curl_slist *  WQRequest::SetHeaders( map<string, string>& headers)
+{
+	CURLcode res;
+	struct curl_slist *chunk = NULL;
+	map<string, string>::iterator it = headers.begin();
+	for (; it != headers.end(); it++)
+	{
+		chunk=curl_slist_append(chunk,(it->first+": "+it->second).c_str() );
+	}
+	return chunk;
+}
+
+CURLcode WQRequest::HTTPGet(const string& url, map<string, string>& headers, ostream& os, long timeout)
+{
+	CURLcode code(CURLE_FAILED_INIT);
+	CURL* curl;
+	curl = curl_easy_init();
+	CURLcode res;
+
+	if (curl)
+	{
+		//if (CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite))
+		//	&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L))
+		//	&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L))
+		//	&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FILE, &os))
+		//	&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout))
+		//	&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_URL, url)))
+		//{
+		//	code = curl_easy_perform(curl);
+		//}
+		res=curl_easy_setopt(curl, CURLOPT_URL, url);
+		res=curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
+		res=curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+		struct curl_slist * hlist = NULL;
+		hlist=SetHeaders( headers);
+		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
+		res = curl_easy_perform(curl);
+		curl_easy_cleanup(curl);
+	}
+	return code;
+}
+
+CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, string>& headers, ostream& os, long timeout)
+{
+	CURL *curl;
+	CURLcode res;
+
+	/* In windows, this will init the winsock stuff */
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	/* get a curl handle */
+	curl = curl_easy_init();
+	if (curl) {
+		/* First set the URL that is about to receive our POST. This URL can
+		just as well be a https:// URL if that is what should receive the
+		data. */
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
+		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		/* Now specify the POST data */
+		res=curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+		struct curl_slist * hlist = NULL;
+		hlist = SetHeaders(headers);
+		if (hlist!=NULL)
+			res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
+		/* Perform the request, res will get the return code */
+		res = curl_easy_perform(curl);
+		/* Check for errors */
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		/* always cleanup */
+		curl_easy_cleanup(curl);
+	}
+	curl_global_cleanup();
+	return res;
+}
+
 string WQRequest::GetCurrentDir()
 {
 	char path[300];

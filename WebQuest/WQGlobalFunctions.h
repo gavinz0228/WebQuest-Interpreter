@@ -27,8 +27,9 @@ public:
 	void Add(string, WQFunction);
 	void LoadFunctions();
 	WQFunction Get(string*);
-private:
-	map<string,WQFunction>* Functions;
+	map<string, WQFunction>* Functions;
+//private:
+	
 
 	//void (*func)(WQState*);
 };

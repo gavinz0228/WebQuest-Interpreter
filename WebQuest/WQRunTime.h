@@ -15,6 +15,8 @@ public:
 		if (ProgramParser != NULL)
 			delete ProgramParser;
 	}
+	void LoadFunctionsToEnvironment();
+	void UnloadFunctionsFromEnvironment();
 	void Evaluate(NodeBase* program,WQState* state);
 	void Run(char* script);
 	void Run(string& script);
@@ -25,7 +27,8 @@ public:
 	long GetCurrentLineNumber();
 	enum RuntimeStage{RS_EVALUATING,RS_PARSING};
 private:
-	WQGlobalFunctions Functions;
+	
+	WQGlobalFunctions StandardFunctions;
 	map<string, DefNode*>* UserFunctions;
 	volatile long CurrentLineNumber;
 	string* Script;

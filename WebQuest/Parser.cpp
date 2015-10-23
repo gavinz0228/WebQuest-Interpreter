@@ -136,65 +136,66 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 				}
 
 				//assignment of  <variable>=[]
-				if (tker->IsNextLeftBracket())
-				{
-					tker->NextToken();
-					if (tker->IsNextRightBracket())
-					{
-						tker->NextToken();
-						CreateListNode * createlist = new CreateListNode;
-						assignment->RightSide->ExpressionType = NT_CREATELIST;
-						assignment->RightSide->Expression = (NodeBase*)createlist;
-					}
-					else
-					{
-						CreateListNode * createlist = new CreateListNode;
-						ParseParameters(tker, createlist->Parameters);
-						assignment->RightSide->ExpressionType = NT_CREATELIST;
-						assignment->RightSide->Expression = (NodeBase*)createlist;
-						if (tker->IsNextRightBracket())
-							tker->NextToken();
-						else
-							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
-					}
-				}
-				//assignment of  <variable>={} or <variable>={<exp>}
-				else if (tker->IsNextLeftCurlyBracket())
-				{
-					tker->NextToken();
-					if (tker->IsNextRightCurlyBracket())
-					{
-						//<variable>={}
-						tker->NextToken();
-						CreateDictionaryNode* createdict = new CreateDictionaryNode;
+				//if (tker->IsNextLeftBracket())
+				//{
+				//	tker->NextToken();
+				//	if (tker->IsNextRightBracket())
+				//	{
+				//		tker->NextToken();
+				//		CreateListNode * createlist = new CreateListNode;
+				//		assignment->RightSide->ExpressionType = NT_CREATELIST;
+				//		assignment->RightSide->Expression = (NodeBase*)createlist;
+				//	}
+				//	else
+				//	{
+				//		CreateListNode * createlist = new CreateListNode;
+				//		ParseParameters(tker, createlist->Parameters);
+				//		assignment->RightSide->ExpressionType = NT_CREATELIST;
+				//		assignment->RightSide->Expression = (NodeBase*)createlist;
+				//		if (tker->IsNextRightBracket())
+				//			tker->NextToken();
+				//		else
+				//			throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+				//	}
+				//}
+				////assignment of  <variable>={} or <variable>={<exp>}
+				//else 
+				//if (tker->IsNextLeftCurlyBracket())
+				//{
+				//	tker->NextToken();
+				//	if (tker->IsNextRightCurlyBracket())
+				//	{
+				//		//<variable>={}
+				//		tker->NextToken();
+				//		CreateDictionaryNode* createdict = new CreateDictionaryNode;
 
-						assignment->RightSide->ExpressionType = NT_CREATEDICT;
-						assignment->RightSide->Expression = (NodeBase*)createdict;
-					}
-					else
-					{
-						ExpressionNode* param = new ExpressionNode;
-						ParseExpression(tker, param);
-						if (tker->IsNextRightCurlyBracket())
-						{
-							CreateDictionaryNode* createdict = new CreateDictionaryNode;
-							createdict->Parameter = param;
+				//		assignment->RightSide->ExpressionType = NT_CREATEDICT;
+				//		assignment->RightSide->Expression = (NodeBase*)createdict;
+				//	}
+				//	else
+				//	{
+				//		ExpressionNode* param = new ExpressionNode;
+				//		ParseExpression(tker, param);
+				//		if (tker->IsNextRightCurlyBracket())
+				//		{
+				//			CreateDictionaryNode* createdict = new CreateDictionaryNode;
+				//			createdict->Parameter = param;
 
-							assignment->RightSide->ExpressionType = NT_CREATEDICT;
-							assignment->RightSide->Expression = (NodeBase*)createdict;
-						}
-						else
-							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
-					}
+				//			assignment->RightSide->ExpressionType = NT_CREATEDICT;
+				//			assignment->RightSide->Expression = (NodeBase*)createdict;
+				//		}
+				//		else
+				//			throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+				//	}
 
 
-					//string* name = tker->NextToken()->Symbol;
-					//FunctionCallNode* createdict = new FunctionCallNode;
-					//createdict->FunctionName = name;
-					//assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
-					//assignment->RightSide->Expression = (NodeBase*)createdict;
-				}
-				else
+				//	//string* name = tker->NextToken()->Symbol;
+				//	//FunctionCallNode* createdict = new FunctionCallNode;
+				//	//createdict->FunctionName = name;
+				//	//assignment->RightSide->ExpressionType = NT_FUNCTIONCALL;
+				//	//assignment->RightSide->Expression = (NodeBase*)createdict;
+				//}
+				//else
 					ParseExpression(tker, assignment->RightSide);
 
 				program->Statements->push_back((NodeBase*)assignment);
@@ -349,7 +350,8 @@ void Parser::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parselog
 	//--see if it's null term,if yes, just return a null-type expression
 	if (frstexp.ExpressionType == NT_NULL)
 	{
-		exp->ExpressionType = NT_NULL;
+		exp->ExpressionType = frstexp.ExpressionType;
+		exp->Expression = frstexp.Expression;
 		return;
 	}
 
@@ -443,189 +445,280 @@ void Parser::ParseExpression(Tokenizer *tker, ExpressionNode* exp, bool parselog
 
 }
 
+void Parser::ParseDictionary(Tokenizer* tker, ExpressionNode* exp)
+{
+	tker->NextToken();
+	//if it's {}
+	if (tker->IsNextRightCurlyBracket())
+	{
+		//<variable>={}
+		tker->NextToken();
+		CreateDictionaryNode* createdict = new CreateDictionaryNode;
 
+		exp->ExpressionType = NT_CREATEDICT;
+		exp->Expression = (NodeBase*)createdict;
+	}
+	//expecting 'key1':<exp>,'key2':<exp> ....
+	//or key1:<exp>,key2:<exp> ....
+	else
+	{
+		CreateDictionaryNode* createdict = new CreateDictionaryNode;
+		exp->Expression = createdict;
+		exp->ExpressionType = NT_CREATEDICT;
+		do
+		{
+			string key;
+			if (tker->IsNextVariable())
+			{
+				key = *tker->NextToken()->Symbol;
+			}
+			else if (tker->IsNextString())
+			{
+				key = *tker->NextToken()->Symbol;
+			}
+			else
+				throw SYNTAX_EXPECTING_DICTIONARY_KEY;
+			if (!tker->IsNextColon())
+				throw SYNTAX_EXPECTING_COLON;
+			tker->NextToken();
+			ExpressionNode* exp = new ExpressionNode;
+			ParseExpression(tker, exp);
+			(*createdict->Pairs)[key] = exp;
+			if (!tker->IsNextComma())
+				break;
+			tker->NextToken();
+		} while (true);
+		if (!tker->IsNextRightCurlyBracket())
+			throw SYNTAX_EXPECTING_RIGHT_CURLY_BRACKET;
+		tker->NextToken();
+	}
+}
+void Parser::ParseList(Tokenizer* tker, ExpressionNode* exp)
+{
+
+	tker->NextToken();
+	if (tker->IsNextRightBracket())
+	{
+		tker->NextToken();
+		CreateListNode * createlist = new CreateListNode;
+		exp->ExpressionType = NT_CREATELIST;
+		exp->Expression = (NodeBase*)createlist;
+	}
+	else
+	{
+		CreateListNode * createlist = new CreateListNode;
+		ParseParameters(tker, createlist->Parameters);
+		exp->ExpressionType = NT_CREATELIST;
+		exp->Expression = (NodeBase*)createlist;
+		if (tker->IsNextRightBracket())
+			tker->NextToken();
+		else
+			throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+	}
+	
+}
 void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 {
+	/*
+	left recursive
+	E-> E[<expression>] | <variable>[<expression>]
+	|
+	right recursive
+	E-> <variable> E'
+	E'-> [<expression>]E'|[<expression>]
+	*/
+	
 	if (tker->IsNextEndKeyword())
 	{
 		exp->ExpressionType = NT_NULL;
 		return;
 	}
-	Token* frsttk=tker->NextToken();
-	if (frsttk->Type == TK_FLOAT)
+	else if (tker->LookAhead() == NULL)
 	{
-		FloatNode* fltnode = new FloatNode;
-		fltnode->Value = frsttk->Float;
-		exp->Expression = (NodeBase*)fltnode;
-		exp->ExpressionType = NT_FLOAT;
+		throw SYNTAX_EXPECTING_EXPRESSION;
 	}
-	else if (frsttk->Type == TK_INTEGER)
+	if (tker->IsNextLeftBracket())
 	{
-		IntegerNode* intnode = new IntegerNode;
-		intnode->Value = frsttk->Integer;
-		exp->Expression = (NodeBase*)intnode;
-		exp->ExpressionType = NT_INTEGER;
+		ParseList(tker, exp);
 	}
-	else if (frsttk->Type == TK_STRING)
+	else if (tker->IsNextLeftCurlyBracket())
 	{
-
-		StringNode* strnode = new StringNode;
-		strnode->Value = frsttk->Symbol;
-		exp->Expression = (NodeBase*)strnode;
-		exp->ExpressionType = NT_STRING;
+		ParseDictionary(tker, exp);
 	}
-	else if (frsttk->Type == TK_BOOLEAN)
+	else
 	{
-		BooleanNode * boolnode = new BooleanNode;
-		if (*frsttk->Symbol == KW_TRUE)
-			boolnode->Value = true;
-		else
-			boolnode->Value = false;
-		exp->Expression = (NodeBase*)boolnode;
-		exp->ExpressionType = NT_BOOLEAN;
-	}
-	else if (frsttk->Type == TK_NULL)
-	{
-		NullNode * nullnode = new NullNode;
-		exp->Expression = (NodeBase*)nullnode;
-		exp->ExpressionType = NT_NULL;
-	}
-	else if (frsttk->Type == TK_VARIABLE)
-	{ //get the next token- variable or function name
-		if (tker->IsNextLeftParen())
+		Token* frsttk = tker->NextToken();
+		if (frsttk->Type == TK_FLOAT)
 		{
-			FunctionCallNode* function = new FunctionCallNode;
-			function->SetLineNumber(frsttk->lineno);
-			//skip the left parenthesis
-			tker->NextToken();
-			ParseParameters(tker, function->Parameters);
-			//right parenthesis
-			tker->NextToken();
-
-			function->FunctionName = frsttk->Symbol;
-			
-			exp->Expression = function;
-			exp->ExpressionType = NT_FUNCTIONCALL;
+			FloatNode* fltnode = new FloatNode;
+			fltnode->Value = frsttk->Float;
+			exp->Expression = (NodeBase*)fltnode;
+			exp->ExpressionType = NT_FLOAT;
 		}
-		else if (tker->IsNextLeftBracket())
+		else if (frsttk->Type == TK_INTEGER)
 		{
-			//parse a list or a dictionary,for example,
-			//<variable>[<exp>]
-			//<variable>[<exp>:<exp>]
-			//<variable>[:]
-			//<variable>[:<exp>]
-			//<variable>[<exp>:]
-			//skip the [
-			tker->NextToken();
-			if (tker->IsNextColon())
-			{
-				//skip :
-				tker->NextToken();
-				//<variable>[:]
-				if (tker->IsNextRightBracket())
-				{
-					//skip ]
-					tker->NextToken();
-					SlicingNode* slicenode = new SlicingNode;
-					slicenode->Variable->Value = frsttk->Symbol;
-					slicenode->HasEndIndex = false;
-					slicenode->HasStartIndex = false;
-					exp->Expression = (NodeBase*)slicenode;
-					exp->ExpressionType = NT_SLICING;
-				}
-				//<variable>[:<exp>]
-				else
-				{
-					SlicingNode* slicenode = new SlicingNode;
-					slicenode->HasEndIndex = true;
-					slicenode->Variable->Value = frsttk->Symbol;
-					ParseExpression(tker, slicenode->EndIndex);
-					if (!tker->IsNextRightBracket())
-					{
-						throw SYNTAX_EXPECTING_RIGHT_BRACKET;
-					}
-					//skip ]
-					tker->NextToken();
-					exp->Expression = (NodeBase*)slicenode;
-					exp->ExpressionType = NT_SLICING;
-				}
-			}
+			IntegerNode* intnode = new IntegerNode;
+			intnode->Value = frsttk->Integer;
+			exp->Expression = (NodeBase*)intnode;
+			exp->ExpressionType = NT_INTEGER;
+		}
+		else if (frsttk->Type == TK_STRING)
+		{
 
-			else{
-				ExpressionNode* firstitem = new ExpressionNode;
-				ParseExpression(tker, firstitem);
+			StringNode* strnode = new StringNode;
+			strnode->Value = frsttk->Symbol;
+			exp->Expression = (NodeBase*)strnode;
+			exp->ExpressionType = NT_STRING;
+		}
+		else if (frsttk->Type == TK_BOOLEAN)
+		{
+			BooleanNode * boolnode = new BooleanNode;
+			if (*frsttk->Symbol == KW_TRUE)
+				boolnode->Value = true;
+			else
+				boolnode->Value = false;
+			exp->Expression = (NodeBase*)boolnode;
+			exp->ExpressionType = NT_BOOLEAN;
+		}
+		else if (frsttk->Type == TK_NULL)
+		{
+			NullNode * nullnode = new NullNode;
+			exp->Expression = (NodeBase*)nullnode;
+			exp->ExpressionType = NT_NULL;
+		}
+		else if (frsttk->Type == TK_VARIABLE)
+		{ //get the next token- variable or function name
+			if (tker->IsNextLeftParen())
+			{
+				FunctionCallNode* function = new FunctionCallNode;
+				function->SetLineNumber(frsttk->lineno);
+				//skip the left parenthesis
+				tker->NextToken();
+				ParseParameters(tker, function->Parameters);
+				//right parenthesis
+				tker->NextToken();
+
+				function->FunctionName = frsttk->Symbol;
+
+				exp->Expression = function;
+				exp->ExpressionType = NT_FUNCTIONCALL;
+			}
+			else if (tker->IsNextLeftBracket())
+			{
+				//parse a list or a dictionary,for example,
+				//<variable>[<exp>]
+				//<variable>[<exp>:<exp>]
+				//<variable>[:]
+				//<variable>[:<exp>]
+				//<variable>[<exp>:]
+				//skip the [
+				tker->NextToken();
 				if (tker->IsNextColon())
 				{
-					//<variable>[<exp>:] or <variable>[<exp>:<exp>]
 					//skip :
 					tker->NextToken();
-					//<variable>[<exp>:]
+					//<variable>[:]
 					if (tker->IsNextRightBracket())
 					{
 						//skip ]
 						tker->NextToken();
 						SlicingNode* slicenode = new SlicingNode;
 						slicenode->Variable->Value = frsttk->Symbol;
-						slicenode->StartIndex->Expression = firstitem->Expression;
-						slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
-						slicenode->HasStartIndex = true;
+						slicenode->HasEndIndex = false;
+						slicenode->HasStartIndex = false;
 						exp->Expression = (NodeBase*)slicenode;
 						exp->ExpressionType = NT_SLICING;
 					}
-					//<variable>[<exp>:<exp>]
+					//<variable>[:<exp>]
 					else
 					{
 						SlicingNode* slicenode = new SlicingNode;
-						slicenode->Variable->Value = frsttk->Symbol;
-						slicenode->StartIndex->Expression = firstitem->Expression;
-						slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
-						slicenode->HasStartIndex = true;
 						slicenode->HasEndIndex = true;
+						slicenode->Variable->Value = frsttk->Symbol;
 						ParseExpression(tker, slicenode->EndIndex);
 						if (!tker->IsNextRightBracket())
 						{
 							throw SYNTAX_EXPECTING_RIGHT_BRACKET;
 						}
-						//skip the ]
+						//skip ]
 						tker->NextToken();
 						exp->Expression = (NodeBase*)slicenode;
 						exp->ExpressionType = NT_SLICING;
 					}
 				}
-				//<variable>[<exp>]
-				else if (tker->IsNextRightBracket())
-				{
-					tker->NextToken();
-					ElementNode * elenode = new ElementNode;
-					elenode->Variable->Value = frsttk->Symbol;
-					elenode->key = firstitem;
-					exp->Expression = (NodeBase*)elenode;
-					exp->ExpressionType = NT_ELEMENT;
-				}
 
-				else
-				{
-					throw SYNTAX_INVALID_EXPRESSION;
+				else{
+					ExpressionNode* firstitem = new ExpressionNode;
+					ParseExpression(tker, firstitem);
+					if (tker->IsNextColon())
+					{
+						//<variable>[<exp>:] or <variable>[<exp>:<exp>]
+						//skip :
+						tker->NextToken();
+						//<variable>[<exp>:]
+						if (tker->IsNextRightBracket())
+						{
+							//skip ]
+							tker->NextToken();
+							SlicingNode* slicenode = new SlicingNode;
+							slicenode->Variable->Value = frsttk->Symbol;
+							slicenode->StartIndex->Expression = firstitem->Expression;
+							slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
+							slicenode->HasStartIndex = true;
+							exp->Expression = (NodeBase*)slicenode;
+							exp->ExpressionType = NT_SLICING;
+						}
+						//<variable>[<exp>:<exp>]
+						else
+						{
+							SlicingNode* slicenode = new SlicingNode;
+							slicenode->Variable->Value = frsttk->Symbol;
+							slicenode->StartIndex->Expression = firstitem->Expression;
+							slicenode->StartIndex->ExpressionType = firstitem->ExpressionType;
+							slicenode->HasStartIndex = true;
+							slicenode->HasEndIndex = true;
+							ParseExpression(tker, slicenode->EndIndex);
+							if (!tker->IsNextRightBracket())
+							{
+								throw SYNTAX_EXPECTING_RIGHT_BRACKET;
+							}
+							//skip the ]
+							tker->NextToken();
+							exp->Expression = (NodeBase*)slicenode;
+							exp->ExpressionType = NT_SLICING;
+						}
+					}
+					//<variable>[<exp>]
+					else if (tker->IsNextRightBracket())
+					{
+						tker->NextToken();
+						ElementNode * elenode = new ElementNode;
+						elenode->Variable->Value = frsttk->Symbol;
+						elenode->key = firstitem;
+						exp->Expression = (NodeBase*)elenode;
+						exp->ExpressionType = NT_ELEMENT;
+					}
+
+					else
+					{
+						throw SYNTAX_INVALID_EXPRESSION;
+					}
 				}
 			}
-		}
 
-		else{
-			VariableNode* varnode = new VariableNode();
-			varnode->Value = frsttk->Symbol;
-			exp->Expression = (NodeBase*)varnode;
-			exp->ExpressionType = NT_VARIABLE;
+			else{
+				VariableNode* varnode = new VariableNode();
+				varnode->Value = frsttk->Symbol;
+				exp->Expression = (NodeBase*)varnode;
+				exp->ExpressionType = NT_VARIABLE;
+			}
+		}
+		else
+		{
+			throw SYNTAX_INVALID_SYMBOL;
 		}
 	}
 
-	else if (tker->LookAhead() == NULL)
-	{
-		return;
-	}
-	else
-	{
-		throw SYNTAX_INVALID_SYMBOL;
-	}
 }
 
 void Parser::ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters)

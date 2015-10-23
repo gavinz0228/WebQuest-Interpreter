@@ -41,6 +41,10 @@ string WQState::GetStringParam()
 	WQObject* obj=GetParam();
 	if (obj->Type == DT_STRING)
 		return obj->ToString();
+	else if (obj->Type == DT_NULL)
+	{
+		return NULL;
+	}
 	else
 		throw RUNTIME_EXPECTING_A_STRING_PARAMETER;
 }
@@ -50,6 +54,10 @@ map<string, WQObject*>* WQState::GetDictionaryParam()
 	WQObject* obj = GetParam();
 	if (obj->Type == DT_DICTIONARY)
 		return obj->GetDictionary();
+	else if (obj->Type == DT_NULL)
+	{
+		return NULL;
+	}
 	else
 		throw RUNTIME_EXPECTING_A_DICTIONARY_PARAMETER;
 	
@@ -68,6 +76,7 @@ WQObject* WQState::CreateObject()
 {
 	return CurrentEnvironment->CreateObject();
 }
+
 WQObject* WQState::GetReturnedReference()
 {
 	return ReferencedObject;

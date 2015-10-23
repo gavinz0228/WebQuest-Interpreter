@@ -6,16 +6,25 @@
 
 class WQEnvironment
 {
+	
 public:
+	//static map<string, WQObject*> Functions;
+	static map<string, WQObject*>GlobalVariables;
 	WQObject* GetVariable(string& name);
+	//WQObject* GetFunction(string& name);
 	WQObject* SearchVariableInCurrentEvironment(string& name);
 	void AddVariable(string& name, WQObject* obj);
 	void SetVariable(string& name, WQObject* obj);
 	WQObject* CreateVariable(string& name);
+	
 	WQObject* CreateObject();
 	void DeleteObject(WQObject* obj);
 	void IncreaseReference(WQObject* obj);
 	void ReleaseReference(WQObject* obj);
+
+	static WQObject* CreateGlobalVariable(string name);
+	static void ClearGlobalVariables();
+
 	WQEnvironment()
 	{
 		Parent = NULL;
@@ -38,7 +47,8 @@ public:
 		{
 			if ((*tempit)->ReferenceCounter < 1)
 			{
-				delete *tempit;
+				
+					delete *tempit;
 				TemporaryVariables.erase(tempit++);
 			}
 			else
@@ -59,13 +69,12 @@ public:
 			else
 			{
 				//it's already the top level of envrionment,means the end of the program, just delete it anyways
-				delete *tempit;
+
+					delete *tempit;
 				TemporaryVariables.erase(tempit++);
 			}
 
 		}
-
-
 	}
 
 	WQEnvironment* Parent;

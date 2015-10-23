@@ -1,4 +1,9 @@
 #include "WQEnvironment.h"
+
+
+map<string, WQObject*> WQEnvironment::GlobalVariables;
+
+
 WQObject* WQEnvironment::GetVariable(string& name)
 {
 	WQObject* var = SearchVariableInCurrentEvironment(name);
@@ -19,11 +24,11 @@ WQObject* WQEnvironment::GetVariable(string& name)
 					return tempobj;
 				tempevnt =tempevnt-> Parent;
 			}
-			return NULL;
+			return GlobalVariables[name];
 		}
 		//it's already the top environment, and it couldn't find it, then return NULL
 		else
-			return NULL;
+			return  GlobalVariables[name];
 	}
 
 }
@@ -81,12 +86,31 @@ void WQEnvironment::SetVariable(string& name, WQObject* newobj)
 		IncreaseReference( newobj);
 	}
 }
+
+
 WQObject* WQEnvironment::CreateVariable(string& name)
 {
 	WQObject* newvar = WQObject::Create();
 	TemporaryVariables.push_back(newvar);
 	AddVariable(name,newvar);
 	return newvar;
+}
+WQObject* WQEnvironment::CreateGlobalVariable(string name)
+{
+	WQObject* newvar = WQObject::Create();
+	newvar->ReferenceCounter++;
+	GlobalVariables[name] = newvar;
+	return newvar;
+}
+void WQEnvironment::ClearGlobalVariables()
+{
+	map<string, WQObject*>::iterator it = GlobalVariables.begin();
+	while (it!=GlobalVariables.end())
+	{
+		delete it->second;
+		it++;
+	}
+	GlobalVariables.clear();
 }
 void WQEnvironment::IncreaseReference(WQObject* obj)
 {

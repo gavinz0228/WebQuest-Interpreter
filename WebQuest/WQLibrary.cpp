@@ -101,24 +101,49 @@
  }
 
 
+ string PairsToURLParameters(map<string, WQObject*>* params)
+ {
+	 if (params == NULL)
+		 return "";
+	 string urlparam = "";
+	 map<string, WQObject*>::iterator it = params->begin();
+	 for (; it != params->end(); it++)
+	 {
+		 urlparam += Uri::URLEncode(it->first) + "=" + Uri::URLEncode(it->second->ToString());
+		 if (next(it) != params->end())
+			 urlparam += "&";
+	 }
+	 return urlparam;
+ }
+ string PairsToStringPairs(map<string, WQObject*>* params, map<string,string>* result)
+ {
+	 if (params == NULL)
+		 return "";
+	 string urlparam = "";
+	 map<string, WQObject*>::iterator it = params->begin();
+	 for (; it != params->end(); it++)
+	 {
+		 (*result)[it->first] = it->second->ToString();
+	 }
+	 return urlparam;
+ }
 
-
-
- void WQGet(WQState* state)
+void WQGet(WQState* state)
 {
 	WebRequest request;
 	
 	if (state->ParamSize < 1 || state->ParamSize>3)
 	{
-		throw "The function only accept maximum 3 parameters";
+		throw "The function only accept maximum 3 parameters and minimum 1 parameter";
 	}
-	string url = state->GetStringParam();
+	
 	if (state->ParamSize == 1)
 	{
 		WQRequest req;
 		stringstream ss;
+		string url = state->GetStringParam();
 		//req.GetResponse("http://www.google.com", ss);
-		req.HTTPSRequest("https://www.yahoo.com", ss);
+		req.HTTPSRequest(url, ss);
 		printf(ss.str().c_str());  
 		//WebResponse response(&request);
 		//string result = request.Get(url);
@@ -143,19 +168,85 @@
 		//	curl_easy_cleanup(curl);
 		//}
 	}
-	else if (state->ParamSize = 2)
+	else if (state->ParamSize == 2)
 	{
-		WebResponse response(&request);
+		WQRequest req;
+		stringstream ss;
+		map<string, string> headers;
+		string url = state->GetStringParam();
 		auto dict = state->GetDictionaryParam();
-		map<string, WQObject*>::iterator it = dict->begin();
-		for (; it != dict->end(); it++)
+		if (dict==NULL)
+			CURLcode code = req.HTTPGet(url, headers, ss);
+		else
+			CURLcode code= req.HTTPGet(url+"?"+PairsToURLParameters(dict), headers, ss);
+		//cout << result<<endl;
+		state->ReturnString(ss.str());
+	}
+	else if (state->ParamSize == 3)
+	{
+		WQRequest req;
+		stringstream ss;
+		map<string, string> headers;
+		string url = state->GetStringParam();
+		auto params = state->GetDictionaryParam();
+		auto heads = state->GetDictionaryParam();
+		string stringparams = "?" + PairsToURLParameters(params);
+		if (heads != NULL)
 		{
-			request.AddHeader(it->first, it->second->ToString());
+			map<string, WQObject*>::iterator it = heads->begin();
+			for (; it != heads->end(); it++)
+			{
+				headers.insert(pair<string, string>(it->first, it->second->ToString()));
+			}
 		}
-		string result = request.Get(url);
-		response.ParseResponse(result);
-		state->ReturnString(response.ResponseBody);
+		CURLcode code = req.HTTPGet(url+stringparams , headers, ss);
+		//cout << result<<endl;
+		state->ReturnString(ss.str());
+	}
+}
+void WQPost(WQState* state)
+{
+	WQRequest request;
+	map<string, string> headers;
+	stringstream ss;
+	if (state->ParamSize < 1 || state->ParamSize>3)
+	{
+		throw "The function only accept maximum 3 parameters and minimum 1 parameter";
+	}
+	if (state->ParamSize==1)
+	{
+		string url = state->GetStringParam();
+		request.HTTPPostForm(url, string(), headers, ss);
+		state->ReturnString(ss.str());
+	}
+	else if (state->ParamSize == 2)
+	{
+		string url = state->GetStringParam();
+		map<string, WQObject*>* params = state->GetDictionaryParam();
+		string postdata;
+		if (url.length() == 0)
+			throw "The url cannot be empty";
 		
+		if (params != NULL)
+			postdata = PairsToURLParameters(params);
+		request.HTTPPostForm(url,postdata , headers, ss);
+		state->ReturnString(ss.str());
+	}
+	else
+	{
+		string postdata;
+		map<string, string> headerslist;
+		string url = state->GetStringParam();
+		if (url.length() == 0)
+			throw "The url cannot be empty";
+		map<string, WQObject*>* params = state->GetDictionaryParam();
+		map<string, WQObject*>* headermap = state->GetDictionaryParam();
+
+		PairsToStringPairs(headermap, &headerslist);
+		if (params != NULL)
+			postdata = PairsToURLParameters(params);
+		request.HTTPPostForm(url, postdata, headerslist, ss);
+		state->ReturnString(ss.str());
 	}
 }
  void WQParseHeader(WQState* state)
@@ -184,7 +275,9 @@
  void WQPrint(WQState* state)
 {
 	WQObject* obj = state->GetParam();
-	printf(obj->ToString().c_str());
+	//printf(obj->ToString().c_str());
+	cout << obj->ToString();
+	cout.flush();
 }
  void WQAppend(WQState* state)
 {

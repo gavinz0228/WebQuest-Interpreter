@@ -135,7 +135,10 @@ class CodeBlockNode :public NodeBase
 public:
 	CodeBlockNode(){ Statements = new list < NodeBase* > ; }
 	~CodeBlockNode(){ 
-		while (!Statements->empty()) delete Statements->front(), Statements->pop_front();
+		while (!Statements->empty())
+		{
+			delete Statements->front(), Statements->pop_front();
+		}
 		delete Statements;
 	}
 	list<NodeBase*>* Statements;
@@ -310,9 +313,16 @@ public:
 class CreateDictionaryNode :public NodeBase
 {
 public:
-	CreateDictionaryNode(){ Parameter = new ExpressionNode; }
-	~CreateDictionaryNode(){ delete Parameter; }
-	ExpressionNode* Parameter;
+	CreateDictionaryNode(){ Pairs = new map < string, ExpressionNode* > ; }
+	~CreateDictionaryNode(){ 
+		map<string, ExpressionNode*>::iterator it = Pairs->begin();
+		while (it != Pairs->end())
+		{
+			delete it->second, it++;
+		}
+		delete Pairs;
+	}
+	map<string,ExpressionNode*>*Pairs ;
 	int GetType(){ return NT_CREATEDICT; }
 };
 
@@ -369,6 +379,8 @@ private:
 	void ParseCodeBlock(Tokenizer* tker, CodeBlockNode* codeblock);
 	void ParseExpression(Tokenizer* tker, ExpressionNode* node,bool parselogicnode=true);
 	void ParseParameters(Tokenizer* tker, list<ExpressionNode*>* parameters);
+	void ParseDictionary(Tokenizer* tker, ExpressionNode* exp);
+	void ParseList(Tokenizer* tker, ExpressionNode * exp);
 	void ConsumeNewLine(Tokenizer* tker);
 	void ParseTerm(Tokenizer* tker, ExpressionNode* exp);
 	void ParseIf(Tokenizer* tker, IfNode* ifnode);

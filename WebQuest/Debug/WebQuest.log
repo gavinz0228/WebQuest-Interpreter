@@ -1,9 +1,8 @@
-﻿Build started 10/16/2015 11:18:19 PM.
+﻿Build started 10/22/2015 10:47:23 PM.
      1>Project "C:\Users\Gavin\OneDrive\WebQuest\WebQuest\WebQuest.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\Gavin\OneDrive\WebQuest\packages\curl.7.30.0.2\build\native\../..//build/native/include/ /IC:\Users\Gavin\OneDrive\WebQuest\packages\libssh2.1.4.3.1\build\native\..\..\build\native\include\ /IC:\Users\Gavin\OneDrive\WebQuest\packages\openssl.1.0.1.21\build\native\..\..\build\native\include\ /IC:\Users\Gavin\OneDrive\WebQuest\packages\zlib.1.2.8.1\build\native\..\..\build\native\include\ /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D HAS_LIBCURL /D ZLIB_DLL /D HAS_ZLIB /D _MBCS /D _MBCS /D _CRT_SECURE_NO_WARNINGS /Gm /EHsc /RTC1 /MT /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WQRequest.cpp
-         WQRequest.cpp
-     1>c:\users\gavin\onedrive\webquest\webquest\wqrequest.cpp(9): warning C4244: 'return' : conversion from 'std::streamsize' to 'size_t', possible loss of data
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\Gavin\OneDrive\WebQuest\packages\curl.7.30.0.2\build\native\../..//build/native/include/ /IC:\Users\Gavin\OneDrive\WebQuest\packages\libssh2.1.4.3.1\build\native\..\..\build\native\include\ /IC:\Users\Gavin\OneDrive\WebQuest\packages\openssl.1.0.1.21\build\native\..\..\build\native\include\ /IC:\Users\Gavin\OneDrive\WebQuest\packages\zlib.1.2.8.1\build\native\..\..\build\native\include\ /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D HAS_LIBCURL /D ZLIB_DLL /D HAS_ZLIB /D _MBCS /D _MBCS /D _CRT_SECURE_NO_WARNINGS /Gm /EHsc /RTC1 /MT /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt WQLibrary.cpp
+         WQLibrary.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\Gavin\OneDrive\WebQuest\WebQuest\Library\ release_libcurl.lib release_libeay32.lib release_libssh2.lib release_ssleay32.lib release_zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Gavin\OneDrive\WebQuest\Debug\WebQuest.lib" /MACHINE:X86 Debug\Converter.obj
          Debug\JSON.obj
@@ -31,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.92
+Time Elapsed 00:00:03.35
