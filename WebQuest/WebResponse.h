@@ -1,7 +1,7 @@
 #include <string>
 #include <map>
-#include<vector>
-#include<sstream>
+#include <vector>
+#include <sstream>
 #include <fstream>
 #include <direct.h>
 #include "WebRequest.h"

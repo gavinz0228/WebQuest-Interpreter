@@ -30,6 +30,7 @@ public:
 	WQObject* CreateReferenceObject(WQObject* targetobj);
 	WQObject* GetParam();
 	string GetStringParam();
+	bool GetBooleanParam();
 	long long GetIntegerParam();
 	long double GetFloatParam();
 	map<string, WQObject*>* GetDictionaryParam();

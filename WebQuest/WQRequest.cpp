@@ -1,4 +1,9 @@
 #include "WQRequest.h"
+//bool WQRequest::ShowHeaders = true;
+WQRequest::WQRequest()
+{
+
+}
 size_t WQRequest::DataWrite(void* buf, size_t size, size_t nmemb, void* userp)
 {
 	if (userp)
@@ -8,7 +13,6 @@ size_t WQRequest::DataWrite(void* buf, size_t size, size_t nmemb, void* userp)
 		if (os.write(static_cast<char*>(buf), len))
 			return len;
 	}
-
 	return 0;
 }
 
@@ -103,10 +107,9 @@ string WQRequest::PairsToURLParameters(map<string, string>& params)
 	}
 	return urlparam;
 }
-curl_slist *  WQRequest::SetHeaders( map<string, string>& headers)
+curl_slist *  WQRequest::SetHeaders(map<string, string>& headers, struct curl_slist* chunk)
 {
 	CURLcode res;
-	struct curl_slist *chunk = NULL;
 	map<string, string>::iterator it = headers.begin();
 	for (; it != headers.end(); it++)
 	{
@@ -115,10 +118,19 @@ curl_slist *  WQRequest::SetHeaders( map<string, string>& headers)
 	return chunk;
 }
 
+curl_slist* WQRequest::SetCookies(struct curl_slist *chunk,string& hostname)
+{
+	string cookies;
+	HTTPUtility::LoadCookiesString(cookies,hostname);
+	chunk = curl_slist_append(chunk, ("Cookie: " + cookies).c_str());
+	return chunk;
+}
+
 CURLcode WQRequest::HTTPGet(const string& url, map<string, string>& headers, ostream& os, long timeout)
 {
 	CURLcode code(CURLE_FAILED_INIT);
 	CURL* curl;
+	URL = Uri::Parse(url);
 	curl = curl_easy_init();
 	CURLcode res;
 
@@ -137,8 +149,10 @@ CURLcode WQRequest::HTTPGet(const string& url, map<string, string>& headers, ost
 		res=curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res=curl_easy_setopt(curl, CURLOPT_FILE, &os);
 		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+		res = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
 		struct curl_slist * hlist = NULL;
-		hlist=SetHeaders( headers);
+		SetCookies(hlist, URL.Host);
+		hlist=SetHeaders( headers,hlist);
 		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
@@ -150,7 +164,7 @@ CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, st
 {
 	CURL *curl;
 	CURLcode res;
-
+	URL = Uri::Parse(url);
 	/* In windows, this will init the winsock stuff */
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -166,9 +180,53 @@ CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, st
 		/* Now specify the POST data */
 		res=curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 		struct curl_slist * hlist = NULL;
-		hlist = SetHeaders(headers);
+		SetCookies(hlist, URL.Host);
+		hlist = SetHeaders(headers,hlist);
 		if (hlist!=NULL)
 			res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
+		res = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+		/* Perform the request, res will get the return code */
+		res = curl_easy_perform(curl);
+		/* Check for errors */
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		/* always cleanup */
+		curl_easy_cleanup(curl);
+	}
+	curl_global_cleanup();
+	return res;
+}
+
+CURLcode WQRequest::HTTPPostJSON(const string& url, string& data, map<string, string>& headers, ostream& os, long timeout)
+{
+	CURL *curl;
+	CURLcode res;
+	URL = Uri::Parse(url);
+	/* In windows, this will init the winsock stuff */
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	/* get a curl handle */
+	curl = curl_easy_init();
+	if (curl) {
+		/* First set the URL that is about to receive our POST. This URL can
+		just as well be a https:// URL if that is what should receive the
+		data. */
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
+		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		/* Now specify the POST data */
+		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+		struct curl_slist * hlist = NULL;
+		hlist = curl_slist_append(hlist, "Accept: application/json");
+		hlist = curl_slist_append(hlist, "Content-Type: application/json");
+		hlist = curl_slist_append(hlist, "charsets: utf-8");
+		SetCookies(hlist, URL.Host);
+		hlist = SetHeaders(headers,hlist);
+		if (hlist != NULL)
+			res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
+		res = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
 		/* Check for errors */

@@ -1,4 +1,4 @@
-for i in range(1210)
-print(i+100)
-aa=sdfsdfedsfeee
-end 
+lst=[12,454,78,45]
+for i in lst
+	print(i+" ")
+end

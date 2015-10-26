@@ -48,6 +48,11 @@ string WQState::GetStringParam()
 	else
 		throw RUNTIME_EXPECTING_A_STRING_PARAMETER;
 }
+bool WQState::GetBooleanParam()
+{
+	WQObject* obj = GetParam();
+	return obj->GetBoolValue();
+}
 
 map<string, WQObject*>* WQState::GetDictionaryParam()
 {

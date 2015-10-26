@@ -73,7 +73,7 @@ map<string, string>& StringUtility::ListToPairs(char delim, vector<string>& sour
 		string key = sbuffer.str();
 		if (strit == item->end())
 		{
-			pairs[key] = "";
+			pairs[Trim(key)] = "";
 		}
 		else
 		{
@@ -82,8 +82,25 @@ map<string, string>& StringUtility::ListToPairs(char delim, vector<string>& sour
 			{
 				sbuffer << (*strit);
 			}
-			pairs[key] = sbuffer.str();
+			pairs[Trim(key)] = sbuffer.str();
 		}
 	}
 	return pairs;
+}
+void StringUtility::StringToPairs(string& str, map<string, string>& pairs)
+{
+	vector<string> items;
+	StringUtility::split(str, ';', items);
+	StringUtility::ListToPairs('=', items, pairs);
+}
+void StringUtility::PairsToString(map<string, string>& pairs, string& str)
+{
+	stringstream sbuffer;
+	map<string, string>::iterator pairit = pairs.begin();
+	for (; pairit != pairs.end(); pairit++)
+	{
+		sbuffer << pairit->first << "=" << pairit->second << ";";
+	}
+	str = sbuffer.str();
+
 }

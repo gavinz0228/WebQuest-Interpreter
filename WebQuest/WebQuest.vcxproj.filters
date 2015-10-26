@@ -69,6 +69,12 @@
     <ClInclude Include="WQRequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WQResponse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Uri.cpp">
@@ -120,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WQRequest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WQResponse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

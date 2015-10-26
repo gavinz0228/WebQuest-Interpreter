@@ -1,7 +1,7 @@
 #include "WQState.h"
 #include "WQRequest.h"
-#include "WebRequest.h"
-#include "WebResponse.h"
+#include "WQResponse.h"
+
 #include "JsonParser\JSON.h"
 #include "JsonParser\JSONValue.h"
 
@@ -17,14 +17,16 @@
  void WQDeepCopy(WQState* state);
  void WQDumpJson(WQState* state);
 
+ void WQShowHeaders(WQState* state);
  void WQParseJson(WQState* state);
  void WQParseStatus(WQState* state);
  void WQParseBody(WQState* state);
  void WQParseHeader(WQState* state);
  void WQGet(WQState* state);
  void WQPost(WQState* state);
+ void WQPostJSON(WQState* state);  
  void WQGetRaw(WQState* state);
- void WQMilli(WQState* state);
+
  
  //-----------------------------------
  void WQStr(WQState* state);
@@ -42,5 +44,6 @@
  void WQHour(WQState* state);
  void WQMinute(WQState* state);
  void WQSecond(WQState* state);
+ void WQMilli(WQState* state);
 
 #endif

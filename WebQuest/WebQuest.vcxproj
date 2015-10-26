@@ -92,11 +92,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Converter.h" />
+    <ClInclude Include="HTTPUtility.h" />
     <ClInclude Include="JsonParser\JSON.h" />
     <ClInclude Include="JsonParser\JSONValue.h" />
     <ClInclude Include="StringUtility.h" />
     <ClInclude Include="WQLibrary.h" />
     <ClInclude Include="WQRequest.h" />
+    <ClInclude Include="WQResponse.h" />
     <ClInclude Include="WQRunTime.h" />
     <ClInclude Include="WQEnvironment.h" />
     <ClInclude Include="WQException.h" />
@@ -111,12 +113,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Converter.cpp" />
+    <ClCompile Include="HTTPUtility.cpp" />
     <ClCompile Include="JsonParser\JSON.cpp" />
     <ClCompile Include="JsonParser\JSONValue.cpp" />
     <ClCompile Include="StringUtility.cpp" />
     <ClCompile Include="WQEnvironment.cpp" />
     <ClCompile Include="WQLibrary.cpp" />
     <ClCompile Include="WQRequest.cpp" />
+    <ClCompile Include="WQResponse.cpp" />
     <ClCompile Include="WQRuntime.cpp" />
     <ClCompile Include="WQGlobalFunctions.cpp" />
     <ClCompile Include="main.cpp" />

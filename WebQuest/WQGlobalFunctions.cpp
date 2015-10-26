@@ -51,6 +51,9 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("parse_status", WQParseStatus);
 	Add("get", WQGet);
 	Add("post", WQPost);
+	Add("post_json", WQPostJSON);
+	Add("post_form", WQPost);
+	Add("show_headers", WQShowHeaders);
 
 
 }

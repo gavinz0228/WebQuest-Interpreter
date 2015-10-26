@@ -95,9 +95,9 @@
 
  void WQGetRaw(WQState* state)
  {
-	 WebRequest request;
-	 string url = state->GetStringParam();
-	 state->ReturnString(request.Get(url));
+	 //WebRequest request;
+	 //string url = state->GetStringParam();
+	 //state->ReturnString(request.Get(url));
  }
 
 
@@ -128,9 +128,14 @@
 	 return urlparam;
  }
 
+ void WQShowHeaders(WQState* state)
+ {
+	 bool val = state->GetBooleanParam();
+	 WQResponse::ShowHeaders=val;
+
+ }
 void WQGet(WQState* state)
 {
-	WebRequest request;
 	
 	if (state->ParamSize < 1 || state->ParamSize>3)
 	{
@@ -139,34 +144,18 @@ void WQGet(WQState* state)
 	
 	if (state->ParamSize == 1)
 	{
-		WQRequest req;
+		WQRequest request;
+		
+		map<string, string> headers;
 		stringstream ss;
 		string url = state->GetStringParam();
-		//req.GetResponse("http://www.google.com", ss);
-		req.HTTPSRequest(url, ss);
-		printf(ss.str().c_str());  
-		//WebResponse response(&request);
-		//string result = request.Get(url);
-		//response.ParseResponse(result);
-		//response.ProcessCookies();
-		//state->ReturnString(response.ResponseBody);
-		//CURL *curl;
-		//CURLcode res;
-		//curl = curl_easy_init();
-		//if (curl)
-		//{
-		//	curl_easy_setopt(curl, CURLOPT_URL, url);
-		//	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
-		//	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
-
-		//	res = curl_easy_perform(curl);
-		//	
-		//	if (res == CURLE_OK)
-		//	{
-		//		
-		//	}
-		//	curl_easy_cleanup(curl);
-		//}
+		request.HTTPGet(url, headers, ss);
+		//
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(),output);
+		response.ProcessCookies();
+		state->ReturnString(output);
 	}
 	else if (state->ParamSize == 2)
 	{
@@ -180,7 +169,12 @@ void WQGet(WQState* state)
 		else
 			CURLcode code= req.HTTPGet(url+"?"+PairsToURLParameters(dict), headers, ss);
 		//cout << result<<endl;
-		state->ReturnString(ss.str());
+		//
+		WQResponse response(&req);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
 	}
 	else if (state->ParamSize == 3)
 	{
@@ -201,7 +195,12 @@ void WQGet(WQState* state)
 		}
 		CURLcode code = req.HTTPGet(url+stringparams , headers, ss);
 		//cout << result<<endl;
-		state->ReturnString(ss.str());
+		//
+		WQResponse response(&req);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
 	}
 }
 void WQPost(WQState* state)
@@ -217,7 +216,13 @@ void WQPost(WQState* state)
 	{
 		string url = state->GetStringParam();
 		request.HTTPPostForm(url, string(), headers, ss);
-		state->ReturnString(ss.str());
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+
 	}
 	else if (state->ParamSize == 2)
 	{
@@ -230,7 +235,12 @@ void WQPost(WQState* state)
 		if (params != NULL)
 			postdata = PairsToURLParameters(params);
 		request.HTTPPostForm(url,postdata , headers, ss);
-		state->ReturnString(ss.str());
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
 	}
 	else
 	{
@@ -246,30 +256,114 @@ void WQPost(WQState* state)
 		if (params != NULL)
 			postdata = PairsToURLParameters(params);
 		request.HTTPPostForm(url, postdata, headerslist, ss);
-		state->ReturnString(ss.str());
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
 	}
+}
+
+void WQPostJSON(WQState* state)
+{
+	WQRequest request;
+	map<string, string> headers;
+	stringstream ss;
+	if (state->ParamSize < 1 || state->ParamSize>3)
+	{
+		throw "The function only accept maximum 3 parameters and minimum 1 parameter";
+	}
+	if (state->ParamSize == 1)
+	{
+		string url = state->GetStringParam();
+		request.HTTPPostJSON(url, string(), headers, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+	}
+	else if (state->ParamSize == 2)
+	{
+		string postdata;
+		string url = state->GetStringParam();
+		if (url.length() == 0)
+			throw "The url cannot be empty";
+		WQObject* dictobj = state->GetParam();
+		if (dictobj->Type != DT_NULL)
+			postdata = dictobj->ToString();
+		request.HTTPPostJSON(url, postdata, headers, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+	}
+	else
+	{
+		string postdata;
+		map<string, string> headerslist;
+		string url = state->GetStringParam();
+		if (url.length() == 0)
+			throw "The url cannot be empty";
+		map<string, WQObject*>* params = state->GetDictionaryParam();
+		map<string, WQObject*>* headermap = state->GetDictionaryParam();
+
+		PairsToStringPairs(headermap, &headerslist);
+		if (params != NULL)
+			postdata = PairsToURLParameters(params);
+		request.HTTPPostJSON(url, postdata, headerslist, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+
+		//string postdata;
+		//map<string, string> headerslist;
+		//string url = state->GetStringParam();
+		//if (url.length() == 0)
+		//	throw "The url cannot be empty";
+		//map<string, WQObject*>* params = state->GetDictionaryParam();
+		//map<string, WQObject*>* headermap = state->GetDictionaryParam();
+
+		//PairsToStringPairs(headermap, &headerslist);
+		//if (params != NULL)
+		//	postdata = PairsToURLParameters(params);
+		//request.HTTPPostForm(url, postdata, headerslist, ss);
+		//state->ReturnString(ss.str());
+	}
+}
+
+void WQPostData(WQState* state)
+{
+
 }
  void WQParseHeader(WQState* state)
 {
-	string str = state->GetStringParam();
-	WebResponse response;
-	response.ParseResponse(str);
-	state->ReturnString(response.RawResponseHeader);
+	//string str = state->GetStringParam();
+	//WebResponse response;
+	//response.ParseResponse(str);
+	//state->ReturnString(response.RawResponseHeader);
 }
  void WQParseBody(WQState* state)
 {
-	string str = state->GetStringParam();
-	WebResponse response;
-	response.ParseResponse(str);
-	state->ReturnString(response.ResponseBody);
+	//string str = state->GetStringParam();
+	//WebResponse response;
+	//response.ParseResponse(str);
+	//state->ReturnString(response.ResponseBody);
 }
 
  void WQParseStatus(WQState* state)
 {
-	string str = state->GetStringParam();
-	WebResponse response;
-	response.ParseResponse(str);
-	state->ReturnString(response.Status);
+	//string str = state->GetStringParam();
+	//WebResponse response;
+	//response.ParseResponse(str);
+	//state->ReturnString(response.Status);
 }
 
  void WQPrint(WQState* state)
