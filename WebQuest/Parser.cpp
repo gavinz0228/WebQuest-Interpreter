@@ -646,7 +646,6 @@ void Parser::ParseTerm(Tokenizer* tker, ExpressionNode* exp)
 						exp->ExpressionType = NT_SLICING;
 					}
 				}
-
 				else{
 					ExpressionNode* firstitem = new ExpressionNode;
 					ParseExpression(tker, firstitem);

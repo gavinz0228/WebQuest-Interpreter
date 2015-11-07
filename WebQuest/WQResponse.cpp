@@ -3,6 +3,19 @@
 bool WQResponse::ShowHeaders = false;
 void WQResponse::ParseResponse(string& response, string& output)
 {
+	if (response.size() != 0)
+	{
+		ParseResponse(response);
+		if (WQResponse::ShowHeaders)
+		{
+			output += response;
+		}
+		else
+			output += ResponseBody;
+	}
+}
+void WQResponse::ParseResponse(string& response)
+{
 
 	if (response.size() != 0)
 	{
@@ -36,12 +49,7 @@ void WQResponse::ParseResponse(string& response, string& output)
 		string hd = RawResponseHeader.substr(start, RawResponseHeader.size() - start);
 		size_t colonindex = hd.find(":");
 		ResponseHeaders[StringUtility::Trim(hd.substr(0, colonindex))] = hd.substr(colonindex + 1, hd.size() - colonindex - 1);
-		if (WQResponse::ShowHeaders)
-		{
-			output += response;
-		}
-		else
-			output += ResponseBody;
+
 		//check headers
 		//---------------------
 		//map<string, string>::iterator findit = ResponseHeaders.find("Transfer-Encoding");

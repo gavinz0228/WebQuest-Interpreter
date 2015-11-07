@@ -6,11 +6,12 @@
 #include "JsonParser\JSONValue.h"
 
 #include "Converter.h"
-
+#include <regex>
 #include <wchar.h>
 #include <ctype.h>
 #include <wctype.h>
 #include <chrono>
+#include <thread>
 #include <ctime>
 #ifndef WQLIBRARY_H
 #define WQLIBRARY_H
@@ -38,6 +39,11 @@
  void WQType(WQState* state);
  void WQAppend(WQState* state);
  //-----------------------------------
+ void WQSplit(WQState* state);
+ void WQFind(WQState* state);
+ void WQSubString(WQState* state);
+ void WQRegexMatch(WQState* state);
+ //-----------------------------------
  void WQYear(WQState* state);
  void WQMonth(WQState* state);
  void WQDay(WQState* state);
@@ -45,5 +51,6 @@
  void WQMinute(WQState* state);
  void WQSecond(WQState* state);
  void WQMilli(WQState* state);
+ void WQSleep(WQState* state);
 
 #endif

@@ -146,7 +146,7 @@ void WQObject::SetIntValue(long long value)
 	*((long long*)Data) = value;
 	assigned = true;
 }
-void WQObject::SetStringValue(string& value)
+void WQObject::SetStringValue(const string& value)
 {
 
 	AssertCanAssign();
@@ -227,16 +227,24 @@ void WQObject::AppendList(WQObject* obj)
 }
 WQObject* WQObject::GetListElement(long _index)
 {
-	unsigned long index = (unsigned long)_index;
+
 	if (Type == DT_LIST)
 	{
 		vector < WQObject* >* ls = (vector < WQObject* >*)Data;
-		if (index < ls->size() && index >= 0)
+		unsigned long index;
+		if (_index >= 0)
 		{
-			return ls->at(index);
+			if (_index >= ls->size())
+				return NULL;
+			index = (unsigned long)_index;
 		}
 		else
-			return NULL;
+		{
+			if (_index + ls->size() < 0)
+				return NULL;
+			index = (unsigned long)(_index + ls->size());
+		}
+		return ls->at(index);
 	}
 	else
 	{

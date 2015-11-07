@@ -32,7 +32,7 @@
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_THAN				"Invalid type for < operator"
 #define		RUNTIME_INVALID_TYPE_FOR_GREATER_THAN			"Invalid type for > operator"
 #define		RUNTIME_INVALID_TYPE_FOR_LESS_EQUAL				"Invalid type for <= operator"
-#define		RUNTIME_ITERATE_NON_LIST_VARIABLE				"Non-list variable cannot be iterated"
+#define		RUNTIME_EXPECTING_ITERABLE_TYPE					"Expecting a iterable type"
 #define		RUNTIME_NON_INTERGER_INDEX						"Non-integer index for a list is not allowed"
 #define		RUNTIME_SLICING_NON_LIST_VARIABLE				"Slicing a non-list variable is not allowed"
 #define		RUNTIME_REASSIGN_OBJECT_NOT_ALLOW				"Not allow reassign an WQObject"

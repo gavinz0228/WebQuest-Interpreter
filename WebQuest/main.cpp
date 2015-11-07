@@ -4,6 +4,7 @@
 #include "WQRunTime.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 using namespace std;
 void Request();
 void Tokenize();
@@ -62,7 +63,13 @@ int main(int argc, char **argv)
 		//string script="res=get('http://requestb.in/znfitizn',null,{'header1':'value1'}) print(res)";
 		//string script = "res=post('http://requestb.in/1isq5r61',{'asdfsf':22,'a':'sdf'},{'header1':'headervalue'}) print(res)";
 		//string script = "show_headers(true) res=post_json('http://requestb.in/1isq5r61',{'asdfsf':22,'a':'sdf'}) print(res)";
-		string script = "show_headers(true) res=get('http://www.baidu.com') print(res)";
+		//string script = "show_headers(true) res=get('https://www.google.com') print(res)";
+		//string script = "a='a d d f e rr' b=split(a,' ') print(b)";
+		//string script = "a='aasdfafewfsssfdddf' print(find(a,'sss'))";
+		//string script = "pat='[0-9]' s='125 456 789' res=regex_match(s,pat) print(res)";
+		//string script = "dict={'key1':'val1','key2':'val2'} for d in dict print(d) end";
+		string script = "a=[1,2,3,5,6,6] print(a[-1])";
+		//substring,iterate dict,regular exp,negative index
 		Execute(script);
 		char wait;
 		scanf_s(&wait);

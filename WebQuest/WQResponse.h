@@ -14,6 +14,7 @@ public:
 	WQResponse(WQRequest* request) :Request(request){}
 
 	void ParseResponse(string& response,string& output);
+	void ParseResponse(string& response);
 	map<string, string> ResponseHeaders;
 	string RawResponseHeader;
 	string ResponseBody;

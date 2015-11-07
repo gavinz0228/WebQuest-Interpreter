@@ -1,6 +1,8 @@
 #include "WebResponse.h"
 
 const string WebResponse::COOKIE_FILE_FORMAT = ".cookie";
+
+
 void WebResponse::ParseResponse(string& response)
 {
 	if (response.size() != 0)

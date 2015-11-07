@@ -51,6 +51,22 @@ vector<std::string>& StringUtility::split(const string &s, char delim, vector<st
 	}
 	return elems;
 }
+vector<string>& splitByString(const string& s, string& delim, vector<string>& strlist)
+{
+	if (s.length() == 0)
+		return strlist;
+	size_t startindex = 0;
+	while (true)
+	{
+		size_t targetindex = s.find(delim, startindex);
+		if (targetindex == string::npos)
+		{
+			strlist.push_back(s.substr(startindex, targetindex - startindex));
+		}
+		strlist.push_back(s.substr(startindex, targetindex - startindex));
+		startindex = targetindex + 1;
+	}
+}
 
 map<string, string>& StringUtility::ListToPairs(char delim, vector<string>& sourcelist, map<string, string>& pairs)
 {

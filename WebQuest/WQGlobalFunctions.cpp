@@ -16,8 +16,6 @@ WQFunction WQGlobalFunctions::Get(string* name)
 		return it->second;
 	}
 }
-
-
 void func(WQState* state)
 {
 }
@@ -33,6 +31,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("str", WQStr);
 	Add("int", WQInt);
 	Add("float", WQFloat);
+
 	//time
 	Add("year", WQYear);
 	Add("month", WQMonth);
@@ -40,10 +39,15 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("hour", WQHour);
 	Add("minute", WQMinute);
 	Add("second", WQSecond);
+	Add("sleep", WQSleep);
 	//utility
 	Add("dump_json", WQDumpJson);
 	Add("parse_json", WQParseJson);
 	Add("milli", WQMilli);
+	Add("split", WQSplit);
+	Add("find", WQFind);
+	Add("sub_str", WQSubString);
+	Add("regex_match", WQRegexMatch);
 	//web
 	Add("get_raw", WQGetRaw);
 	Add("parse_headers",WQParseHeader);
@@ -54,6 +58,4 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("post_json", WQPostJSON);
 	Add("post_form", WQPost);
 	Add("show_headers", WQShowHeaders);
-
-
 }

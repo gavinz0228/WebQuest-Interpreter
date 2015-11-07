@@ -8,6 +8,12 @@
 		);
 	state->ReturnInteger(ms.count());
 }
+void WQSleep(WQState* state)
+{
+	 state->ExpectParams(1);
+	 long long val = state->GetIntegerParam();
+	 std::this_thread::sleep_for(std::chrono::milliseconds(val));
+}
  void WQType(WQState* state)
  {
 
@@ -92,15 +98,115 @@
 	 Converter::StringToFloat(val, floatval);
 	 state->ReturnFloat(floatval);
  }
+ void WQSplit(WQState* state)
+ {
+	 state->ExpectParams(2);
+	 string str=state->GetStringParam();
+	 string delim = state->GetStringParam();
+	 WQObject* obj = state->CreateObject();
+	 obj->InitList();
+	 vector<WQObject*>* strlist = obj->GetList();
 
+	 if (str.length() == 0)
+	 {
+		 state->ReturnReference(obj);
+		 return;
+	 }
+	 size_t startindex = 0;
+	 while (true)
+	 {
+		 size_t targetindex = str.find(delim, startindex);
+		 if (targetindex == string::npos)
+		 {
+			 WQObject* newitem=state->CreateObject();
+			 newitem->SetStringValue(str.substr(startindex, targetindex - startindex));
+			 obj->AppendList(newitem);
+			 break;
+		 }
+		 WQObject* newitem = state->CreateObject();
+		 newitem->SetStringValue(str.substr(startindex, targetindex - startindex));
+		 obj->AppendList(newitem);
+		 startindex = targetindex + 1;
+	 }
+	 state->ReturnReference(obj);
+ }
+ void WQFind(WQState* state)
+ {
+	 state->ExpectParams(2);
+	 string str = state->GetStringParam();
+	 string target = state->GetStringParam();
+	 size_t index = str.find(target);
+	 if (index == string::npos)
+		 state->ReturnInteger(-1);
+	 else
+		 state->ReturnInteger(index);
+ }
+ void WQSubString(WQState* state)
+ {
+	 if (state->ParamSize <= 1)
+	 {
+		 throw "this function accepts 2 or 3 elements";
+	 }
+	 else if (state->ParamSize == 2)
+	 {
+		 string str = state->GetStringParam();
+		 long long startindex = abs(state->GetIntegerParam());
+		 if (startindex < str.length())
+		 {
+			 string returnstr=str.substr(startindex);
+			 state->ReturnString(returnstr);
+		 }
+		 else
+		 {
+			 string emptystr = "";
+			 state->ReturnString(emptystr);
+		 }
+	 }
+	 else if (state->ParamSize == 3)
+	 {
+		 string str = state->GetStringParam();
+		 unsigned long long startindex = abs(state->GetIntegerParam());
+		 unsigned long long endindex = abs(state->GetIntegerParam());
+		 if (startindex < str.length() && endindex < str.length())
+		 {
+			 string returnstr = str.substr(startindex,endindex);
+			 state->ReturnString(returnstr);
+		 }
+		 else
+		 {
+			 string emptystr = "";
+			 state->ReturnString(emptystr);
+		 }
+	 }
+	 else{
+		 throw "function accepts 2 or 3 elements";
+	 }
+
+ }
+ void WQRegexMatch(WQState* state)
+ {
+	 state->ExpectParams(2);
+	 string source = state->GetStringParam();
+	 string pattern = state->GetStringParam();
+	 regex reg_exp(pattern);
+	 regex_iterator<string::iterator> regex(source.begin(), source.end(), reg_exp, regex_constants::match_continuous);
+	 std::regex_iterator<string::iterator> end;
+	 WQObject* lstresult = state->CreateObject();
+	 lstresult->InitList();
+	 for (; regex != end;regex++)
+	 {
+		 WQObject* res = state->CreateObject();
+		 res->SetStringValue(regex->str());
+		 lstresult->AppendList(res);
+	 }
+	 state->ReturnReference(lstresult);
+ }
  void WQGetRaw(WQState* state)
  {
 	 //WebRequest request;
 	 //string url = state->GetStringParam();
 	 //state->ReturnString(request.Get(url));
  }
-
-
  string PairsToURLParameters(map<string, WQObject*>* params)
  {
 	 if (params == NULL)
@@ -345,25 +451,25 @@ void WQPostData(WQState* state)
 }
  void WQParseHeader(WQState* state)
 {
-	//string str = state->GetStringParam();
-	//WebResponse response;
-	//response.ParseResponse(str);
-	//state->ReturnString(response.RawResponseHeader);
+	string str = state->GetStringParam();
+	WQResponse response;
+	response.ParseResponse(str);
+	state->ReturnString(response.RawResponseHeader);
 }
  void WQParseBody(WQState* state)
 {
-	//string str = state->GetStringParam();
-	//WebResponse response;
-	//response.ParseResponse(str);
-	//state->ReturnString(response.ResponseBody);
+	string str = state->GetStringParam();
+	WQResponse response;
+	response.ParseResponse(str);
+	state->ReturnString(response.ResponseBody);
 }
 
  void WQParseStatus(WQState* state)
 {
-	//string str = state->GetStringParam();
-	//WebResponse response;
-	//response.ParseResponse(str);
-	//state->ReturnString(response.Status);
+	string str = state->GetStringParam();
+	WQResponse response;
+	response.ParseResponse(str);
+	state->ReturnString(response.Status);
 }
 
  void WQPrint(WQState* state)
@@ -395,6 +501,10 @@ void WQPostData(WQState* state)
 	else if (param->Type == DT_LIST)
 	{
 		state->ReturnInteger(param->GetList()->size());
+	}
+	else if (param->Type == DT_DICTIONARY)
+	{
+		state->ReturnInteger(param->GetDictionary()->size());
 	}
 	else
 	{

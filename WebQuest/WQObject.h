@@ -24,7 +24,7 @@ public:
 
 	void SetIntValue(long long val);
 	void SetFloatValue(long double val);
-	void SetStringValue(string& val);
+	void SetStringValue(const string& val);
 	void SetBoolValue(bool val);
 
 	void SetUserFunctionValue(void* func);

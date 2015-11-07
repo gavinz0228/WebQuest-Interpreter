@@ -121,6 +121,24 @@ void PerformAssignment(WQObject* left, string *optr,WQObject* right,WQState* sta
 		}
 	}
 }
+void DictionaryToPairs(WQObject* source, WQObject* output,WQState* state)
+{
+	map<string, WQObject*>* dict = source->GetDictionary();
+	output->InitList();
+	map<string, WQObject*>::iterator it = dict->begin();
+	while (it != dict->end())
+	{
+		auto lst=state->CreateObject();
+		lst->InitList();
+		auto key = state->CreateObject();
+		key->SetStringValue(it->first);
+		lst->AppendList(key);
+		it->second->ReferenceCounter++;
+		lst->AppendList(it->second);
+		output->AppendList(lst);
+		it++;
+	}
+}
 void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 {
  	if (node->GetType() == NT_EXPRESSION)
@@ -152,7 +170,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			state->CurrentEnvironment->SetVariable(*var->Value, state->GetReturnedReference());
 
 		}
-		else if (assignment->TargetType == AT_ELEMENT)
+		else if (assignment->TargetType == AT_ELEMENT) 
 		{
 			ElementNode* ele = assignment->LeftSideElement;
 			Evaluate(ele->Variable, state);
@@ -212,7 +230,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		{
 			Evaluate(elenode->key, state);
 			long index = (long)state->GetReturnedReference()->GetIntValue();
-			state->ReturnReference(var->GetList()->at(index));
+			state->ReturnReference(var->GetListElement(index));
 		}
 		else if (var->Type == DT_DICTIONARY)
 		{
@@ -598,21 +616,32 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		Evaluate(fornode->IterableVariable, state);
 		WQObject* iterable=state->GetReturnedReference();
 
-		if (iterable->Type != DT_LIST)
-			throw RUNTIME_ITERATE_NON_LIST_VARIABLE;
-		vector<WQObject*>* iterablelist = iterable->GetList();
-		for (unsigned int i = 0; i < iterablelist->size(); i++)
+		if (iterable->Type == DT_LIST || iterable->Type == DT_DICTIONARY)
 		{
-			
-			state->EnterNewEnvironment(ET_LOOP);
-			state->CurrentEnvironment->SetVariable(*fornode->TempVariable->Value, iterablelist->at(i));
-			Evaluate(fornode->CodeBlock, state);
-			state->BackToParentEnvironment();
-			if (state->BreakOccurred)
+			vector<WQObject*>* iterablelist = NULL;
+			if (iterable->Type==DT_LIST)
+				iterablelist=iterable->GetList();
+			else
 			{
-				break;
+				auto templist = state->CreateObject();
+				DictionaryToPairs(iterable, templist, state);
+				iterablelist = templist->GetList();
+			}
+			for (unsigned int i = 0; i < iterablelist->size(); i++)
+			{
+
+				state->EnterNewEnvironment(ET_LOOP);
+				state->CurrentEnvironment->SetVariable(*fornode->TempVariable->Value, iterablelist->at(i));
+				Evaluate(fornode->CodeBlock, state);
+				state->BackToParentEnvironment();
+				if (state->BreakOccurred)
+				{
+					break;
+				}
 			}
 		}
+		else
+			throw RUNTIME_EXPECTING_ITERABLE_TYPE;
 	}
 	else if (node->GetType() == NT_SLICING)
 	{

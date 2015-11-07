@@ -34,6 +34,8 @@ public:
 	long long GetIntegerParam();
 	long double GetFloatParam();
 	map<string, WQObject*>* GetDictionaryParam();
+	void ExpectParams(int min, int max);
+	void ExpectParams(int num);
 	void AddParam(WQObject* obj);
 	void ClearParams();
 	void ReturnInteger(long long integer);

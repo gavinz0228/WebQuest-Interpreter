@@ -16,6 +16,7 @@ size_t WQRequest::DataWrite(void* buf, size_t size, size_t nmemb, void* userp)
 	return 0;
 }
 
+
 /**
 * timeout is in seconds
 **/
@@ -30,9 +31,9 @@ CURLcode WQRequest::HTTPSRequest(const string& url, ostream& os, long timeout)
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, url);
 
-	curl_easy_setopt(curl,CURLOPT_SSLCERT, "ca-bundle.crt");
-	curl_easy_setopt(curl,CURLOPT_CAINFO, "ca-bundle.crt");
-#ifdef SKIP_PEER_VERIFICATION
+	//curl_easy_setopt(curl,CURLOPT_SSLCERT, "ca-bundle.crt");
+	//curl_easy_setopt(curl,CURLOPT_CAINFO, "ca-bundle.crt");
+//#ifdef SKIP_PEER_VERIFICATION
 		/*
 		* If you want to connect to a site who isn't using a certificate that is
 		* signed by one of the certs in the CA bundle you have, you can skip the
@@ -44,7 +45,7 @@ CURLcode WQRequest::HTTPSRequest(const string& url, ostream& os, long timeout)
 		* you.
 		*/
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-#endif
+//#endif
 
 #ifdef SKIP_HOSTNAME_VERIFICATION
 		/*
@@ -146,6 +147,7 @@ CURLcode WQRequest::HTTPGet(const string& url, map<string, string>& headers, ost
 		//	code = curl_easy_perform(curl);
 		//}
 		res=curl_easy_setopt(curl, CURLOPT_URL, url);
+		res=curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res=curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res=curl_easy_setopt(curl, CURLOPT_FILE, &os);
 		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
@@ -175,6 +177,7 @@ CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, st
 		just as well be a https:// URL if that is what should receive the
 		data. */
 		curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
 		/* Now specify the POST data */
@@ -214,6 +217,7 @@ CURLcode WQRequest::HTTPPostJSON(const string& url, string& data, map<string, st
 		just as well be a https:// URL if that is what should receive the
 		data. */
 		curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
 		/* Now specify the POST data */

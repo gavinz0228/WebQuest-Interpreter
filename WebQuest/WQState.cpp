@@ -25,6 +25,18 @@ EnvironmentType WQState::GetCurrentEnvironmentType()
 	else
 		return EnvironmentTypeStack.top();
 }
+void WQState::ExpectParams(int min, int max)
+{
+	if (ParamSize<min || ParamSize>max)
+	{
+		throw "Expecting " + to_string(min) + " to " + to_string(max) + "parameter(s)";
+	}
+}
+void WQState::ExpectParams(int num)
+{
+	if (ParamSize != num)
+		throw "Expecting " + to_string(num) + "parameter(s)";
+}
 long long WQState::GetIntegerParam()
 {
 	WQObject* param = GetParam();

@@ -99,7 +99,32 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 			}
 		}
 		//return true if it's operator, operatorlen outputs the length of the operator
-		else if (IsOperator(&(*it), charlen,operatorStart,operatorlen))
+
+		else if (IsFloat(it, script.end(), charlen))
+		{
+			Converter::StringToFloat(&(*it), charlen, floatno);
+
+			Token* tk = new Token(floatno, CurrentLineNumber);
+			Tokens->push_back(tk);
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+		}
+		else if (IsInteger(it, script.end(), charlen))
+		{
+			Converter::StringToInteger(&(*it), charlen, integer);
+
+			Token* tk = new Token(integer, CurrentLineNumber);
+			Tokens->push_back(tk);
+			while (charlen>0)
+			{
+				it++;
+				charlen--;
+			}
+		}
+		else if (IsOperator(&(*it), charlen, operatorStart, operatorlen))
 		{
 			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, CurrentLineNumber);
 			Tokens->push_back(tk);
@@ -138,30 +163,6 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 				}
 			}
 
-		}
-		else if (IsFloat(it, script.end(), charlen))
-		{
-			Converter::StringToFloat(&(*it), charlen, floatno);
-
-			Token* tk = new Token(floatno, CurrentLineNumber);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
-		}
-		else if (IsInteger(it, script.end(), charlen))
-		{
-			Converter::StringToInteger(&(*it), charlen, integer);
-
-			Token* tk = new Token(integer, CurrentLineNumber);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
 		}
 		//must be variable name,string, or numbers
 		else
