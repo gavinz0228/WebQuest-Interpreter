@@ -252,6 +252,10 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 			{
 				tk = new Token(start, len, TK_BREAK, CurrentLineNumber);
 			}
+			else if (len == strlen(KW_CONTINUE) && strncmp(start, KW_CONTINUE, len) == 0)
+			{
+				tk = new Token(start, len, TK_CONTINUE, CurrentLineNumber);
+			}
 			else if (len == strlen(KW_NULL) && strncmp(start, KW_NULL, len) == 0)
 			{
 				tk = new Token(start, len, TK_NULL, CurrentLineNumber);
@@ -622,4 +626,9 @@ bool Tokenizer::IsNextReturnKeyword()
 {
 	Token* next = LookAhead();
 	return next != NULL&&next->Type == TK_RETURN;
+}
+bool Tokenizer::IsNextContinueKeyword()
+{
+	Token* next = LookAhead();
+	return next != NULL&&next->Type == TK_CONTINUE;
 }

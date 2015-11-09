@@ -511,6 +511,72 @@ void WQPostData(WQState* state)
 		throw "len function can only used for string type and lsit type";
 	}
 }
+ void WQContains(WQState* state)
+ {
+	 state->ExpectParams(2);
+	 auto source = state->GetParam();
+	 auto target = state->GetParam();
+	 if (source->Type == DT_LIST)
+	 {
+		 bool result = false;
+		 auto lst = source->GetList();
+		 for (int i = 0; i < lst->size(); i++)
+		 {
+			 if (*(lst->at(i)) == *target)
+			 {
+				 result = true;
+			 }
+		 }
+		 state->ReturnBoolean(result);
+	 }
+	 else if (source->Type == DT_DICTIONARY)
+	 {
+		 auto dict = source->GetDictionary();
+		 string key = target->ToString();
+		 map<string, WQObject*>::iterator it = dict->find(key);
+		 if (it == dict->end())
+		 {
+			 state->ReturnBoolean(false);
+		 }
+		 else
+			 state->ReturnBoolean(true);
+	 }
+	 else
+		 state->ReturnBoolean(false);
+ }
+ void WQSaveFile(WQState* state)
+ {
+	 state->ExpectParams(2);
+	 auto data = state->GetParam();
+	 auto path = state->GetStringParam();
+	 ofstream os;
+	 os.open(path);
+	 if (os.is_open())
+	 {
+		 auto strdata = data->ToString();
+		 os.write(strdata.c_str(),strdata.length());
+		 os.close();
+	 }
+	 else
+	 {
+		 throw "Failed to open the file : " + path;
+	 }
+ }
+ void WQLoadFile(WQState* state)
+ {
+	 state->ExpectParams(1);
+	 auto path = state->GetStringParam();
+	 ifstream is;
+	 is.open(path);
+	 if (is.is_open())
+	 {
+		std::string str((std::istreambuf_iterator<char>(is)),
+		std::istreambuf_iterator<char>());
+		return state->ReturnString(str);
+	 }
+	 else
+		 throw "Failed to open the file : " + path;
+ }
  void WQRange(WQState* state)
 {
 	WQObject* ls = state->CreateObject();

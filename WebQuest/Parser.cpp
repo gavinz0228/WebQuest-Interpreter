@@ -257,6 +257,11 @@ void Parser::ParseCodeBlock(Tokenizer* tker, CodeBlockNode* program)
 			tker->NextToken();
 			program->Statements->push_back(new BreakNode);
 		}
+		else if (tker->IsNextContinueKeyword())
+		{
+			tker->NextToken();
+			program->Statements->push_back(new ContinueNode);
+		}
 		else if (tker->IsNextDefKeyword())
 		{
 			//skip def

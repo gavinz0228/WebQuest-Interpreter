@@ -38,6 +38,10 @@
  void WQLen(WQState* state);
  void WQType(WQState* state);
  void WQAppend(WQState* state);
+ void WQContains(WQState* state);
+ //-----------------------------------
+ void WQSaveFile(WQState* state);
+ void WQLoadFile(WQState* state);
  //-----------------------------------
  void WQSplit(WQState* state);
  void WQFind(WQState* state);

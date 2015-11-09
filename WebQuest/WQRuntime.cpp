@@ -724,6 +724,11 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 					state->BreakOccurred = true;
 					break;
 				}
+				else 
+				if (nxt->GetType() == NT_CONTINUE)
+				{
+					break;
+				}
 				Evaluate(*it, state);
 			}
 		else if (state->GetCurrentEnvironmentType() == ET_FUNCTION)

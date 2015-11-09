@@ -68,7 +68,10 @@ int main(int argc, char **argv)
 		//string script = "a='aasdfafewfsssfdddf' print(find(a,'sss'))";
 		//string script = "pat='[0-9]' s='125 456 789' res=regex_match(s,pat) print(res)";
 		//string script = "dict={'key1':'val1','key2':'val2'} for d in dict print(d) end";
-		string script = "a=[1,2,3,5,6,6] print(a[-1])";
+		//string script = "a=[1,2,3,5,6,6] print(contains(a,1))";
+		//string script = "a={'key1':'val1'} print(contains(a,'key1'))";
+		//string script = "a='asdfasdfsdf' save_file(a,'C:\\22.json')";
+		string script = "sleep(5000) print( load_file('C:\\22.json'))";
 		//substring,iterate dict,regular exp,negative index
 		Execute(script);
 		char wait;

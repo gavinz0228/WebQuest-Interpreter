@@ -23,6 +23,7 @@ enum TokenType :char{
 	TK_FOR ,
 	TK_IN ,
 	TK_BREAK ,
+	TK_CONTINUE,
 	TK_DEF ,
 	TK_RETURN ,
 	TK_NULL
@@ -93,6 +94,7 @@ public:
 	bool IsNextWhileKeyword();
 	bool IsNextDefKeyword();
 	bool IsNextReturnKeyword();
+	bool IsNextContinueKeyword();
 	//+=,-=,*= etc..
 	bool IsNextAssignment();
 	bool IsNextForKeyword();
@@ -150,6 +152,7 @@ private:
 #define				KW_FOR						"for"
 #define				KW_IN						"in"
 #define				KW_BREAK					"break"
+#define				KW_CONTINUE					"continue"
 #define				KW_DEF						"def"
 #define				KW_RETURN					"return"
 #define				KW_NULL						"null"

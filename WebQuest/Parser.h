@@ -28,6 +28,7 @@ enum ParserNodeType{ NT_ASSIGNMENT,
 	NT_ELEMENT,
 	NT_FOR,
 	NT_BREAK,
+	NT_CONTINUE,
 	NT_SLICING,
 	NT_BEGIN,
 	NT_DEF,
@@ -60,6 +61,11 @@ class BreakNode :public TerminalNodeBase
 {
 	int GetType(){ return NT_BREAK; }
 };
+class ContinueNode :public TerminalNodeBase
+{
+	int GetType(){ return NT_CONTINUE; }
+};
+
 class NullNode :public TerminalNodeBase
 {
 	int GetType(){ return NT_NULL; }

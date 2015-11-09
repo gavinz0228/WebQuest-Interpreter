@@ -46,6 +46,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("milli", WQMilli);
 	Add("split", WQSplit);
 	Add("find", WQFind);
+	Add("contains", WQContains);
 	Add("sub_str", WQSubString);
 	Add("regex_match", WQRegexMatch);
 	//web
@@ -58,4 +59,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("post_json", WQPostJSON);
 	Add("post_form", WQPost);
 	Add("show_headers", WQShowHeaders);
+	//IO
+	Add("save_file", WQSaveFile);
+	Add("load_file", WQLoadFile);
 }

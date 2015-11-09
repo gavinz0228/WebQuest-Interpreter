@@ -566,9 +566,7 @@ bool WQObject::operator == (const WQObject& right)
 		return GetBoolValue() == right.GetBoolValue();
 	}
 	else
-		throw RUNTIME_INVALID_TYPE_FOR_EQUAL;
-
-	return false;
+		return this == &right;
 
 }
 WQObject& WQObject::operator+=(WQObject& right)
