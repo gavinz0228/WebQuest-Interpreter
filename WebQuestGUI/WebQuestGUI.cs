@@ -10,43 +10,63 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using ScintillaNET;
 namespace WebQuestGUI
 {
     public partial class WebQuestGUI : Form
     {
         string EXECUTABLE_PATH=Application.StartupPath +"\\WebQuest.exe";
         string SCRIPT_PATH = Application.StartupPath + "\\script.wq";
-        string[] WEBQUEST_KEYWORDS = {"for","in","while","end","def","return","break"};
-        string[] WEBQUEST_OPERATORS = { "[","]","(",")","+","-","*","/","="};
-        Timer UpdateTimer = new Timer();
-        HighLighter TextBoxHighLighter = new HighLighter();
+        //string[] WEBQUEST_KEYWORDS = {"for","in","while","end","def","return","break"};
+        //string[] WEBQUEST_OPERATORS = { "[","]","(",")","+","-","*","/","="};
+        //Timer UpdateTimer = new Timer();
+        //HighLighter TextBoxHighLighter = new HighLighter();
+
+        public const int StyleDefault = 0;
+        public const int StyleKeyword = 1;
+        public const int StyleIdentifier = 2;
+        public const int StyleNumber = 3;
+        public const int StyleString = 4;
+
+        private const int STATE_UNKNOWN = 0;
+        private const int STATE_IDENTIFIER = 1;
+        private const int STATE_NUMBER = 2;
+        private const int STATE_STRING = 3;
         public WebQuestGUI()
         {
             InitializeComponent();
-        }
-        void InitTimer()
-        {
-            UpdateTimer.Interval = 1000;
-            UpdateTimer.Tick += (object obj, EventArgs e) => {
-                var rtb = this.tbxScript;
-                Task.Factory.StartNew(()=>{
-                    Action action=()=>{
+            editor.Margins[0].Type = MarginType.Number;
+            editor.Margins[0].Width = 35;
 
-                        
-                    };
-                    rtb.Invoke(action);
-                });
-            };
-            UpdateTimer.Enabled = true;
-            //UpdateTimer.Start();
+            editor.Lexer = Lexer.Python;
+
+            editor.SetKeywords(0, "for in while if elseif end for def null break");
+            editor.SetKeywords(1, "get post post_form post_json sleep append");
+            editor.Styles[Style.Default].Size = 12;
+            editor.Styles[Style.Default].Font = "CONSOLAS";
+            editor.Styles[Style.Python.String].ForeColor = Color.FromArgb(102, 25, 0);
+            editor.Styles[Style.Python.Number].ForeColor = Color.FromArgb(158, 0, 126);
+            editor.Styles[Style.Python.Operator].ForeColor = Color.FromArgb(0, 102, 27);
+            editor.Styles[Style.Python.Operator].Bold = true;
+            editor.Styles[Style.Python.DefName].ForeColor = Color.RoyalBlue;
+            editor.Styles[Style.Python.CommentLine].ForeColor = Color.Gray;
+            editor.Styles[Style.Python.Identifier].ForeColor = Color.Black;
+            editor.Styles[Style.Python.Word].ForeColor = Color.FromArgb(0, 49, 186);
+            editor.Styles[Style.Python.Word].Bold = true;
+            editor.Styles[Style.Python.Word2].ForeColor = Color.Blue;
+            editor.Styles[Style.Python.Word2].Italic = true;
+            // editor.StyleNeeded += scintilla_StyleNeeded;
+            //this.Controls.Add(editor);
         }
+
+
         private void btnRun_Click(object sender, EventArgs e)
         {
             var filePath = SCRIPT_PATH;
             
             tbxResult.Clear();
             var writer = File.CreateText(filePath);
-            writer.Write(tbxScript.Text);
+            writer.Write(editor.Text);
             writer.Close();
 
             Task.Run(() => { 
@@ -77,7 +97,7 @@ namespace WebQuestGUI
                         byteread = reader.Read(buffer, 0, 1024);
                         //string result = System.Text.Encoding.UTF8.GetString(buffer, 0, byteread);
                         string result = new string(buffer, 0, byteread);
-                        Action act = () => { tbxResult.AppendText( result); };
+                        Action act = () => { tbxResult.AppendText(result); tbxResult.Refresh(); };
                         this.Invoke(act);
                     }
                     
@@ -86,30 +106,26 @@ namespace WebQuestGUI
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            tbxScript.Text= File.ReadAllText(SCRIPT_PATH);
-            InitTimer();
+            editor.Text= File.ReadAllText(SCRIPT_PATH);
+           // (new FrmDocumentation()).Show();
         }
 
-        void HighLight(RichTextBox tbxRich)
-        {
-            TextBoxHighLighter.ResetHighLightText(tbxRich);
-            foreach (var kw in WEBQUEST_KEYWORDS)
-            {
-                TextBoxHighLighter.HighlightText(tbxRich,kw+" ", Color.Blue);
-                TextBoxHighLighter.HighlightText(tbxRich, " "+kw+" ", Color.Blue);
-            }
-            foreach (var op in WEBQUEST_OPERATORS)
-            {
-                TextBoxHighLighter.HighlightText(tbxRich, op, Color.Red);
-            }
 
-
-        }
 
         private void tbxScript_TextChanged(object sender, EventArgs e)
         {
-            HighLight(tbxScript);
-            tbxScript.Refresh();
+            //HighLight(tbxScript);
+            //tbxScript.Refresh();
+        }
+
+        private void tbxResult_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tbxSearchDoc_TextChanged(object sender, EventArgs e)
+        {
+            FrmDocumentation.OpenWindow(tbxSearchDoc.Text);
         }
 
     }

@@ -445,10 +445,68 @@ void WQPostJSON(WQState* state)
 	}
 }
 
-void WQPostData(WQState* state)
+void WQPut(WQState* state)
 {
 
+	WQRequest request;
+	map<string, string> headers;
+	stringstream ss;
+	if (state->ParamSize < 1 || state->ParamSize>3)
+	{
+		throw "The function only accept maximum 3 parameters and minimum 1 parameter";
+	}
+	if (state->ParamSize == 1)
+	{
+		string url = state->GetStringParam();
+		request.HTTPPut(url, string(), headers, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+	}
+	else if (state->ParamSize == 2)
+	{
+		string postdata;
+		string url = state->GetStringParam();
+		if (url.length() == 0)
+			throw "The url cannot be empty";
+		WQObject* dictobj = state->GetParam();
+		if (dictobj->Type != DT_NULL)
+			postdata = dictobj->ToString();
+		request.HTTPPut(url, postdata, headers, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+	}
+	else
+	{
+		string postdata;
+		map<string, string> headerslist;
+		string url = state->GetStringParam();
+		if (url.length() == 0)
+			throw "The url cannot be empty";
+		map<string, WQObject*>* params = state->GetDictionaryParam();
+		map<string, WQObject*>* headermap = state->GetDictionaryParam();
+
+		PairsToStringPairs(headermap, &headerslist);
+		if (params != NULL)
+			postdata = PairsToURLParameters(params);
+		request.HTTPPut(url, postdata, headerslist, ss);
+		//---
+		WQResponse response(&request);
+		string output;
+		response.ParseResponse(ss.str(), output);
+		response.ProcessCookies();
+		state->ReturnString(output);
+	}
 }
+
+
  void WQParseHeader(WQState* state)
 {
 	string str = state->GetStringParam();

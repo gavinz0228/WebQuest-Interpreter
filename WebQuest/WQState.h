@@ -48,6 +48,7 @@ public:
 	WQObject* GetReturnedReference();
 	//WQObject* GetReturnObject();
 	bool BreakOccurred;
+	bool ReturnOccurred;
 
 	void EnterNewEnvironment(EnvironmentType nodeType);
 	void BackToParentEnvironment();

@@ -58,6 +58,7 @@ void WQGlobalFunctions::LoadFunctions()
 	Add("post", WQPost);
 	Add("post_json", WQPostJSON);
 	Add("post_form", WQPost);
+	Add("put", WQPut);
 	Add("show_headers", WQShowHeaders);
 	//IO
 	Add("save_file", WQSaveFile);

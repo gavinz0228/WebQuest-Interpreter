@@ -1,0 +1,8 @@
+﻿{
+    "functions": [
+        { "name": "get", "usage": "get(url[, data[, headers ]])", "desc": "It sends a get request. Parameter data can be a string or a dictionary object. If data is a dictionary object, the object will be url encoded and appended to the url. "  },
+        { "name": "post", "usage": "get(url[, data[, headers ]])", "desc": "It sends a post request." },
+        { "name": "post_form", "usage": "get(url[, data[, headers ]])", "desc": "It sends a post request." },
+        { "name": "post_json","usage": "get(url[, data[, headers ]])","desc":"It sends a post request."}
+    ]
+}

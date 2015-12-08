@@ -158,6 +158,7 @@ CURLcode WQRequest::HTTPGet(const string& url, map<string, string>& headers, ost
 		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
+		curl_slist_free_all(hlist);;
 	}
 	return code;
 }
@@ -180,6 +181,7 @@ CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, st
 		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
 		/* Now specify the POST data */
 		res=curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 		struct curl_slist * hlist = NULL;
@@ -197,6 +199,8 @@ CURLcode WQRequest::HTTPPostForm(const string& url, string& data, map<string, st
 
 		/* always cleanup */
 		curl_easy_cleanup(curl);
+		curl_slist_free_all(hlist);
+
 	}
 	curl_global_cleanup();
 	return res;
@@ -216,10 +220,11 @@ CURLcode WQRequest::HTTPPostJSON(const string& url, string& data, map<string, st
 		/* First set the URL that is about to receive our POST. This URL can
 		just as well be a https:// URL if that is what should receive the
 		data. */
-		curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_URL, url);
 		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
 		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
 		/* Now specify the POST data */
 		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 		struct curl_slist * hlist = NULL;
@@ -240,11 +245,77 @@ CURLcode WQRequest::HTTPPostJSON(const string& url, string& data, map<string, st
 
 		/* always cleanup */
 		curl_easy_cleanup(curl);
+		curl_slist_free_all(hlist);
 	}
 	curl_global_cleanup();
 	return res;
 }
 
+CURLcode WQRequest::HTTPPut(const string& url, string& data, map<string, string>&headers, ostream& os, long timeout)
+{
+	CURL *curl;
+	CURLcode res;
+	URL = Uri::Parse(url);
+	/* In windows, this will init the winsock stuff */
+	curl_global_init(CURL_GLOBAL_ALL);
+	curl = curl_easy_init();
+
+	if (curl) {
+		
+		res = curl_easy_setopt(curl, CURLOPT_URL, url);
+		res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WQRequest::DataWrite);
+		res = curl_easy_setopt(curl, CURLOPT_FILE, &os);
+		res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+		/* Now specify the POST data */
+		res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+		struct curl_slist * hlist = NULL;
+		hlist = curl_slist_append(hlist, "Content-Type: application/json");
+		hlist = curl_slist_append(hlist, "charsets: utf-8");
+		if (hlist != NULL)
+			res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hlist);
+		
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
+
+		res = curl_easy_perform(curl);
+
+		curl_slist_free_all(hlist);
+		curl_easy_cleanup(curl);
+	}
+	curl_global_cleanup();
+	return res;
+}
+CURLcode WQRequest::HTTPDelete(const string& url, string& data, map<string, string>&headers, ostream& os, long timeout)
+{
+	CURL *curl;
+	CURLcode res = CURLE_OK;
+
+	curl = curl_easy_init();
+	if (curl) {
+		/* Set username and password */
+		curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+
+		/* This is just the server URL */
+		curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
+
+		/* Set the DELETE command specifing the existing folder */
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE FOLDER");
+
+		/* Perform the custom request */
+		res = curl_easy_perform(curl);
+
+		/* Check for errors */
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		/* Always cleanup */
+		curl_easy_cleanup(curl);
+	}
+
+	return res;
+}
 string WQRequest::GetCurrentDir()
 {
 	char path[300];

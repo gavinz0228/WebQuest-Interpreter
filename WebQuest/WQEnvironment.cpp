@@ -87,6 +87,31 @@ void WQEnvironment::SetVariable(string& name, WQObject* newobj)
 	}
 }
 
+void WQEnvironment::SetLocalVariable(string& name, WQObject* newobj)
+{
+
+	WQObject* targetobj = this->SearchVariableInCurrentEvironment(name);
+	if (targetobj == NULL)
+	{
+		//the variable doesn't exist yet,
+		//create that variable
+		AddVariable(name, newobj);
+		//the new object is being refrenced, so increment the counter
+		IncreaseReference(newobj);
+	}
+	else
+	{
+		//GarbageVariables.insert(pair<string,WQObject*>(name, newobj));
+		//TemporaryVariables.push_back(targetobj);
+		this->Variables.erase(name);
+		//object is not refrenced by the variable, so decrement the counter
+		ReleaseReference(targetobj);
+		this->Variables.insert(pair<string, WQObject*>(name, newobj));
+		//increment the counter of the new obj
+		IncreaseReference(newobj);
+	}
+}
+
 
 WQObject* WQEnvironment::CreateVariable(string& name)
 {

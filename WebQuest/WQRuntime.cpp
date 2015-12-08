@@ -158,7 +158,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			VariableNode* var = assignment->LeftSideVariable;
 			
 			WQObject* left=NULL;
-			//if it's a assignment operation '=' , no need to evaluate the left side
+			//if it's an assignment operation '=' , no need to evaluate the left side
 			if (*assignment->AssignmentOperator != OP_ASSIGN)
 			{
 				Evaluate(var, state);
@@ -218,6 +218,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		}
 		else
 		{
+			int val = obj->GetIntValue();
 			state->ReturnReference(obj);
 		}
 	}
@@ -343,11 +344,23 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			}
 			if (state->GetReturnedReference()->GetBoolValue())
 			{
+				anyifexecuted = true;
 				state->EnterNewEnvironment(ET_IF);
 				Evaluate(it->second, state);
+
+				if (state->ReturnOccurred == true)
+				{
+					//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+					if (state->CurrentEnvironment->Parent != NULL)
+					{
+						//printf(state->GetReturnedReference()->ToString().c_str());
+						state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+					}
+				}
 				state->BackToParentEnvironment();
+
 			}
-			anyifexecuted = true;
+			
 		}
 		it++;
 		if (anyifexecuted == false)
@@ -362,9 +375,20 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 				}
 				if (state->GetReturnedReference()->GetBoolValue())
 				{
+					anyifexecuted = true;
 					state->EnterNewEnvironment(ET_IF);
 					Evaluate(it->second, state);
+					if (state->ReturnOccurred == true)
+					{
+						//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+						if (state->CurrentEnvironment->Parent != NULL)
+						{
+							//printf(state->GetReturnedReference()->ToString().c_str());
+							state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+						}
+				 	}
 					state->BackToParentEnvironment();
+
 					break;
 				}
 
@@ -392,6 +416,16 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			state->BreakOccurred = false;
 			state->EnterNewEnvironment(ET_LOOP);
 			Evaluate(whilenode->CodeBlock, state);
+			if (state->ReturnOccurred == true)
+			{
+				//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+				if (state->CurrentEnvironment->Parent != NULL)
+				{
+					//printf(state->GetReturnedReference()->ToString().c_str());
+					state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+				}
+				break;
+			}
 			state->BackToParentEnvironment();
 			if (state->BreakOccurred)
 				break;
@@ -404,8 +438,9 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 		Evaluate(comnode->LeftSide, state);
 		
 		WQObject* left=state->GetReturnedReference();
-
 		Evaluate(comnode->RightSide, state);
+		int l = left->GetIntValue();
+		int r = state->GetReturnedReference()->GetIntValue();
 		bool result=false;
 		if (*comnode->Operator == OP_EQUAL)
 		{
@@ -554,11 +589,13 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			//next step is to evaulate the parameters and inject to the function's environment
 			list<VariableNode*>::iterator paramit = def->Parameters->begin();
 			list<ExpressionNode*>::iterator paramexpit = funcnode->Parameters->begin();
+			state->ReturnOccurred = false;
 			state->EnterNewEnvironment(ET_FUNCTION);
 			for (; paramexpit != funcnode->Parameters->end(); paramexpit++, paramit++)
 			{
 				Evaluate(*paramexpit, state);
-				state->CurrentEnvironment->SetVariable(*(*paramit)->Value,state->GetReturnedReference());
+				//state->CurrentEnvironment->SetVariable(*(*paramit)->Value,state->GetReturnedReference());
+				state->CurrentEnvironment->SetLocalVariable(*(*paramit)->Value, state->GetReturnedReference());
 			}
 			//supply the rest arugements, just put null objects
 			while (paramit != def->Parameters->end())
@@ -568,13 +605,18 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 			}
 			//all the parameters are all set, invoke the function
 			Evaluate(def->CodeBlock, state);
-			//this is the return value of the function, needs to be brought to the parent environment in order to keep it
-			if (state->CurrentEnvironment->Parent != NULL)
+			if (state->ReturnOccurred == true)
 			{
-				//printf(state->GetReturnedReference()->ToString().c_str());
-				state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+				//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+				if (state->CurrentEnvironment->Parent != NULL)
+				{
+					//printf(state->GetReturnedReference()->ToString().c_str());
+					state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+				}
 			}
 			state->BackToParentEnvironment();
+			//clear the parameters in the list
+			state->ClearParams();
 			//}
 			
 		}
@@ -633,11 +675,22 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 				state->EnterNewEnvironment(ET_LOOP);
 				state->CurrentEnvironment->SetVariable(*fornode->TempVariable->Value, iterablelist->at(i));
 				Evaluate(fornode->CodeBlock, state);
+				if (state->ReturnOccurred == true)
+				{
+					//this is the return value of the function, needs to be brought to the parent environment in order to keep it
+					if (state->CurrentEnvironment->Parent != NULL)
+					{
+						//printf(state->GetReturnedReference()->ToString().c_str());
+						state->MoveVariableToParentEnvironment(state->GetReturnedReference());
+					}
+					break;
+				}
 				state->BackToParentEnvironment();
 				if (state->BreakOccurred)
 				{
 					break;
 				}
+				
 			}
 		}
 		else
@@ -714,7 +767,7 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 	else if (node->GetType() == NT_CODEBLOCK)
 	{
 		CodeBlockNode* program = (CodeBlockNode*)node;
-		//if it's a loop, it allows the code to break
+		//if it's a loop, it allows the code to break and continue
 		if (state->GetCurrentEnvironmentType()==ET_LOOP)
 			for (list<NodeBase*>::iterator it = program->Statements->begin(); it != program->Statements->end(); it++)
 			{
@@ -724,10 +777,21 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 					state->BreakOccurred = true;
 					break;
 				}
-				else 
-				if (nxt->GetType() == NT_CONTINUE)
+				else if (nxt->GetType() == NT_CONTINUE)
 				{
 					break;
+				}
+				else if (nxt->GetType() == NT_RETURN)
+				{
+					ReturnNode* returnode = (ReturnNode*)nxt;
+					if (returnode->ReturnExpression->ExpressionType == NT_NULL)
+						state->ReturnNull();
+					else
+						//this value will be moved to its parent enviroment to be protected
+						Evaluate(returnode->ReturnExpression, state);
+					state->ReturnOccurred = true;
+					break;
+
 				}
 				Evaluate(*it, state);
 			}
@@ -743,7 +807,10 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 					else
 						//this value will be moved to its parent enviroment to be protected
 						Evaluate(returnode->ReturnExpression, state);
+
+					state->ReturnOccurred = true;
 					break;
+
 				}
 				Evaluate(*it, state);
 			}
@@ -757,6 +824,19 @@ void WQRuntime::Evaluate(NodeBase* node,WQState* state)
 					state->BreakOccurred = true;
 					break;
 				}
+				else if (nxt->GetType() == NT_RETURN)
+				{
+					ReturnNode* returnode = (ReturnNode*)nxt;
+					if (returnode->ReturnExpression->ExpressionType == NT_NULL)
+						state->ReturnNull();
+					else
+						//this value will be moved to its parent enviroment to be protected
+						Evaluate(returnode->ReturnExpression, state);
+
+					state->ReturnOccurred = true;
+					break;
+				}
+
 				Evaluate(*it, state);
 			}
 	}

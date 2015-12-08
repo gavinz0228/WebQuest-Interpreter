@@ -59,6 +59,7 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 	CurrentLineNumber = 1;
 	string::iterator it = script.begin();
 	int charlen;
+
 	while (it!=script.end())
 	{
 		if (*it==' ')
@@ -100,50 +101,31 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 		}
 		//return true if it's operator, operatorlen outputs the length of the operator
 
-		else if (IsFloat(it, script.end(), charlen))
-		{
-			Converter::StringToFloat(&(*it), charlen, floatno);
 
-			Token* tk = new Token(floatno, CurrentLineNumber);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
-		}
-		else if (IsInteger(it, script.end(), charlen))
+		else if (IsOperator(&(*it), charlen, operatorStart, operatorlen)
+			|| IsFloat(it, script.end(), charlen)
+			|| IsInteger(it, script.end(), charlen)
+			)
 		{
-			Converter::StringToInteger(&(*it), charlen, integer);
+			//situation like (-3) ,a==-2, a=-4, [-3:-5]
+			//in this case first parse number
+			if (!Tokens->empty()
+				&& Tokens->back()->Type == TK_OPERATOR
+				&& (
+				*(Tokens->back()->Symbol) == OP_ASSIGN
+				|| *(Tokens->back()->Symbol) == OP_EQUAL
+				|| *(Tokens->back()->Symbol) == OP_L_PAREN
+				|| *(Tokens->back()->Symbol) == OP_ASSIGN)
+				)
+			{
 
-			Token* tk = new Token(integer, CurrentLineNumber);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
-		}
-		else if (IsOperator(&(*it), charlen, operatorStart, operatorlen))
-		{
-			Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, CurrentLineNumber);
-			Tokens->push_back(tk);
-			while (charlen>0)
-			{
-				it++;
-				charlen--;
-			}
-			//in order to deal with situation that is like a=-2 or a=-2.0
-
-			if (tk->Type == TK_OPERATOR&&*tk->Symbol == string(OP_ASSIGN))
-			{
 				if (IsFloat(it, script.end(), charlen))
 				{
 					Converter::StringToFloat(&(*it), charlen, floatno);
 
 					Token* tk = new Token(floatno, CurrentLineNumber);
 					Tokens->push_back(tk);
-					while (charlen>0)
+					while (charlen > 0)
 					{
 						it++;
 						charlen--;
@@ -155,15 +137,87 @@ list<Token*>* Tokenizer::Tokenize(string& script)
 
 					Token* tk = new Token(integer, CurrentLineNumber);
 					Tokens->push_back(tk);
-					while (charlen>0)
+					while (charlen > 0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+				else if (IsOperator(&(*it), charlen, operatorStart, operatorlen))
+				{
+					Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen > 0)
 					{
 						it++;
 						charlen--;
 					}
 				}
 			}
+			//otherwise first parse operators
+			else
+			{
+				if (IsOperator(&(*it), charlen, operatorStart, operatorlen))
+				{
+					Token* tk = new Token(operatorStart, operatorlen, TK_OPERATOR, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen > 0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+				else if (IsFloat(it, script.end(), charlen))
+				{
+					Converter::StringToFloat(&(*it), charlen, floatno);
 
+					Token* tk = new Token(floatno, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen > 0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+				else if (IsInteger(it, script.end(), charlen))
+				{
+					Converter::StringToInteger(&(*it), charlen, integer);
+
+					Token* tk = new Token(integer, CurrentLineNumber);
+					Tokens->push_back(tk);
+					while (charlen > 0)
+					{
+						it++;
+						charlen--;
+					}
+				}
+			}
 		}
+		//else if (IsFloat(it, script.end(), charlen))
+		//{
+		//	Converter::StringToFloat(&(*it), charlen, floatno);
+
+		//	Token* tk = new Token(floatno, CurrentLineNumber);
+		//	Tokens->push_back(tk);
+		//	while (charlen>0)
+		//	{
+		//		it++;
+		//		charlen--;
+		//	}
+		//}
+		//else if (IsInteger(it, script.end(), charlen))
+		//{
+		//	Converter::StringToInteger(&(*it), charlen, integer);
+
+		//	Token* tk = new Token(integer, CurrentLineNumber);
+		//	Tokens->push_back(tk);
+		//	while (charlen>0)
+		//	{
+		//		it++;
+		//		charlen--;
+		//	}
+		//}
+
 		//must be variable name,string, or numbers
 		else
 		{

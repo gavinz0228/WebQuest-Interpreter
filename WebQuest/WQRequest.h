@@ -12,26 +12,6 @@
 #ifndef WQREQUEST_H
 #define WQREQUEST_H
 using namespace std;
-/*
-#if _DEBUG
-#pragma comment(lib, "Library/debug_libcurl.lib") 
-#pragma comment(lib, "Library/debug_libssh2.lib") 
-#pragma comment(lib, "Library/debug_libeay32.lib") 
-#pragma comment(lib, "Library/debug_ssleay32.lib") 
-#pragma comment(lib, "Library/debug_zlib.lib") 
-
-#else
-
-#pragma comment(lib, "Library/release_libcurl.lib") 
-#pragma comment(lib, "Library/release_libssh2.lib") 
-#pragma comment(lib, "Library/release_libeay32.lib") 
-#pragma comment(lib, "Library/release_ssleay32.lib") 
-#pragma comment(lib, "Library/release_zlib.lib") 
-
-#endif
-#pragma comment(lib, "wldap32.lib") 
-*/
-
 
 class WQRequest
 {
@@ -44,6 +24,8 @@ public:
 	CURLcode HTTPGet(const string& url, map<string, string>& headers, ostream& os, long timeout = 30);
 	CURLcode HTTPPostForm(const string& url,string& data, map<string, string>& headers, ostream& os, long timeout = 30);
 	CURLcode HTTPPostJSON(const string& url, string& data, map<string, string>& headers, ostream& os, long timeout = 30);
+	CURLcode HTTPPut(const string& url, string& data, map<string, string>&headers, ostream& os, long timeout = 30);
+	CURLcode HTTPDelete(const string& url, string& data, map<string, string>&headers, ostream& os, long timeout = 30);
 	string PairsToURLParameters(map<string, string>& params);
 	curl_slist * SetHeaders(map<string, string>& headers, struct curl_slist *chunk);
 	curl_slist* SetCookies( struct curl_slist *chunk,string& hostname);

@@ -15,6 +15,7 @@ public:
 	WQObject* SearchVariableInCurrentEvironment(string& name);
 	void AddVariable(string& name, WQObject* obj);
 	void SetVariable(string& name, WQObject* obj);
+	void SetLocalVariable(string& name, WQObject* obj);
 	WQObject* CreateVariable(string& name);
 	
 	WQObject* CreateObject();

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ScintillaNET>
+  <Language Name="default">
+    <Styles>
+      <Style Name="Default" FontName="Consolas" FontSize="20"/>
+    </Styles>
+  </Language>
+
+  <Language Name="WebQuest">
+    <Indentation TabWidth="2" UseTabs="true"/>
+    <Lexer LexerName="Python"  StreamCommentPrefix="{" StreamCommentSuffix="}">
+      <Keywords List="0">for in end while if else elseif</Keywords>
+      <Keywords List="1">string</Keywords>
+    </Lexer>
+    <Styles>
+      <Style Name="CHARACTER" ForeColor="Black" BackColor="Red"/>
+      <Style Name="CHARACTER" ForeColor="Black" BackColor="Red"/>
+      <Style Name="CHARACTER" ForeColor="Black" BackColor="Red"/>
+    </Styles>
+  </Language>
+</ScintillaNET>

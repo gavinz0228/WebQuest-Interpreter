@@ -71,7 +71,8 @@ int main(int argc, char **argv)
 		//string script = "a=[1,2,3,5,6,6] print(contains(a,1))";
 		//string script = "a={'key1':'val1'} print(contains(a,'key1'))";
 		//string script = "a='asdfasdfsdf' save_file(a,'C:\\22.json')";
-		string script = "sleep(5000) print( load_file('C:\\22.json'))";
+		//string script = "sleep(5000) print( load_file('C:\\22.json'))";
+		string script = "def fib(n) if n==0 return 1 elseif n==1 return 1 else return fib(n-1)+fib(n-2) end end print(fib(5))";
 		//substring,iterate dict,regular exp,negative index
 		Execute(script);
 		char wait;

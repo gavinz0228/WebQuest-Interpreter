@@ -26,6 +26,7 @@
  void WQGet(WQState* state);
  void WQPost(WQState* state);
  void WQPostJSON(WQState* state);  
+ void WQPut(WQState* state);
  void WQGetRaw(WQState* state);
 
  
